@@ -1,0 +1,37 @@
+# Simple high precision patterns for kbp relations.
+# Patterns wildcard target and slotfiller as $ARG1 and $ARG2.
+# For reflexive relations, both arguments are wildcarded as $ARG0.
+# There is also a wildcard '*' standing for 1-4 arbitrary tokens.
+# The patterns are meant to be sent to a search engine, and the results
+# to be filtered by a suitable type checker. In the combination with a type
+# checker, the patterns should unambiguously express the relation.
+# Basis for the patterns were:
+#  - The definition of the slots using the TAC KBP guidelines of 2011,
+#  - The examples given in the guidelines, and
+#  - introspection/linguistic intuition generalizing from both.
+# No actual queries/slot fillers/assessments of the task were looked at.
+# It cannot be assumed that matching is done case invariant. However, patterns
+# should not be combinatorially blown up to incorporate different casing
+# variants, and always the correct/most common casing should be used only.
+
+# TODO: tokenization: "," vs " ," "'s" vs " 's", "'" vs " '", "(" vs "( "
+# Is this reflexive?
+per:alternate_names $ARG1 formerly known as $ARG2
+per:alternate_names $ARG1 aka $ARG2
+per:alternate_names $ARG1 a.k.a. $ARG2
+per:alternate_names $ARG1 a. k. a. $ARG2
+per:alternate_names $ARG1 is also known as $ARG2
+per:alternate_names $ARG1 is known as $ARG2
+per:alternate_names $ARG1 , also known as $ARG2
+per:alternate_names $ARG1 , better known as $ARG2
+per:alternate_names $ARG1 , best known as $ARG2
+per:alternate_names $ARG1 , aka $ARG2
+per:alternate_names $ARG1 , a.k.a. $ARG2
+per:alternate_names $ARG1 , a. k. a. $ARG2
+per:alternate_names $ARG1 ( also known as $ARG2 )
+per:alternate_names $ARG1 ( better known as $ARG2 )
+# This overgeneralizes too much (e.g. actors playing roles).
+#per:alternate_names $ARG1 ( $ARG2 )
+per:alternate_names $ARG1 ( aka $ARG2 )
+per:alternate_names $ARG1 ( a.k.a. $ARG2 )
+per:alternate_names $ARG1 ( a. k. a. $ARG2 )

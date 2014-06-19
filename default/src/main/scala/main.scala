@@ -2,16 +2,16 @@ import cc.factorie.app.nlp._
 
 import scala.util.matching.Regex
 
-object MainButt extends App
+object Main extends App
 {
 
   // load the data
-  val doc = load.LoadPlainText.fromSource(io.Source.fromString("This is a poop string sentence. Butts can't poop's butts :) butts butts anuus...\n"))
+  val doc = load.LoadPlainText.fromSource(io.Source.fromString("This is a test.\n"))
   // set up tokenizer / segmenter
-  val anuusPoopline = new DocumentAnnotationPipeline(Seq(segment.DeterministicTokenizer, segment.DeterministicSentenceSegmenter))
+  val pipeline = new DocumentAnnotationPipeline(Seq(segment.DeterministicTokenizer, segment.DeterministicSentenceSegmenter))
 
   // process the document
-  anuusPoopline.process(doc.head)
+  pipeline.process(doc.head)
   // print out the individual sentences in the document
   val sentenceString = doc.head.sentences.map(_.tokens.map(_.string)).map(_.mkString(" "))
   //sentenceString.foreach(sentence => println(sentence.mkString(" ")))
