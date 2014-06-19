@@ -1,34 +1,40 @@
+package co.pemma
+
 import cc.factorie.app.nlp._
 
 import scala.util.matching.Regex
 
-object Main extends App
+object Testing
 {
-  // load the data
-  val doc = load.LoadPlainText.fromSource(io.Source.fromString("This is a test. Testing test. \n"))
-  // set up tokenizer / segmenter
-  val pipeline = new DocumentAnnotationPipeline(Seq(segment.DeterministicTokenizer, segment.DeterministicSentenceSegmenter))
+  def main(args: Array[String]) {
+    // load the data
+    val doc = load.LoadPlainText.fromSource(io.Source.fromString("This is a test. Testing test. \n"))
+    // set up tokenizer / segmenter
+    val pipeline = new DocumentAnnotationPipeline(Seq(segment.DeterministicTokenizer, segment.DeterministicSentenceSegmenter))
 
-  // process the document
-  pipeline.process(doc.head)
-  // print out the individual sentences in the document
-  val sentenceString = doc.head.sentences.map(_.tokens.map(_.string)).map(_.mkString(" "))
-  //sentenceString.foreach(sentence => println(sentence.mkString(" ")))
+    // process the document
+    pipeline.process(doc.head)
+    // print out the individual sentences in the document
+    val sentenceString = doc.head.sentences.map(_.tokens.map(_.string)).map(_.mkString(" "))
+    //sentenceString.foreach(sentence => println(sentence.mkString(" ")))
 
-  // set file defining patterns
-  val patternUrl = this.getClass.getResource("/patterns")
-  // convert patterns to regex
-  val regexMap = generateSurfacePatternRegexesFromURL(patternUrl, patternUrl)
+    // set file defining patterns
+    val patternUrl = this.getClass.getResource("patterns")
+    // convert patterns to regex
+    val regexMap = generateSurfacePatternRegexesFromURL(patternUrl, patternUrl)
 
-  // dont compile
-  regexMap.foreach{case(name,regexList) =>
-    regexList.foreach( regex =>
-      regex.findAllMatchIn(sentenceString.head).foreach(matches => {
-    println(matches.group(0))
-  }))}
+    // dont compile
+    regexMap.foreach { case (name, regexList) =>
+      regexList.foreach(regex =>
+        regex.findAllMatchIn(sentenceString.head).foreach(matches => {
+          println(matches.group(0))
+        }))
+    }
+  }
 
   def generateSurfacePatternRegexesFromURL(patternListURL: java.net.URL, typeListURL: java.net.URL): collection.mutable.Map[String, collection.mutable.ArrayBuffer[Regex]] =
   {
+    println(typeListURL)
     val types = io.Source.fromURL(typeListURL).getLines().filter(_ != "").filter(!_.startsWith("#"))
     //val types = Seq("PER","ORG","LOC")
 
