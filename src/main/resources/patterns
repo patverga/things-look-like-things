@@ -16,22 +16,6 @@
 
 # TODO: tokenization: "," vs " ," "'s" vs " 's", "'" vs " '", "(" vs "( "
 # Is this reflexive?
-per:alternate_names $ARG1 formerly known as $ARG2
-per:alternate_names $ARG1 aka $ARG2
-per:alternate_names $ARG1 a.k.a. $ARG2
-per:alternate_names $ARG1 a. k. a. $ARG2
-per:alternate_names $ARG1 is also known as $ARG2
-per:alternate_names $ARG1 is known as $ARG2
-per:alternate_names $ARG1 , also known as $ARG2
-per:alternate_names $ARG1 , better known as $ARG2
-per:alternate_names $ARG1 , best known as $ARG2
-per:alternate_names $ARG1 , aka $ARG2
-per:alternate_names $ARG1 , a.k.a. $ARG2
-per:alternate_names $ARG1 , a. k. a. $ARG2
-per:alternate_names $ARG1 ( also known as $ARG2 )
-per:alternate_names $ARG1 ( better known as $ARG2 )
-# This overgeneralizes too much (e.g. actors playing roles).
-#per:alternate_names $ARG1 ( $ARG2 )
-per:alternate_names $ARG1 ( aka $ARG2 )
-per:alternate_names $ARG1 ( a.k.a. $ARG2 )
-per:alternate_names $ARG1 ( a. k. a. $ARG2 )
+
+#per:looks_like $ARG1 looks like $ARG2
+per:looks_like .*?((?:\w+\W+){1,4})looks like((?:\W+\w+){1,4}).*

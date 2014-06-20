@@ -7,34 +7,45 @@ import scala.util.matching.Regex
 object Testing
 {
   def main(args: Array[String]) {
+    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp"
     // load the data
-    val doc = load.LoadPlainText.fromSource(io.Source.fromString("This is a test. Testing test. \n"))
-    // set up tokenizer / segmenter
-    val pipeline = new DocumentAnnotationPipeline(Seq(segment.DeterministicTokenizer, segment.DeterministicSentenceSegmenter))
+    val source = io.Source.fromFile(fileLocation)
+    val lines = source.getLines()
+    val doc = load.LoadPlainText.fromSource(source)
 
-    // process the document
-    pipeline.process(doc.head)
-    // print out the individual sentences in the document
-    val sentenceString = doc.head.sentences.map(_.tokens.map(_.string)).map(_.mkString(" "))
-    //sentenceString.foreach(sentence => println(sentence.mkString(" ")))
+//    lines.foreach {line =>
+//      println(line)
+      //set up tokenizer / segmenter
+      val pipeline = new DocumentAnnotationPipeline(Seq(segment.DeterministicTokenizer, segment.DeterministicSentenceSegmenter))
 
-    // set file defining patterns
-    val patternUrl = this.getClass.getResource("patterns")
-    // convert patterns to regex
-    val regexMap = generateSurfacePatternRegexesFromURL(patternUrl, patternUrl)
+      // process the document
+      pipeline.process(doc.head)
+      // print out the individual sentences in the document
+      val sentenceString = doc.head.sentences.map(_.tokens.map(_.string)).map(_.mkString(" "))
+      //sentenceString.foreach(sentence => println(sentence.mkString(" ")))
 
-    // dont compile
-    regexMap.foreach { case (name, regexList) =>
-      regexList.foreach(regex =>
-        regex.findAllMatchIn(sentenceString.head).foreach(matches => {
-          println(matches.group(0))
-        }))
-    }
+      // set file defining patterns
+      val patternUrl = this.getClass.getResource("/patterns")
+      val typeUrl = this.getClass.getResource("/types")
+      // convert patterns to regex
+      val regexMap = generateSurfacePatternRegexesFromURL(patternUrl, typeUrl)
+
+      // dont compile
+      regexMap.foreach { case (name, regexList) =>
+        regexList.foreach(regex => {
+          println(regex)
+          regex.findAllMatchIn(sentenceString.head).foreach(matches => {
+            println(matches.group(0))
+          })
+        })
+      }
+//    }
+
+    source.close()
   }
 
   def generateSurfacePatternRegexesFromURL(patternListURL: java.net.URL, typeListURL: java.net.URL): collection.mutable.Map[String, collection.mutable.ArrayBuffer[Regex]] =
   {
-    println(typeListURL)
     val types = io.Source.fromURL(typeListURL).getLines().filter(_ != "").filter(!_.startsWith("#"))
     //val types = Seq("PER","ORG","LOC")
 
@@ -57,10 +68,10 @@ object Testing
         val patternType = splitLine.head
 
         val rest = splitLine.drop(1).mkString(" ")
-          .replaceAllLiterally(" *", "(?: \\S+){0,3}") // handle wildcards for words
-          .replaceAllLiterally("*", "\\S+") // handle wildcards within a word
-          .replaceAllLiterally("(", "\\(") // handle literal parens
-          .replaceAllLiterally(")", "\\)") // handle literal parens
+          //          .replaceAllLiterally(" *", "(?: \\S+){0,3}") // handle wildcards for words
+          //          .replaceAllLiterally("*", "\\S+") // handle wildcards within a word
+          //          .replaceAllLiterally("(", "\\(") // handle literal parens
+          //          .replaceAllLiterally(")", "\\)") // handle literal parens
           .replaceAll(argRegexString, typedArgRegexString) // handle typed args
 
         //        println(s"pattern: $rest")
