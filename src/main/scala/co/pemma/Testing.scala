@@ -1,13 +1,24 @@
 package co.pemma
 
 import cc.factorie.app.nlp._
+import cc.factorie.app.nlp.wordnet.WordNet
 
 import scala.util.matching.Regex
 
 object Testing
 {
-  def main(args: Array[String]) {
-    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp1"
+  def main(args: Array[String])
+  {
+//    testPatterns()
+    wordNeting()
+  }
+
+
+  def testPatterns()
+  {
+    //    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp1"
+    val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
+
     // load the data
     val source = io.Source.fromFile(fileLocation,"ISO-8859-1")
     val doc = load.LoadPlainText.fromSource(source)
@@ -19,6 +30,7 @@ object Testing
     val pipeline = new DocumentAnnotationPipeline(Seq(segment.DeterministicTokenizer, segment.DeterministicSentenceSegmenter))
 
     // process the document
+    print("Processing data...")
     pipeline.process(doc.head)
     println("done processing")
     //    print out the individual sentences in the document
@@ -35,7 +47,7 @@ object Testing
     regexMap.foreach { case (name, regexList) =>
       sentenceString.foreach( sentence => {
         regexList.foreach( regex => {
-//          println(regex)
+          //          println(regex)
           regex.findAllMatchIn(sentence).foreach( matches => {
             println(matches.group(1), matches.group(2), matches.group(3))
           })
@@ -82,5 +94,18 @@ object Testing
       }
     })
     patternMap
+  }
+
+  def wordNeting()
+  {
+    val synonyms = WordNet.synsets("run")
+    println(WordNet.areSynonyms("crowd","gum"))
+    synonyms.head.hyps.foreach(h => println(h))
+    println(synonyms.head.hyps)
+
+    val p = WordNet.synsets("poop").flatMap(_.hyps)
+    println(p)
+
+    p.foreach(s => println(s.toString))
   }
 }

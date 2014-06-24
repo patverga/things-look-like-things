@@ -18,10 +18,10 @@
 # Is this reflexive?
 
 #per:looks_like $ARG1 looks like $ARG2
-per:looks_like .*?((?:\w+\W+){1,4})(appears like)((?:\W+\w+){1,4}).*
-per:looks_like .*?((?:\w+\W+){1,4})(looks like)((?:\W+\w+){1,4}).*
+per:looks_like .*?((?:\w+\W+){1,4})(appears? like)((?:\W+\w+){1,4}).*
+per:looks_like .*?((?:\w+\W+){1,4})(looks? like)((?:\W+\w+){1,4}).*
 per:looks_like .*?((?:\w+\W+){1,4})(is similar to)((?:\W+\w+){1,4}).*
 per:looks_like .*?((?:\w+\W+){1,4})(is the same as)((?:\W+\w+){1,4}).*
-per:looks_like .*?((?:\w+\W+){1,4})(looks similar to)((?:\W+\w+){1,4}).*
-per:looks_like .*?((?:\w+\W+){1,4})(appears similar to)((?:\W+\w+){1,4}).*
+per:looks_like .*?((?:\w+\W+){1,4})(looks? similar to)((?:\W+\w+){1,4}).*
+per:looks_like .*?((?:\w+\W+){1,4})(appears? similar to)((?:\W+\w+){1,4}).*
 per:looks_like .*?((?:\w+\W+){1,4})(appearance is like)((?:\W+\w+){1,4}).*
