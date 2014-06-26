@@ -1,27 +1,8 @@
-# Simple high precision patterns for kbp relations.
-# Patterns wildcard target and slotfiller as $ARG1 and $ARG2.
-# For reflexive relations, both arguments are wildcarded as $ARG0.
-# There is also a wildcard '*' standing for 1-4 arbitrary tokens.
-# The patterns are meant to be sent to a search engine, and the results
-# to be filtered by a suitable type checker. In the combination with a type
-# checker, the patterns should unambiguously express the relation.
-# Basis for the patterns were:
-#  - The definition of the slots using the TAC KBP guidelines of 2011,
-#  - The examples given in the guidelines, and
-#  - introspection/linguistic intuition generalizing from both.
-# No actual queries/slot fillers/assessments of the task were looked at.
-# It cannot be assumed that matching is done case invariant. However, patterns
-# should not be combinatorially blown up to incorporate different casing
-# variants, and always the correct/most common casing should be used only.
-
-# TODO: tokenization: "," vs " ," "'s" vs " 's", "'" vs " '", "(" vs "( "
-# Is this reflexive?
-
-#per:looks_like $ARG1 looks like $ARG2
-per:looks_like .*?((?:\w+\W+){1,4})(appears? like)((?:\W+\w+){1,4}).*
-per:looks_like .*?((?:\w+\W+){1,4})(looks? like)((?:\W+\w+){1,4}).*
-per:looks_like .*?((?:\w+\W+){1,4})(is similar to)((?:\W+\w+){1,4}).*
-per:looks_like .*?((?:\w+\W+){1,4})(is the same as)((?:\W+\w+){1,4}).*
-per:looks_like .*?((?:\w+\W+){1,4})(looks? similar to)((?:\W+\w+){1,4}).*
-per:looks_like .*?((?:\w+\W+){1,4})(appears? similar to)((?:\W+\w+){1,4}).*
-per:looks_like .*?((?:\w+\W+){1,4})(appearance is like)((?:\W+\w+){1,4}).*
+looks? like
+appears? like
+is similar to
+is the same as
+is a
+looks? similar to
+appears? similar to
+appearance is like
