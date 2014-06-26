@@ -2,6 +2,8 @@ package co.pemma
 
 import java.io.{PrintStream, ByteArrayOutputStream}
 
+import org.lemurproject.galago.core.parse.Document
+import org.lemurproject.galago.core.retrieval.{RetrievalFactory, Retrieval}
 import org.lemurproject.galago.core.tools.apps.{DumpDocFn, BatchSearch}
 import org.lemurproject.galago.tupleflow.Parameters
 
@@ -17,7 +19,20 @@ object Galagular
   {
     val results = queryGalago("test")
 
-    results.foreach(r => println(r))
+    val dc: Document.DocumentComponents = new Document.DocumentComponents(true, false, false)
+    val r: Retrieval = RetrievalFactory.instance(INDEX_LOCATION, new Parameters)
+
+    results.foreach(res => {
+      val document: Document = r.getDocument(res, dc)
+      if (document != null) {
+        println(document.toString)
+      }
+      else {
+        println("Document " + res + " does not exist in index " + INDEX_LOCATION + ".")
+      }
+    })
+
+    //    results.foreach(r => getDocument(r))
   }
 
   def getDocument(doc : String)
@@ -37,9 +52,7 @@ object Galagular
     docDumper.run(params, stream)
 
     val resultString = baos.toString("UTF8")
-    val results = resultString.split("\n")
-
-    println(results.toString)
+    println(resultString)
   }
 
   /**
