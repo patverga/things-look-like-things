@@ -12,47 +12,39 @@ import org.lemurproject.galago.tupleflow.Parameters
  */
 object Galagular
 {
-
   val INDEX_LOCATION = "/mnt/nfs/indexes/ClueWeb12/galago/clueweb-12-B13.index/"
+  val TEXT     = true
+  val TOKENIZE = false
+  val METADATA = false
 
   def main(args: Array[String])
   {
-    val results = queryGalago("test")
-
-    val dc: Document.DocumentComponents = new Document.DocumentComponents(true, false, false)
-    val r: Retrieval = RetrievalFactory.instance(INDEX_LOCATION, new Parameters)
-
-    results.foreach(res => {
-      val document: Document = r.getDocument(res, dc)
-      if (document != null) {
-        println(document.toString)
-      }
-      else {
-        println("Document " + res + " does not exist in index " + INDEX_LOCATION + ".")
-      }
-    })
-
-    //    results.foreach(r => getDocument(r))
+    val docList = getDocumentsForQueryTerms("test")
+    println(docList.size)
   }
 
-  def getDocument(doc : String)
+  def getDocumentsForQueryTerms(query : String) : collection.mutable.MutableList[String] =
   {
-    val args = Array[String](
-      "--index=" + INDEX_LOCATION,
-      "--id=" + doc,
-      "--text=true",
-      "--tokenize=false",
-      "--metadata=false"
-    )
-    val params = argsToParams(args)
-    val baos = new ByteArrayOutputStream()
-    val stream = new PrintStream(baos)
+    val resultIds = queryGalago(query)
 
-    val docDumper = new DumpDocFn()
-    docDumper.run(params, stream)
+    // make this once and reuse it because it turns out it takes forever
+    val dc: Document.DocumentComponents = new Document.DocumentComponents(TEXT, TOKENIZE, METADATA)
+    val r: Retrieval = RetrievalFactory.instance(INDEX_LOCATION, new Parameters)
 
-    val resultString = baos.toString("UTF8")
-    println(resultString)
+    // retrieve each document and put it in a list
+    val docList = collection.mutable.MutableList[String]()
+    resultIds.foreach(docId =>
+    {
+      val document: Document = r.getDocument(docId, dc)
+      if (document != null)
+      {
+        docList += document.toString
+      }
+      else {
+        println("Document " + docId + " does not exist in index " + INDEX_LOCATION + ".")
+      }
+    })
+    docList
   }
 
   /**
@@ -110,6 +102,26 @@ object Galagular
       }
     }
     params
+  }
+
+  def getSingleDocument(doc : String) : String =
+  {
+    val args = Array[String](
+      "--index=" + INDEX_LOCATION,
+      "--id=" + doc,
+      "--text=true",
+      "--tokenize=false",
+      "--metadata=false"
+    )
+    val params = argsToParams(args)
+    val baos = new ByteArrayOutputStream()
+    val stream = new PrintStream(baos)
+
+    val docDumper = new DumpDocFn()
+    docDumper.run(params, stream)
+
+    val resultString = baos.toString("UTF8")
+    resultString
   }
 
 
