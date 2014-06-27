@@ -10,7 +10,7 @@ import org.lemurproject.galago.tupleflow.Parameters
 /**
  * Created by pat on 6/26/14.
  */
-object Galagular extends GalagoWrapper("/mnt/nfs/indexes/ClueWeb12/galago/clueweb-12-B13.index/", true, false, false)
+object GalagoClueWeb12 extends GalagoWrapper("/mnt/nfs/indexes/ClueWeb12/galago/clueweb-12-B13.index/", true, false, false)
 {
   def main(args: Array[String])
   {
@@ -26,7 +26,7 @@ object Galagular extends GalagoWrapper("/mnt/nfs/indexes/ClueWeb12/galago/cluewe
     val docList = collection.mutable.MutableList[String]()
     resultIds.foreach(docId =>
     {
-      val document: Document = retrieval.getDocument(docId.toString(), docComponents)
+      val document: Document = retrieval.getDocument(docId.documentName, docComponents)
       if (document != null)
       {
         docList += document.toString
@@ -40,15 +40,17 @@ object Galagular extends GalagoWrapper("/mnt/nfs/indexes/ClueWeb12/galago/cluewe
 
   def runQuery(queryText : String) : collection.mutable.Buffer[ScoredDocument] =
   {
-    // TO DO : this is ugly, fix it
-    val args = Array[String](
-      "--query=#combine("+queryText+")"
-    )
-    val params = argsToParams(args)
-
-    // get queries
-    val queries: java.util.List[Parameters] = BatchSearch.collectQueries(params)
-    val query = queries.get(0)
+    //    // TO DO : this is ugly, fix it
+    //    val args = Array[String](
+    //      "--query=#combine("+queryText+")"
+    //    )
+    //    val params = argsToParams(args)
+    //    // get queries
+    //    val queries: java.util.List[Parameters] = BatchSearch.collectQueries(params)
+    //    val query = queries.get(0)
+    val query = new Parameters()
+    query.set("text","#combine("+queryText+")")
+    query.set("number","pop")
 
     // parse and transform query into runnable form
     val root: Node = StructuredQuery.parse(queryText)
@@ -58,7 +60,6 @@ object Galagular extends GalagoWrapper("/mnt/nfs/indexes/ClueWeb12/galago/cluewe
     val results = retrieval.executeQuery(transformed, query).scoredDocuments
     results.asScala
   }
-
 
   def argsToParams(args : Array[String]) : Parameters =
   {
