@@ -11,11 +11,6 @@ import org.lemurproject.galago.tupleflow.Parameters
  */
 object GalagoClueWeb12 extends GalagoWrapper("/mnt/nfs/indexes/ClueWeb12/galago/clueweb-12-B13.index/", true, false, false)
 {
-  def main(args: Array[String])
-  {
-    val docList = getDocumentsForQueryTerms("test")
-    println(docList.size)
-  }
 
   def getDocumentsForQueryTerms(query : String) : collection.mutable.MutableList[String] =
   {
@@ -52,19 +47,9 @@ object GalagoClueWeb12 extends GalagoWrapper("/mnt/nfs/indexes/ClueWeb12/galago/
     results.asScala
   }
 
-  def argsToParams(args : Array[String]) : Parameters =
+  def main(args: Array[String])
   {
-    var params: Parameters = null
-    try
-    {
-      params = Parameters.parseArgs(args)
-    }
-    catch {
-      case e: Exception =>
-      {
-        e.printStackTrace
-      }
-    }
-    params
+    val docList = getDocumentsForQueryTerms("test")
+    println(docList.size)
   }
 }

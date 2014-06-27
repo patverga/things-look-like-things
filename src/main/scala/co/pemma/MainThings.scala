@@ -4,41 +4,31 @@ import cc.factorie.app.nlp._
 
 object MainThings
 {
-  def findThingsThatLookLikeThisThing(thing : String)
-  {
-    //        val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp"
-    val fileLocation = "/home/pat/things-look-like-things/target/classes/" + thing + ".data"
-    val documentString = processDocument(fileLocation)
 
-    val lowerCaseThing = thing.toLowerCase()
-
-    // set file defining patterns
-    val patternUrl = this.getClass.getResource("/patterns")
-    // convert patterns to regex
-    val regexList = Regexer.generateSurfacePatternRegexes(patternUrl, lowerCaseThing)
-
-    println("Looking for things that look like " + thing)
-    documentString.foreach( sentence =>
-    {
-      val lowerSentence = sentence.toLowerCase
-      regexList.foreach( regex =>
-      {
-        //          println(regex)
-        regex.findAllMatchIn(lowerSentence).foreach( matches =>
-        {
-          println(matches.group(1), matches.group(2), matches.group(3))
-        })
-      })
-    })
-
-  }
-
-  def processDocument(fileLocation : String) : Iterable[String] =
+  def findThingsThatLookLikeThisThingFromFile(thing : String, fileLocation : String)
   {
     // load the data
     val source = io.Source.fromFile(fileLocation,"ISO-8859-1")
     val doc = load.LoadPlainText.fromSource(source)
+    val documentString = processDocument(doc)
+    source.close()
+    Regexer.extractRegexFromString(documentString, thing)
+  }
 
+  def findThingsThatLookLikeThisThingFromGalago(thing : String)
+  {
+    val documents = GalagoClueWeb12.getDocumentsForQueryTerms("looks like " + thing)
+    // load the data
+    documents.foreach(document =>
+    {
+      val doc = load.LoadPlainText.fromString(document)
+      val documentString = processDocument(doc)
+      Regexer.extractRegexFromString(documentString, thing)
+    })
+  }
+
+  def processDocument(doc : Seq[Document]) : Iterable[cc.factorie.app.nlp.Sentence] =
+  {
     //set up tokenizer / segmenter
     val pipeline = new DocumentAnnotationPipeline(Seq(segment.DeterministicTokenizer, segment.DeterministicSentenceSegmenter))
 
@@ -46,8 +36,8 @@ object MainThings
     print("Processing data...")
     pipeline.process(doc.head)
 
-    val documentString = doc.head.sentences.map(_.tokens.map(_.string)).map(_.mkString(" "))
-    source.close()
+    //    val documentString = doc.head.string
+    val documentString = doc.head.sentences //.map(_.tokens.map(_.string)).map(_.mkString(" ")).toString()
     println("done processing")
 
     documentString
@@ -56,9 +46,15 @@ object MainThings
 
   def main(args: Array[String])
   {
-//    Regexer.testRegexMaker()
-//        findThingsThatLookLikeThisThing("Actor")
-        JWIWordNetWrap.getSynonyms("dog").foreach(s => println(s))
+//    //    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp2"
+//    val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
+//    findThingsThatLookLikeThisThingFromFile("", fileLocation)
+
+    findThingsThatLookLikeThisThingFromGalago("whippet")
+
+    //    Regexer.testRegexMaker()
+    //    JWIWordNetWrap.allThingSynonyms()
+
 
   }
 }
