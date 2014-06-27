@@ -3,45 +3,41 @@ package co.pemma
 import java.io.{PrintStream, ByteArrayOutputStream}
 
 import org.lemurproject.galago.core.parse.Document
-import org.lemurproject.galago.core.retrieval.{RetrievalFactory, Retrieval}
+import org.lemurproject.galago.core.retrieval.query.{StructuredQuery, Node}
+import org.lemurproject.galago.core.retrieval.{Retrieval}
 import org.lemurproject.galago.core.tools.apps.{DumpDocFn, BatchSearch}
 import org.lemurproject.galago.tupleflow.Parameters
 
 /**
  * Created by pat on 6/26/14.
  */
-object Galagular
+object Galagular extends GalagoWrapper("/mnt/nfs/indexes/ClueWeb12/galago/clueweb-12-B13.index/", true, false, false)
 {
   val INDEX_LOCATION = "/mnt/nfs/indexes/ClueWeb12/galago/clueweb-12-B13.index/"
-  val TEXT     = true
-  val TOKENIZE = false
-  val METADATA = false
 
   def main(args: Array[String])
   {
-    val docList = getDocumentsForQueryTerms("test")
-    println(docList.size)
+//    val docList = getDocumentsForQueryTerms("test")
+//    println(docList.size)
+    runQuery("test query")
   }
 
   def getDocumentsForQueryTerms(query : String) : collection.mutable.MutableList[String] =
   {
+    //  MAKE THIS WORK, HAVE IT USE INTERNAL FUNCTIONS
     val resultIds = queryGalago(query)
-
-    // make this once and reuse it because it turns out it takes forever
-    val dc: Document.DocumentComponents = new Document.DocumentComponents(TEXT, TOKENIZE, METADATA)
-    val r: Retrieval = RetrievalFactory.instance(INDEX_LOCATION, new Parameters)
 
     // retrieve each document and put it in a list
     val docList = collection.mutable.MutableList[String]()
     resultIds.foreach(docId =>
     {
-      val document: Document = r.getDocument(docId, dc)
+      val document: Document = retrieval.getDocument(docId, docComponents)
       if (document != null)
       {
         docList += document.toString
       }
       else {
-        println("Document " + docId + " does not exist in index " + INDEX_LOCATION + ".")
+        println("Document " + docId + " does not exist in index.")
       }
     })
     docList
@@ -50,7 +46,7 @@ object Galagular
   /**
    * Takes a query string and returns the top 1000 most relevant docs
    * @param query The query terms to search for
-   * @return the top 1000 documents for the search query
+   * @return ids of the top 1000 documents for the search query
    */
   def queryGalago(query : String) : collection.mutable.MutableList[String] =
   {
@@ -87,6 +83,33 @@ object Galagular
 
     docList
   }
+
+  def runQuery(queryText : String)
+  {
+    val args = Array[String](
+      "--query=#combine("+queryText+")"
+    )
+    val params = argsToParams(args)
+    // get queries
+    val queries: java.util.List[Parameters] = BatchSearch.collectQueries(params)
+    val query = queries.get(0)
+
+    // parse and transform query into runnable form
+    val root: Node = StructuredQuery.parse(queryText)
+    val transformed: Node = retrieval.transformQuery(root, query)
+
+    // run query
+    val results = retrieval.executeQuery(transformed, query).scoredDocuments
+
+    // print results
+    var i = 0
+    while (i < results.size())
+    {
+      println(results.get(i).toString())
+      i += 1
+    }
+  }
+
 
   def argsToParams(args : Array[String]) : Parameters =
   {
