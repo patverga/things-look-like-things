@@ -4,7 +4,6 @@ import scala.collection.JavaConverters._
 import org.lemurproject.galago.core.parse.Document
 import org.lemurproject.galago.core.retrieval.query.{StructuredQuery, Node}
 import org.lemurproject.galago.core.retrieval.ScoredDocument
-import org.lemurproject.galago.core.tools.apps.BatchSearch
 import org.lemurproject.galago.tupleflow.Parameters
 
 /**
@@ -40,17 +39,9 @@ object GalagoClueWeb12 extends GalagoWrapper("/mnt/nfs/indexes/ClueWeb12/galago/
 
   def runQuery(queryText : String) : collection.mutable.Buffer[ScoredDocument] =
   {
-    //    // TO DO : this is ugly, fix it
-    //    val args = Array[String](
-    //      "--query=#combine("+queryText+")"
-    //    )
-    //    val params = argsToParams(args)
-    //    // get queries
-    //    val queries: java.util.List[Parameters] = BatchSearch.collectQueries(params)
-    //    val query = queries.get(0)
+
     val query = new Parameters()
     query.set("text","#combine("+queryText+")")
-    query.set("number","pop")
 
     // parse and transform query into runnable form
     val root: Node = StructuredQuery.parse(queryText)

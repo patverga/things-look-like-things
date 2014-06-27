@@ -44,20 +44,13 @@ object MainThings
 
     // process the document
     print("Processing data...")
-
-    //    source.getLines().foreach(line =>
-    //    {
-    //      println(line)
-    //      println()
-    //      segment.DeterministicTokenizer(line)
-    //    })
     pipeline.process(doc.head)
-    println("done processing")
-    //    print out the individual sentences in the document
+
     val documentString = doc.head.sentences.map(_.tokens.map(_.string)).map(_.mkString(" "))
     source.close()
-    documentString
+    println("done processing")
 
+    documentString
   }
 
 
