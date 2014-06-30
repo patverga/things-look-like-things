@@ -21,8 +21,8 @@ object MainThings
     // load the data
     documents.foreach(document =>
     {
-//      val doc = load.LoadPlainText.fromString(document)
-//      val documentString = processDocument(doc)
+      //      val doc = load.LoadPlainText.fromString(document)
+      //      val documentString = processDocument(doc)
       Regexer.extractRegexFromString(document, thing)
     })
   }
@@ -46,13 +46,18 @@ object MainThings
 
   def main(args: Array[String])
   {
-//    //    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp2"
+    //    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp2"
     val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
-    findThingsThatLookLikeThisThingFromFile("whippet", fileLocation)
 
-//    findThingsThatLookLikeThisThingFromGalago("whippet")
+    var thing = "whippet"
+    if (args.length > 0)
+      thing = args(0)
 
-    //    Regexer.testRegexMaker()
+//    findThingsThatLookLikeThisThingFromFile(thing, fileLocation)
+
+        findThingsThatLookLikeThisThingFromGalago(thing)
+
+//        Regexer.testRegexMaker()
     //    JWIWordNetWrap.allThingSynonyms()
 
 

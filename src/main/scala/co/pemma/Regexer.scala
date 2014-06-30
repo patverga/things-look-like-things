@@ -25,7 +25,7 @@ object Regexer
       {
         println(regex)
         println(matches.group(1), matches.group(2), matches.group(3))
-        println(matches.group(0))
+//        println(matches.group(0))
       })
     })
     //    })
@@ -35,8 +35,8 @@ object Regexer
   {
     val patternList = collection.mutable.MutableList[Regex]()
 
-    val anyWordsRegex = "([\\s*\\S+\\s*]*{1,4})"
-    val thingRegEx = "([\\s*\\S+\\s*]*{0,4}"+thing+"[\\s*\\S+\\s*]*{0,4})"
+    val anyWordsRegex = "((?:\\s*\\S+\\s*){1,4})"
+    val thingRegEx = "((?:\\s*\\S+\\s*){0,4}"+thing+"(?:\\s*\\S+\\s*){0,4})"
 
     io.Source.fromURL(patternListURL).getLines().foreach(line => {
       if (!line.startsWith("#") && line != "") {

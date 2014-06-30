@@ -11,6 +11,8 @@ import org.lemurproject.galago.tupleflow.Parameters
  */
 object GalagoClueWeb12 extends GalagoWrapper("/mnt/nfs/indexes/ClueWeb12/galago/clueweb-12-B13.index/", true, false, false)
 {
+  // how many results to return from search
+  val K_RESULTS = 1000
 
   def getDocumentsForQueryTerms(query : String) : collection.mutable.MutableList[String] =
   {
@@ -36,7 +38,8 @@ object GalagoClueWeb12 extends GalagoWrapper("/mnt/nfs/indexes/ClueWeb12/galago/
   {
 
     val query = new Parameters()
-    query.set("text","#combine("+queryText+")")
+    query.set("text", "#combine("+queryText+")")
+    query.set("requested", K_RESULTS)
 
     // parse and transform query into runnable form
     val root: Node = StructuredQuery.parse(queryText)
