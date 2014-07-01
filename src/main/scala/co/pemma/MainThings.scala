@@ -5,39 +5,42 @@ import cc.factorie.app.nlp._
 object MainThings
 {
 
-  def findThingsThatLookLikeThisThingFromFile(thing : String, fileLocation : String)
+  def findThingsThatLookLikeThisThingFromFile(thing : String, inputFileLocation : String)
   {
     // load the data
-    val source = io.Source.fromFile(fileLocation,"ISO-8859-1")
+    val source = io.Source.fromFile(inputFileLocation,"ISO-8859-1")
     val doc = load.LoadPlainText.fromSource(source)
-    val documentString = processDocument(doc)
+    val documentString = processDocument(doc.head).flatMap(_.tokens).toString()
     source.close()
     Regexer.extractRegexFromString(documentString, thing)
   }
 
-  def findThingsThatLookLikeThisThingFromGalago(thing : String)
+  def findThingsThatLookLikeThisThingFromGalago(thing : String, output : String)
   {
-    val documents = GalagoClueWeb12.getDocumentsForQueryTerms("looks like " + thing)
-    // load the data
-    documents.foreach(document =>
+    io.Source.fromFile("/home/pat/things-look-like-things/target/classes/patterns").getLines().foreach(pattern =>
     {
-      //      val doc = load.LoadPlainText.fromString(document)
-      //      val documentString = processDocument(doc)
-      Regexer.extractRegexFromString(document, thing)
+      // query galago
+      val documents = GalagoClueWeb12.getDocumentsForQueryTerms(s"${pattern.replaceAll("?","")} $thing")
+      // load the data
+      documents.foreach(document => {
+        //        Regexer.extractRegexFromString(document, thing)
+        val doc = load.LoadPlainText.fromString(document).head
+        val sentences = processDocument(doc)
+        Regexer.extractRegexFromSentences(sentences, thing, output)
+      })
     })
   }
 
-  def processDocument(doc : Seq[Document]) : String =
+  def processDocument(doc : Document) : Iterable[Sentence] =
   {
     //set up tokenizer / segmenter
     val pipeline = new DocumentAnnotationPipeline(Seq(segment.DeterministicTokenizer, segment.DeterministicSentenceSegmenter))
 
     // process the document
     print("Processing data...")
-    pipeline.process(doc.head)
+    pipeline.process(doc)
 
-    //    val documentString = doc.head.string
-    val documentString = doc.head.toString //.map(_.tokens.map(_.string)).map(_.mkString(" ")).toString()
+    val documentString = doc.sentences
     println("done processing")
 
     documentString
@@ -46,20 +49,19 @@ object MainThings
 
   def main(args: Array[String])
   {
-    //    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp2"
-    val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
 
     var thing = "whippet"
     if (args.length > 0)
       thing = args(0)
 
-//    findThingsThatLookLikeThisThingFromFile(thing, fileLocation)
+    //    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp2"
+//        val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
+//        findThingsThatLookLikeThisThingFromFile(thing, fileLocation)
 
-        findThingsThatLookLikeThisThingFromGalago(thing)
+    findThingsThatLookLikeThisThingFromGalago(thing, "")
 
-//        Regexer.testRegexMaker()
-    //    JWIWordNetWrap.allThingSynonyms()
-
+    //        Regexer.testRegexMaker()
+    //        JWIWordNetWrap.allThingSynonyms()
 
   }
 }

@@ -1,5 +1,7 @@
 package co.pemma
 
+import cc.factorie.app.nlp.Sentence
+
 import scala.util.matching.Regex
 /**
  * Created by pat on 6/25/14.
@@ -7,28 +9,34 @@ import scala.util.matching.Regex
 object Regexer
 {
 
-  def extractRegexFromString(documentString : String, thing : String)
+  def extractRegexFromSentences(sentences : Iterable[Sentence], thing : String, output : String)
+  {
+    println("Looking for things that look like " + thing)
+    sentences.foreach(sentence =>
+    {
+      val matches = extractRegexFromString(sentence.string, thing)
+      matches.foreach(m =>
+      {
+        println(s"${m.group(1)} - ${m.group(2)} - ${m.group(3)}")
+        //        println(matches.group(0))
+      })
+    })
+  }
+
+  def extractRegexFromString(documentString : String, thing : String) : collection.mutable.MutableList[Regex.Match] =
   {
     // set file defining patterns
     val patternUrl = this.getClass.getResource("/patterns")
     // convert patterns to regex
     val regexList = generateSurfacePatternRegexes(patternUrl, thing.toLowerCase())
 
-    println("Looking for things that look like " + thing)
-    //    documentString.foreach( sentence =>
-    //    {
-    //      val lowerSentence = sentence.string.toLowerCase
     val lowerSentence = documentString.toLowerCase()
+    val matches =  collection.mutable.MutableList[Regex.Match]()
     regexList.foreach( regex =>
     {
-      regex.findAllMatchIn(lowerSentence).foreach( matches =>
-      {
-        println(regex)
-        println(matches.group(1), matches.group(2), matches.group(3))
-//        println(matches.group(0))
-      })
+      matches ++= regex.findAllMatchIn(lowerSentence)
     })
-    //    })
+    matches
   }
 
   def generateSurfacePatternRegexes(patternListURL: java.net.URL, thing: String): collection.mutable.MutableList[Regex] =

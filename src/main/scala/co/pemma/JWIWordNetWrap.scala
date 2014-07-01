@@ -33,7 +33,11 @@ object JWIWordNetWrap
     var phraseCount = 1;
     words.foreach(word =>
     {
-      val synonyms = getSynonyms(word)
+      var synonyms = getSynonyms(word)
+      if (word.toLowerCase().equals("or")) {
+        synonyms = new collection.mutable.MutableList[String]()
+        synonyms += "or"
+      }
       if (synonyms != null) {
         wordSynonyms += synonyms
         phraseCount *= synonyms.size
