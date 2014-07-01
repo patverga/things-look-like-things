@@ -1,26 +1,30 @@
 package co.pemma
 
 import cc.factorie.app.nlp.Sentence
+import java.io.PrintWriter
 
 import scala.util.matching.Regex
+
 /**
  * Created by pat on 6/25/14.
  */
 object Regexer
 {
 
-  def extractRegexFromSentences(sentences : Iterable[Sentence], thing : String, output : String)
+  def extractRegexFromSentences(sentences : Iterable[Sentence], thing : String, outputLocation : String)
   {
     println("Looking for things that look like " + thing)
+    val writer = new PrintWriter(outputLocation)
     sentences.foreach(sentence =>
     {
       val matches = extractRegexFromString(sentence.string, thing)
       matches.foreach(m =>
       {
         println(s"${m.group(1)} - ${m.group(2)} - ${m.group(3)}")
-        //        println(matches.group(0))
+        writer.println(m.group(0))
       })
     })
+    writer.close()
   }
 
   def extractRegexFromString(documentString : String, thing : String) : collection.mutable.MutableList[Regex.Match] =

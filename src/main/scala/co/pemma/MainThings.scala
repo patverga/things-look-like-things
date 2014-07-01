@@ -58,7 +58,7 @@ object MainThings
 //        val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
 //        findThingsThatLookLikeThisThingFromFile(thing, fileLocation)
 
-    findThingsThatLookLikeThisThingFromGalago(thing, "")
+    findThingsThatLookLikeThisThingFromGalago(thing, s"${this.getClass.getResource("/results").toString}/$thing.result")
 
     //        Regexer.testRegexMaker()
     //        JWIWordNetWrap.allThingSynonyms()
