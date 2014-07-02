@@ -1,7 +1,7 @@
 package co.pemma
 
 import cc.factorie.app.nlp.Sentence
-import java.io.PrintWriter
+import java.io.{FileWriter, BufferedWriter, PrintWriter}
 
 import scala.util.matching.Regex
 
@@ -14,7 +14,7 @@ object Regexer
   def extractRegexFromSentences(sentences : Iterable[Sentence], thing : String, outputLocation : String)
   {
     println("Looking for things that look like " + thing)
-    val writer = new PrintWriter(outputLocation)
+    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
     sentences.foreach(sentence =>
     {
       val matches = extractRegexFromString(sentence.string, thing)
