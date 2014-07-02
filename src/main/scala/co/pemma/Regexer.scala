@@ -81,8 +81,8 @@ object Regexer
     val center = collection.mutable.MutableList[String]()
     val right = collection.mutable.MutableList[String]()
 
-    if ( sentence.matches(s"$arg1((?:\\s*\\S+\\s*){0,10}$arg2") ||
-      sentence.matches(s"$arg2((?:\\s*\\S+\\s*){0,10}$arg1") )
+    if ( sentence.matches(s"$arg1(?:\\s*\\S+\\s*){0,10}$arg2") ||
+      sentence.matches(s"$arg2(?:\\s*\\S+\\s*){0,10}$arg1") )
     {
       getAllRegexMatches(regexList, sentence).foreach(m =>
       {
