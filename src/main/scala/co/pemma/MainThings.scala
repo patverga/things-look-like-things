@@ -26,7 +26,8 @@ object MainThings
         //        Regexer.extractRegexFromString(document, thing)
         val doc = load.LoadPlainText.fromString(document).head
         val sentences = processDocument(doc)
-        Regexer.extractRegexFromSentences(sentences, thing, output)
+        if (sentences != null)
+          Regexer.extractRegexFromSentences(sentences, thing, output)
       })
     })
   }
@@ -38,12 +39,15 @@ object MainThings
 
     // process the document
     print("Processing data...")
-    pipeline.process(doc)
-
-    val documentString = doc.sentences
-    println("done processing")
-
-    documentString
+    try
+    {
+      pipeline.process(doc)
+      val documentString = doc.sentences
+      println("done processing")
+      documentString
+    } catch {
+      case e: Exception => return (null)
+    }
   }
 
 
@@ -55,10 +59,10 @@ object MainThings
       thing = args(0)
 
     //    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp2"
-//        val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
-//        findThingsThatLookLikeThisThingFromFile(thing, fileLocation)
+    //        val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
+    //        findThingsThatLookLikeThisThingFromFile(thing, fileLocation)
 
-  val output = s"results/$thing.result"
+    val output = s"results/$thing.result"
     println(output)
     findThingsThatLookLikeThisThingFromGalago(thing, output)
 
