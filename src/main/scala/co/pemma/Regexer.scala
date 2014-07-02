@@ -53,8 +53,8 @@ object Regexer
     io.Source.fromURL(patternListURL).getLines().foreach(line => {
       if (!line.startsWith("#") && line != "") {
 
-        val pattern1 = new Regex(anyWordsRegex + "("+line+")" + thingRegEx)
-        val pattern2 = new Regex(thingRegEx + "("+line+")" + anyWordsRegex)
+        val pattern1 = new Regex(anyWordsRegex + s"( $line )" + thingRegEx)
+        val pattern2 = new Regex(thingRegEx + s"( $line )" + anyWordsRegex)
         //        println(pattern1)
         //        println(pattern2)
         patternList += pattern1
