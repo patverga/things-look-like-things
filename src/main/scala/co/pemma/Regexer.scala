@@ -80,7 +80,9 @@ object Regexer
     val left = collection.mutable.MutableList[String]()
     val center = collection.mutable.MutableList[String]()
     val right = collection.mutable.MutableList[String]()
-    if (sentence.contains(arg1) && sentence.contains(arg2))
+
+    if ( sentence.matches(s"$arg1((?:\\s*\\S+\\s*){0,10}$arg2") ||
+      sentence.matches(s"$arg2((?:\\s*\\S+\\s*){0,10}$arg1") )
     {
       getAllRegexMatches(regexList, sentence).foreach(m =>
       {
