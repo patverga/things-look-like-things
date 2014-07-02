@@ -20,7 +20,7 @@ object MainThings
     io.Source.fromFile("/home/pat/things-look-like-things/target/classes/patterns").getLines().foreach(pattern =>
     {
       // query galago
-      val documents = GalagoClueWeb12.getDocumentsForQueryTerms(s"${pattern.replaceAll("?","")} $thing")
+      val documents = GalagoClueWeb12.getDocumentsForQueryTerms(s"${pattern.replaceAll("\\?","")} $thing")
       // load the data
       documents.foreach(document => {
         //        Regexer.extractRegexFromString(document, thing)
@@ -58,7 +58,9 @@ object MainThings
 //        val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
 //        findThingsThatLookLikeThisThingFromFile(thing, fileLocation)
 
-    findThingsThatLookLikeThisThingFromGalago(thing, s"${this.getClass.getResource("/results").toString}/$thing.result")
+  val output = s"results/$thing.result"
+    println(output)
+    findThingsThatLookLikeThisThingFromGalago(thing, output)
 
     //        Regexer.testRegexMaker()
     //        JWIWordNetWrap.allThingSynonyms()
