@@ -12,7 +12,7 @@ object MainThings
     val doc = load.LoadPlainText.fromSource(source)
     val documentString = processDocument(doc.head).flatMap(_.tokens).toString()
     source.close()
-    Regexer.extractRegexFromString(documentString, thing)
+//    Regexer.extractRegexFromString(documentString, thing)
   }
 
   def findThingsThatLookLikeThisThingFromGalago(thing : String, output : String)
@@ -23,11 +23,11 @@ object MainThings
       val documents = GalagoClueWeb12.getDocumentsForQueryTerms(s"${pattern.replaceAll("\\?","")} $thing")
       // load the data
       documents.foreach(document => {
-        //        Regexer.extractRegexFromString(document, thing)
-        val doc = load.LoadPlainText.fromString(document).head
-        val sentences = processDocument(doc)
-        if (sentences != null)
-          Regexer.extractRegexFromSentences(sentences, thing, output)
+                Regexer.extractRegexFromString(document, thing, output)
+//        val doc = load.LoadPlainText.fromString(document).head
+//        val sentences = processDocument(doc)
+//        if (sentences != null)
+//          Regexer.extractRegexFromSentences(sentences, thing, output)
       })
     })
   }

@@ -13,21 +13,21 @@ object Regexer
 
   def extractRegexFromSentences(sentences : Iterable[Sentence], thing : String, outputLocation : String)
   {
-    println("Looking for things that look like " + thing)
-    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
-    sentences.foreach(sentence =>
-    {
-      val matches = extractRegexFromString(sentence.string, thing)
-      matches.foreach(m =>
-      {
-        println(s"${m.group(1)} - ${m.group(2)} - ${m.group(3)}")
-        writer.println(m.group(0))
-      })
-    })
-    writer.close()
+//    println("Looking for things that look like " + thing)
+//    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
+//    sentences.foreach(sentence =>
+//    {
+//      val matches = extractRegexFromString(sentence.string, thing)
+//      matches.foreach(m =>
+//      {
+//        println(s"${m.group(1)} - ${m.group(2)} - ${m.group(3)}")
+//        writer.println(m.group(0))
+//      })
+//    })
+//    writer.close()
   }
 
-  def extractRegexFromString(documentString : String, thing : String) : collection.mutable.MutableList[Regex.Match] =
+  def extractRegexFromString(documentString : String, thing : String, outputLocation : String) : collection.mutable.MutableList[Regex.Match] =
   {
     // set file defining patterns
     val patternUrl = this.getClass.getResource("/patterns")
@@ -40,6 +40,14 @@ object Regexer
     {
       matches ++= regex.findAllMatchIn(lowerSentence)
     })
+
+    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
+    matches.foreach(m =>
+    {
+      println(s"${m.group(1)} - ${m.group(2)} - ${m.group(3)}")
+      writer.println(m.group(0))
+    })
+    writer.close()
     matches
   }
 
