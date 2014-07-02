@@ -39,7 +39,7 @@ object GalagoClueWeb12 extends GalagoWrapper("/mnt/nfs/indexes/ClueWeb12/galago/
 
     val query = new Parameters()
     query.set("text", s"#combine($queryText)")
-    query.set("requested", s"$K_RESULTS")
+    query.set("requested", K_RESULTS)
 
     // parse and transform query into runnable form
     val root: Node = StructuredQuery.parse(queryText)

@@ -1,6 +1,6 @@
 package co.pemma
 
-import cc.factorie.app.nlp.Sentence
+import cc.factorie.app.nlp.{Token, load, Sentence}
 import java.io.{FileWriter, BufferedWriter, PrintWriter}
 
 import scala.util.matching.Regex
@@ -13,42 +13,28 @@ object Regexer
 
   def extractRegexFromSentences(sentences : Iterable[Sentence], thing : String, outputLocation : String)
   {
-//    println("Looking for things that look like " + thing)
-//    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
-//    sentences.foreach(sentence =>
-//    {
-//      val matches = extractRegexFromString(sentence.string, thing)
-//      matches.foreach(m =>
-//      {
-//        println(s"${m.group(1)} - ${m.group(2)} - ${m.group(3)}")
-//        writer.println(m.group(0))
-//      })
-//    })
-//    writer.close()
+    println("Looking for things that look like " + thing)
+    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
+    sentences.foreach(sentence =>
+    {
+      val matches = extractRegexFromString(sentence.string, thing)
+      matches.foreach(m =>
+      {
+        println(s"${m.group(1)} - ${m.group(2)} - ${m.group(3)}")
+        writer.println(m.group(0))
+      })
+    })
+    writer.close()
   }
 
-  def extractRegexFromString(documentString : String, thing : String, outputLocation : String) : collection.mutable.MutableList[Regex.Match] =
+  def extractRegexFromString(documentString : String, thing : String) : collection.mutable.MutableList[Regex.Match] =
   {
     // set file defining patterns
     val patternUrl = this.getClass.getResource("/patterns")
     // convert patterns to regex
     val regexList = generateSurfacePatternRegexes(patternUrl, thing.toLowerCase())
 
-    val lowerSentence = documentString.toLowerCase()
-    val matches =  collection.mutable.MutableList[Regex.Match]()
-    regexList.foreach( regex =>
-    {
-      matches ++= regex.findAllMatchIn(lowerSentence)
-    })
-
-    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
-    matches.foreach(m =>
-    {
-      println(s"${m.group(1)} - ${m.group(2)} - ${m.group(3)}")
-      writer.println(m.group(0))
-    })
-    writer.close()
-    matches
+    getAllRegexMatches(regexList, documentString.toLowerCase())
   }
 
   def generateSurfacePatternRegexes(patternListURL: java.net.URL, thing: String): collection.mutable.MutableList[Regex] =
@@ -71,6 +57,44 @@ object Regexer
     })
     patternList
   }
+
+  def getAllRegexMatches(regexList : collection.mutable.MutableList[Regex], sentence : String)
+  : collection.mutable.MutableList[Regex.Match] =
+  {
+    val matches =  collection.mutable.MutableList[Regex.Match]()
+    regexList.foreach( regex =>
+    {
+      matches ++= regex.findAllMatchIn(sentence)
+    })
+    matches
+  }
+
+  def extractRelationForArgs(arg1 : String, arg2 : String, sentence : String)
+    : (collection.mutable.MutableList[String], collection.mutable.MutableList[String],
+        collection.mutable.MutableList[String]) =
+  {
+    val regexList = collection.mutable.MutableList[Regex]()
+    regexList += new Regex(s"(.*)$arg1(.*)$arg2(.*)")
+    regexList += new Regex(s"(.*)$arg2(.*)$arg1(.*)")
+
+    val left = collection.mutable.MutableList[String]()
+    val center = collection.mutable.MutableList[String]()
+    val right = collection.mutable.MutableList[String]()
+    if (sentence.contains(arg1) && sentence.contains(arg2))
+    {
+      getAllRegexMatches(regexList, sentence).foreach(m =>
+      {
+        left += m.group(1)
+        center += m.group(2)
+        right += m.group(3)
+        println(m.group(0))
+      })
+    }
+    (left, center, right)
+  }
+
+
+
 
   def testRegexMaker()
   {
@@ -97,6 +121,13 @@ object Regexer
         })
       })
     })
+  }
+
+  def main(args: Array[String])
+  {
+    //    testRegexMaker()
+
+    extractRelationForArgs("cat", "dog", "a cat is not a dog.")
   }
 
 }

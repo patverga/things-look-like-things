@@ -12,7 +12,9 @@ object MainThings
     val doc = load.LoadPlainText.fromSource(source)
     val documentString = processDocument(doc.head).flatMap(_.tokens).toString()
     source.close()
-    //    Regexer.extractRegexFromString(documentString, thing)
+    Regexer.extractRegexFromString(documentString, thing).foreach(m =>
+      println(s"${m.group(1)} - ${m.group(2)} - ${m.group(3)}")
+    )
   }
 
   def findThingsThatLookLikeThisThingFromGalago(thing : String, output : String)
@@ -24,11 +26,30 @@ object MainThings
       // load the data
       documents.foreach(document =>
       {
-        Regexer.extractRegexFromString(document, thing, output)
-        //        val doc = load.LoadPlainText.fromString(document).head
-        //        val sentences = processDocument(doc)
-        //        if (sentences != null)
-        //          Regexer.extractRegexFromSentences(sentences, thing, output)
+        //        Regexer.extractRegexFromString(document, thing, output)
+        val doc = load.LoadPlainText.fromString(document).head
+        val sentences = processDocument(doc)
+        Regexer.extractRegexFromSentences(sentences, thing, output)
+      })
+    })
+  }
+
+  def extractContextsBetweenThings(arg1 : String, arg2 :String)
+  {
+    val documents = GalagoClueWeb12.getDocumentsForQueryTerms(s"$arg1 $arg2")
+    val left = collection.mutable.MutableList[String]()
+    val center = collection.mutable.MutableList[String]()
+    val right = collection.mutable.MutableList[String]()
+
+    documents.foreach(document =>
+    {
+      val doc = load.LoadPlainText.fromString(document).head
+      processDocument(doc).foreach(sentence =>
+      {
+        val extract = Regexer.extractRelationForArgs(arg1, arg2, sentence.string)
+        left ++= extract._1
+        center ++= extract._2
+        right ++= extract._3
       })
     })
   }
@@ -39,16 +60,11 @@ object MainThings
     val pipeline = new DocumentAnnotationPipeline(Seq(segment.DeterministicTokenizer, segment.DeterministicSentenceSegmenter))
 
     // process the document
-    print("Processing data...")
-    try
-    {
-      pipeline.process(doc)
-      val documentString = doc.sentences
-      println("done processing")
-      documentString
-    } catch {
-      case e: Exception => return (null)
-    }
+    print("Processing document...")
+    pipeline.process(doc)
+    val documentString = doc.sentences
+    println("Done")
+    documentString
   }
 
 
@@ -59,13 +75,14 @@ object MainThings
     if (args.length > 0)
       thing = args(0)
 
-    //    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp2"
-    //        val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
-    //        findThingsThatLookLikeThisThingFromFile(thing, fileLocation)
+    extractContextsBetweenThings("whippet", "greyhound")
+//    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp2"
+    //    val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
+//    findThingsThatLookLikeThisThingFromFile(thing, fileLocation)
 
-    val output = s"results/$thing.result"
-    println(output)
-    findThingsThatLookLikeThisThingFromGalago(thing, output)
+    //    val output = s"results/$thing.result"
+    //    println(output)
+    //    findThingsThatLookLikeThisThingFromGalago(thing, output)
 
     //        Regexer.testRegexMaker()
     //        JWIWordNetWrap.allThingSynonyms()
