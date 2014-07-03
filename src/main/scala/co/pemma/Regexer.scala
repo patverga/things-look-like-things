@@ -20,48 +20,24 @@ class Regexer(thing: String)
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
     sentences.foreach(sentence =>
     {
-      val matches = extractRegexFromString(sentence.string, thing)
+      val matches = regex.findAllMatchIn(sentence.string)
       matches.foreach(m =>
       {
-        println(s"${m.group(1)} - ${m.group(2)} - ${m.group(3)}")
-        writer.println(m.group(0))
+        println(s"${m.group(0)}")
+        writer.println(s"${m.group(0)} \n")
       })
     })
     writer.close()
   }
 
-  def extractRegexFromString(documentString : String, thing : String) : Iterator[scala.util.matching.Regex.Match] =
-  {
-    // convert patterns to regex
-    regex.findAllMatchIn(documentString.toLowerCase())
-  }
-
   def generateSurfacePatternRegexes(thing: String): Regex =
   {
-//    val patternList = collection.mutable.MutableList[Regex]()
-
-//    val anyWordsRegex = "((?:\\s*\\S+\\s*){1,4})"
-//    val thingRegEx = "((?:\\s*\\S+\\s*){0,4}"+thing+"(?:\\s*\\S+\\s*){0,4})"
-
     val anyWordsRegex = ".*"
     val thingRegEx = s"(?:^$thing |(?:.* $thing\\W.*)|(?:.* $thing$$))"
 
     io.Source.fromURL(patternUrl).getLines.filter(!_.startsWith("#")).filter(_ != "")
       .map(pattern => s"($anyWordsRegex$pattern$thingRegEx)|($thingRegEx$pattern$anyWordsRegex)")
       .mkString("|").r
-
-//    io.Source.fromURL(patternListURL).getLines().foreach(pattern => {
-//      if (!pattern.startsWith("#") && pattern != "") {
-//
-//        val pattern1 = (s"($anyWordsRegex$pattern$thingRegEx)").r
-//        val pattern2 = (s"($thingRegEx$pattern$anyWordsRegex)").r
-//        //        println(pattern1)
-//        //        println(pattern2)
-//        patternList += pattern1
-//        patternList += pattern2
-//      }
-//    })
-//    patternList
   }
 
   def extractRelationForArgs(arg1 : String, arg2 : String, sentence : String)

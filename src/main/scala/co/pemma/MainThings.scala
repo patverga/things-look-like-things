@@ -15,7 +15,7 @@ object MainThings
     val documentString = processDocument(doc.head).flatMap(_.tokens).toString()
     source.close()
 
-    regexerObject.extractRegexFromString(documentString, thing).foreach(m =>
+    regexerObject.regex.findAllMatchIn(documentString).foreach(m =>
       println(s"${m.group(0)}")
     )
   }
