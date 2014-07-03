@@ -24,18 +24,16 @@ object MainThings
   {
     val regexerObject = new Regexer(thing, ".*")
 
-    io.Source.fromFile("target/classes/patterns").getLines().foreach(pattern =>
+    val documents = io.Source.fromFile("target/classes/patterns").getLines().flatMap(pattern =>
     {
-      // query galago
-      val documents = GalagoClueWeb12.getDocumentsForQueryTerms(s"${pattern.replaceAll("\\?","")} $thing")
-      // load the data
-      documents.foreach(document =>
-      {
-        //        Regexer.extractRegexFromString(document, thing, output)
-        val doc = load.LoadPlainText.fromString(document).head
-        val sentences = processDocument(doc)
-        regexerObject.extractRegexFromSentences(sentences, thing, output)
-      })
+      GalagoClueWeb12.getDocumentsForQueryTerms(s"${pattern.replaceAll("\\?", "")} $thing")
+    })
+    // load the data
+    documents.toSet[String].foreach(document =>
+    {
+      val doc = load.LoadPlainText.fromString(document).head
+      val sentences = processDocument(doc)
+      regexerObject.extractRegexFromSentences(sentences, thing, output)
     })
   }
 
@@ -80,14 +78,14 @@ object MainThings
     if (args.length > 1)
       thing2 = args(1)
 
-    extractContextsBetweenThings(thing1, thing2)
+//    extractContextsBetweenThings(thing1, thing2)
     //    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp2"
     //    val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
     //    findThingsThatLookLikeThisThingFromFile(thing, fileLocation)
 
-    //        val output = s"results/$thing.result"
-    //        println(output)
-    //        findThingsThatLookLikeThisThingFromGalago(thing, output)
+            val output = s"results/$thing.result"
+            println(output)
+            findThingsThatLookLikeThisThingFromGalago(thing, output)
 
     //            Regexer.testRegexMaker()
     //        JWIWordNetWrap.allThingSynonyms()
