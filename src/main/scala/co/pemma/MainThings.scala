@@ -5,23 +5,25 @@ import cc.factorie.app.nlp._
 object MainThings
 {
 
-  var regexerObject : Regexer = null
-
   def findThingsThatLookLikeThisThingFromFile(thing : String, inputFileLocation : String)
   {
+    val regexerObject = new Regexer(thing, ".*")
+
     // load the data
-    val source = io.Source.fromFile(inputFileLocation,"ISO-8859-1")
+    val source = io.Source.fromFile(inputFileLocation)
     val doc = load.LoadPlainText.fromSource(source)
     val documentString = processDocument(doc.head).flatMap(_.tokens).toString()
     source.close()
 
-    regexerObject.regex.findAllMatchIn(documentString).foreach(m =>
+    regexerObject.patternRegex.findAllMatchIn(documentString).foreach(m =>
       println(s"${m.group(0)}")
     )
   }
 
   def findThingsThatLookLikeThisThingFromGalago(thing : String, output : String)
   {
+    val regexerObject = new Regexer(thing, ".*")
+
     io.Source.fromFile("target/classes/patterns").getLines().foreach(pattern =>
     {
       // query galago
@@ -37,19 +39,21 @@ object MainThings
     })
   }
 
-  def extractContextsBetweenThings(arg1 : String, arg2 :String)
+  def extractContextsBetweenThings(thing1 : String, thing2 :String)
   {
-    val documents = GalagoClueWeb12.getDocumentsForQueryTerms(s"$arg1 $arg2")
+    val regexerObject = new Regexer(thing1, thing2)
+
+    val documents = GalagoClueWeb12.getDocumentsForQueryTerms(s"$thing1 $thing2")
 
     val matches = documents.flatMap(doc =>
     {
-      processDocument(load.LoadPlainText.fromString(doc).head).map(sentence =>
+      processDocument(load.LoadPlainText.fromString(doc).head).flatMap(sentence =>
       {
-        regexerObject.extractContextsForRelation(arg1, arg2, sentence.string)
+        regexerObject.extractContextsForRelation(sentence.string)
       })
-    }).flatten
+    })
 
-    matches.foreach(m => println(s"${m.group(1)} : ${m.group(2)} : ${m.group(3)}"))
+    matches.foreach(m => println(s"${m.group(1)}:${m.group(2)}:${m.group(3)}:${m.group(4)}:${m.group(5)}"))
   }
 
   def processDocument(doc : Document) : Iterable[Sentence] =
@@ -69,30 +73,33 @@ object MainThings
   def main(args: Array[String])
   {
 
-    var thing = "whippet"
+    var thing1 = "whippet"
     if (args.length > 0)
-      thing = args(0)
+      thing1 = args(0)
+    var thing2 = "greyhound"
+    if (args.length > 1)
+      thing2 = args(1)
 
-    regexerObject = new Regexer(thing)
-
-        extractContextsBetweenThings("whippet", "greyhound")
-//    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp2"
+    extractContextsBetweenThings(thing1, thing2)
+    //    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp2"
     //    val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
-//    findThingsThatLookLikeThisThingFromFile(thing, fileLocation)
+    //    findThingsThatLookLikeThisThingFromFile(thing, fileLocation)
 
-//        val output = s"results/$thing.result"
-//        println(output)
-//        findThingsThatLookLikeThisThingFromGalago(thing, output)
+    //        val output = s"results/$thing.result"
+    //        println(output)
+    //        findThingsThatLookLikeThisThingFromGalago(thing, output)
 
-//            Regexer.testRegexMaker()
+    //            Regexer.testRegexMaker()
     //        JWIWordNetWrap.allThingSynonyms()
 
     // set file defining patterns
-//    val patternUrl = this.getClass.getResource("/patterns")
+    //    val patternUrl = this.getClass.getResource("/patterns")
     // convert patterns to regex
-//   println(Regexer.generateSurfacePatternRegexes(patternUrl, thing.toLowerCase()).mkString("|").toString())
+    //   println(Regexer.generateSurfacePatternRegexes(patternUrl, thing.toLowerCase()).mkString("|").toString())
 
-//    regexerObject.testContextExtractor()
+    //    regexerObject.testContextExtractor()
 
+
+    println("Done.")
   }
 }

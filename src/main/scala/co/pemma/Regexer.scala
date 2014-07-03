@@ -8,11 +8,14 @@ import scala.util.matching.Regex
 /**
  * Created by pat on 6/25/14.
  */
-class Regexer(thing: String)
+class Regexer(thing1: String, thing2: String)
 {
 
   val patternUrl = this.getClass.getResource("/patterns")
-  val regex = generateSurfacePatternRegexes(thing)
+  val patternRegex = generateSurfacePatternRegexes(thing1)
+
+  val context1Regex =  s"(?:(.*)($thing1)(\\s*(?:\\S+\\s*){0,10})($thing2)(.*))".r
+  val context2Regex =  s"(?:(.*)($thing2)(\\s*(?:\\S+\\s*){0,10})($thing1)(.*))".r
 
   def extractRegexFromSentences(sentences : Iterable[Sentence], thing : String, outputLocation : String)
   {
@@ -20,7 +23,7 @@ class Regexer(thing: String)
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
     sentences.foreach(sentence =>
     {
-      val matches = regex.findAllMatchIn(sentence.string)
+      val matches = patternRegex.findAllMatchIn(sentence.string)
       matches.foreach(m =>
       {
         println(s"${m.group(0)} \n")
@@ -40,13 +43,8 @@ class Regexer(thing: String)
       .mkString("|").r
   }
 
-  def extractContextsForRelation(arg1 : String, arg2 : String, sentence : String) :
-  Iterator[Regex.Match] =
+  def extractContextsForRelation(sentence : String) : Iterator[Regex.Match] =
   {
-    // args must be within 10 words of eachother
-    val context1Regex =  s"(?:(.*)$arg1(\\s*(?:\\S+\\s*){0,10})$arg2(.*))".r
-    val context2Regex =  s"(?:(.*)$arg2(\\s*(?:\\S+\\s*){0,10})$arg1(.*))".r
-
     val m1 = context1Regex.findAllMatchIn(sentence)
     val m2 = context2Regex.findAllMatchIn(sentence)
 
@@ -70,7 +68,7 @@ class Regexer(thing: String)
     testStringList.foreach( sentence =>
     {
       val lowerCase = sentence.toLowerCase()
-      regex.findAllMatchIn(lowerCase).foreach( matches =>
+      patternRegex.findAllMatchIn(lowerCase).foreach( matches =>
       {
         println(matches.group(0))
       })
@@ -94,7 +92,7 @@ class Regexer(thing: String)
     {
       val lowerCase = sentence.toLowerCase()
       println(sentence)
-      extractContextsForRelation(arg1, arg2, lowerCase).foreach( matches =>
+      extractContextsForRelation(lowerCase).foreach( matches =>
       {
         println(s"\t ${matches.group(1)} : ${matches.group(2)} : ${matches.group(3)}")
       })

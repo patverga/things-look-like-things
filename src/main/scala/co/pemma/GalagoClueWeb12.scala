@@ -1,7 +1,6 @@
 package co.pemma
 
 import scala.collection.JavaConverters._
-import org.lemurproject.galago.core.parse.Document
 import org.lemurproject.galago.core.retrieval.query.{StructuredQuery, Node}
 import org.lemurproject.galago.core.retrieval.ScoredDocument
 import org.lemurproject.galago.tupleflow.Parameters
@@ -12,7 +11,7 @@ import org.lemurproject.galago.tupleflow.Parameters
 object GalagoClueWeb12 extends GalagoWrapper("/mnt/nfs/indexes/ClueWeb12/galago/clueweb-12-B13.index/", true, false, false)
 {
   // how many results to return from search
-  val K_RESULTS = 10
+  val K_RESULTS = 1000
 
   def getDocumentsForQueryTerms(query : String) :  Seq[String] =
   {
