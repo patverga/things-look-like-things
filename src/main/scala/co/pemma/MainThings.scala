@@ -48,6 +48,8 @@ object MainThings
         regexerObject.extractContextsForRelation(arg1, arg2, sentence.string)
       })
     })
+
+    matches.foreach(m => println(s"${m.group(1)} : ${m.group(2)} : ${m.group(3)}"))
   }
 
   def processDocument(doc : Document) : Iterable[Sentence] =
