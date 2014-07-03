@@ -24,7 +24,7 @@ object MainThings
   {
     val regexerObject = new Regexer(thing, ".*")
 
-    val documents = io.Source.fromFile("target/classes/patterns").getLines().flatMap(pattern =>
+    val documents = io.Source.fromFile("target/classes/patterns").getLines().filter(_.startsWith("#")).filterNot(_=="").flatMap(pattern =>
     {
       GalagoClueWeb12.getDocumentsForQueryTerms(s"${pattern.replaceAll("\\?", "")} $thing")
     })
