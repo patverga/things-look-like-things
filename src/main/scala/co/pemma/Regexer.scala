@@ -23,7 +23,7 @@ class Regexer(thing: String)
       val matches = regex.findAllMatchIn(sentence.string)
       matches.foreach(m =>
       {
-        println(s"${m.group(0)}")
+        println(s"${m.group(0)} \n")
         writer.println(s"${m.group(0)} \n")
       })
     })
@@ -40,30 +40,17 @@ class Regexer(thing: String)
       .mkString("|").r
   }
 
-  def extractRelationForArgs(arg1 : String, arg2 : String, sentence : String)
-    : (collection.mutable.MutableList[String], collection.mutable.MutableList[String],
-        collection.mutable.MutableList[String]) =
+  def extractContextsForRelation(arg1 : String, arg2 : String, sentence : String) :
+  Iterator[Regex.Match] =
   {
-    val regexList = collection.mutable.MutableList[Regex]()
-    regexList += s"(.*)$arg1(.*)$arg2(.*)".r
-    regexList += s"(.*)$arg2(.*)$arg1(.*)".r
+    // args must be within 10 words of eachother
+    val context1Regex =  s"(?:(.*)$arg1(\\s*(?:\\S+\\s*){0,10})$arg2(.*))".r
+    val context2Regex =  s"(?:(.*)$arg2(\\s*(?:\\S+\\s*){0,10})$arg1(.*))".r
 
-    val left = collection.mutable.MutableList[String]()
-    val center = collection.mutable.MutableList[String]()
-    val right = collection.mutable.MutableList[String]()
+    val m1 = context1Regex.findAllMatchIn(sentence)
+    val m2 = context2Regex.findAllMatchIn(sentence)
 
-    if ( sentence.matches(s"$arg1(?:\\s*\\S+\\s*){0,10}$arg2") ||
-      sentence.matches(s"$arg2(?:\\s*\\S+\\s*){0,10}$arg1") )
-    {
-      regexList.mkString("|").r.findAllMatchIn(sentence).foreach(m =>
-      {
-        left += m.group(1)
-        center += m.group(2)
-        right += m.group(3)
-        println(m.group(0))
-      })
-    }
-    (left, center, right)
+    return (m1 ++ m2)
   }
 
 
@@ -84,17 +71,33 @@ class Regexer(thing: String)
     {
       val lowerCase = sentence.toLowerCase()
       regex.findAllMatchIn(lowerCase).foreach( matches =>
-        {
-          println(matches.group(0))
-        })
+      {
+        println(matches.group(0))
+      })
     })
   }
 
-  def main(args: Array[String])
+  def testContextExtractor()
   {
-    //    testRegexMaker()
+    val arg1 = "cat"
+    val arg2 = "dog"
 
-    extractRelationForArgs("cat", "dog", "a cat is not a dog.")
+    val testStringList = Seq(
+      "this cat is like a dog",
+      "this dog is like a cat",
+      "cat 1 2 3 4 5 6 7 8 9 10 11 12 dog",
+      "no cat no dog",
+      "cat dog"
+    )
+
+    testStringList.foreach( sentence =>
+    {
+      val lowerCase = sentence.toLowerCase()
+      println(sentence)
+      extractContextsForRelation(arg1, arg2, lowerCase).foreach( matches =>
+      {
+        println(s"\t ${matches.group(1)} : ${matches.group(2)} : ${matches.group(3)}")
+      })
+    })
   }
-
 }

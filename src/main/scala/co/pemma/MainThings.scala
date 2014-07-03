@@ -40,19 +40,12 @@ object MainThings
   def extractContextsBetweenThings(arg1 : String, arg2 :String)
   {
     val documents = GalagoClueWeb12.getDocumentsForQueryTerms(s"$arg1 $arg2")
-    val left = collection.mutable.MutableList[String]()
-    val center = collection.mutable.MutableList[String]()
-    val right = collection.mutable.MutableList[String]()
 
-    documents.foreach(document =>
+    val matches = documents.flatMap(doc =>
     {
-      val doc = load.LoadPlainText.fromString(document).head
-      processDocument(doc).foreach(sentence =>
+      processDocument(load.LoadPlainText.fromString(doc).head).map(sentence =>
       {
-        val extract = regexerObject.extractRelationForArgs(arg1, arg2, sentence.string)
-        left ++= extract._1
-        center ++= extract._2
-        right ++= extract._3
+        regexerObject.extractContextsForRelation(arg1, arg2, sentence.string)
       })
     })
   }
@@ -80,14 +73,14 @@ object MainThings
 
     regexerObject = new Regexer(thing)
 
-    //    extractContextsBetweenThings("whippet", "greyhound")
+        extractContextsBetweenThings("whippet", "greyhound")
 //    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp2"
     //    val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
 //    findThingsThatLookLikeThisThingFromFile(thing, fileLocation)
 
-        val output = s"results/$thing.result"
-        println(output)
-        findThingsThatLookLikeThisThingFromGalago(thing, output)
+//        val output = s"results/$thing.result"
+//        println(output)
+//        findThingsThatLookLikeThisThingFromGalago(thing, output)
 
 //            Regexer.testRegexMaker()
     //        JWIWordNetWrap.allThingSynonyms()
@@ -96,5 +89,8 @@ object MainThings
 //    val patternUrl = this.getClass.getResource("/patterns")
     // convert patterns to regex
 //   println(Regexer.generateSurfacePatternRegexes(patternUrl, thing.toLowerCase()).mkString("|").toString())
+
+//    regexerObject.testContextExtractor()
+
   }
 }

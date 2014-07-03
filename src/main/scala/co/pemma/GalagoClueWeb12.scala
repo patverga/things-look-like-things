@@ -14,24 +14,10 @@ object GalagoClueWeb12 extends GalagoWrapper("/mnt/nfs/indexes/ClueWeb12/galago/
   // how many results to return from search
   val K_RESULTS = 10
 
-  def getDocumentsForQueryTerms(query : String) : collection.mutable.MutableList[String] =
+  def getDocumentsForQueryTerms(query : String) :  Seq[String] =
   {
-    val resultIds = runQuery(query)
-
     // retrieve each document and put it in a list
-    val docList = collection.mutable.MutableList[String]()
-    resultIds.foreach(docId =>
-    {
-      val document: Document = retrieval.getDocument(docId.documentName, docComponents)
-      if (document != null)
-      {
-        docList += document.toString
-      }
-      else {
-        println("Document " + docId + " does not exist in index.")
-      }
-    })
-    docList
+      runQuery(query).map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
   }
 
   def runQuery(queryText : String) : collection.mutable.Buffer[ScoredDocument] =
