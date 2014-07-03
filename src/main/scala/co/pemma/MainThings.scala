@@ -47,7 +47,7 @@ object MainThings
       {
         regexerObject.extractContextsForRelation(arg1, arg2, sentence.string)
       })
-    })
+    }).flatten
 
     matches.foreach(m => println(s"${m.group(1)} : ${m.group(2)} : ${m.group(3)}"))
   }
