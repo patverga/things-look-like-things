@@ -80,9 +80,9 @@ object MainThings
     //    val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
 //    findThingsThatLookLikeThisThingFromFile(thing, fileLocation)
 
-    //    val output = s"results/$thing.result"
-    //    println(output)
-    //    findThingsThatLookLikeThisThingFromGalago(thing, output)
+        val output = s"results/$thing.result"
+        println(output)
+        findThingsThatLookLikeThisThingFromGalago(thing, output)
 
     //        Regexer.testRegexMaker()
     //        JWIWordNetWrap.allThingSynonyms()
