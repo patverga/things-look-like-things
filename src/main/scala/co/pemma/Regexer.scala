@@ -27,14 +27,14 @@ object Regexer
     writer.close()
   }
 
-  def extractRegexFromString(documentString : String, thing : String) : collection.mutable.MutableList[Regex.Match] =
+  def extractRegexFromString(documentString : String, thing : String) : Iterator[scala.util.matching.Regex.Match] =
   {
     // set file defining patterns
     val patternUrl = this.getClass.getResource("/patterns")
     // convert patterns to regex
     val regexList = generateSurfacePatternRegexes(patternUrl, thing.toLowerCase())
 
-    getAllRegexMatches(regexList, documentString.toLowerCase())
+    regexList.mkString("|").r.findAllMatchIn(documentString.toLowerCase())
   }
 
   def generateSurfacePatternRegexes(patternListURL: java.net.URL, thing: String): collection.mutable.MutableList[Regex] =
@@ -58,12 +58,6 @@ object Regexer
     patternList
   }
 
-  def getAllRegexMatches(regexList : collection.mutable.MutableList[Regex], sentence : String)
-  : collection.mutable.MutableList[Regex.Match] =
-  {
-     regexList.mkString("|").r.findAllMatchIn(sentence)
-  }
-
   def extractRelationForArgs(arg1 : String, arg2 : String, sentence : String)
     : (collection.mutable.MutableList[String], collection.mutable.MutableList[String],
         collection.mutable.MutableList[String]) =
@@ -79,7 +73,7 @@ object Regexer
     if ( sentence.matches(s"$arg1(?:\\s*\\S+\\s*){0,10}$arg2") ||
       sentence.matches(s"$arg2(?:\\s*\\S+\\s*){0,10}$arg1") )
     {
-      getAllRegexMatches(regexList, sentence).foreach(m =>
+      regexList.mkString("|").r.findAllMatchIn(sentence).foreach(m =>
       {
         left += m.group(1)
         center += m.group(2)
