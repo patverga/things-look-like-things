@@ -75,7 +75,7 @@ object MainThings
     if (args.length > 0)
       thing = args(0)
 
-    extractContextsBetweenThings("whippet", "greyhound")
+//    extractContextsBetweenThings("whippet", "greyhound")
 //    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp2"
     //    val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
 //    findThingsThatLookLikeThisThingFromFile(thing, fileLocation)

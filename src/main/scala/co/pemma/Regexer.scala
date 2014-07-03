@@ -47,8 +47,8 @@ object Regexer
     io.Source.fromURL(patternListURL).getLines().foreach(line => {
       if (!line.startsWith("#") && line != "") {
 
-        val pattern1 = new Regex(anyWordsRegex + s"( $line )" + thingRegEx)
-        val pattern2 = new Regex(thingRegEx + s"( $line )" + anyWordsRegex)
+        val pattern1 = (anyWordsRegex + s"( $line )" + thingRegEx).r
+        val pattern2 = (thingRegEx + s"( $line )" + anyWordsRegex).r
         //        println(pattern1)
         //        println(pattern2)
         patternList += pattern1
@@ -61,12 +61,7 @@ object Regexer
   def getAllRegexMatches(regexList : collection.mutable.MutableList[Regex], sentence : String)
   : collection.mutable.MutableList[Regex.Match] =
   {
-    val matches =  collection.mutable.MutableList[Regex.Match]()
-    regexList.foreach( regex =>
-    {
-      matches ++= regex.findAllMatchIn(sentence)
-    })
-    matches
+     regexList.mkString("|").r.findAllMatchIn(sentence)
   }
 
   def extractRelationForArgs(arg1 : String, arg2 : String, sentence : String)
@@ -74,8 +69,8 @@ object Regexer
         collection.mutable.MutableList[String]) =
   {
     val regexList = collection.mutable.MutableList[Regex]()
-    regexList += new Regex(s"(.*)$arg1(.*)$arg2(.*)")
-    regexList += new Regex(s"(.*)$arg2(.*)$arg1(.*)")
+    regexList += s"(.*)$arg1(.*)$arg2(.*)".r
+    regexList += s"(.*)$arg2(.*)$arg1(.*)".r
 
     val left = collection.mutable.MutableList[String]()
     val center = collection.mutable.MutableList[String]()
