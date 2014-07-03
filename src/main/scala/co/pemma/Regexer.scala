@@ -41,14 +41,17 @@ object Regexer
   {
     val patternList = collection.mutable.MutableList[Regex]()
 
-    val anyWordsRegex = "((?:\\s*\\S+\\s*){1,4})"
-    val thingRegEx = "((?:\\s*\\S+\\s*){0,4}"+thing+"(?:\\s*\\S+\\s*){0,4})"
+//    val anyWordsRegex = "((?:\\s*\\S+\\s*){1,4})"
+//    val thingRegEx = "((?:\\s*\\S+\\s*){0,4}"+thing+"(?:\\s*\\S+\\s*){0,4})"
 
-    io.Source.fromURL(patternListURL).getLines().foreach(line => {
-      if (!line.startsWith("#") && line != "") {
+    val anyWordsRegex = ".*"
+    val thingRegEx = s"(?:^$thing |(?:.* $thing\\W.*)|(?:.* $thing$$))"
 
-        val pattern1 = (anyWordsRegex + s"( $line )" + thingRegEx).r
-        val pattern2 = (thingRegEx + s"( $line )" + anyWordsRegex).r
+    io.Source.fromURL(patternListURL).getLines().foreach(pattern => {
+      if (!pattern.startsWith("#") && pattern != "") {
+
+        val pattern1 = (s"($anyWordsRegex$pattern$thingRegEx)").r
+        val pattern2 = (s"($thingRegEx$pattern$anyWordsRegex)").r
         //        println(pattern1)
         //        println(pattern2)
         patternList += pattern1
@@ -103,14 +106,10 @@ object Regexer
     testStringList.foreach( sentence =>
     {
       val lowerCase = sentence.toLowerCase()
-      regexList.foreach( regex =>
-      {
-        regex.findAllMatchIn(lowerCase).foreach( matches =>
+      regexList.mkString("|").r.findAllMatchIn(lowerCase).foreach( matches =>
         {
-          println(regex)
-          println(matches.group(1), matches.group(2), matches.group(3))
+          println(matches.group(0))
         })
-      })
     })
   }
 

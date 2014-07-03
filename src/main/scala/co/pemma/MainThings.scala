@@ -19,7 +19,7 @@ object MainThings
 
   def findThingsThatLookLikeThisThingFromGalago(thing : String, output : String)
   {
-    io.Source.fromFile("/home/pat/things-look-like-things/target/classes/patterns").getLines().foreach(pattern =>
+    io.Source.fromFile("target/classes/patterns").getLines().foreach(pattern =>
     {
       // query galago
       val documents = GalagoClueWeb12.getDocumentsForQueryTerms(s"${pattern.replaceAll("\\?","")} $thing")
@@ -84,8 +84,12 @@ object MainThings
         println(output)
         findThingsThatLookLikeThisThingFromGalago(thing, output)
 
-    //        Regexer.testRegexMaker()
+//            Regexer.testRegexMaker()
     //        JWIWordNetWrap.allThingSynonyms()
 
+    // set file defining patterns
+//    val patternUrl = this.getClass.getResource("/patterns")
+    // convert patterns to regex
+//   println(Regexer.generateSurfacePatternRegexes(patternUrl, thing.toLowerCase()).mkString("|").toString())
   }
 }
