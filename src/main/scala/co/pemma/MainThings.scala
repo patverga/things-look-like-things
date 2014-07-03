@@ -16,7 +16,7 @@ object MainThings
     source.close()
 
     regexerObject.extractRegexFromString(documentString, thing).foreach(m =>
-      println(s"${m.group(1)} - ${m.group(2)} - ${m.group(3)}")
+      println(s"${m.group(0)}")
     )
   }
 
