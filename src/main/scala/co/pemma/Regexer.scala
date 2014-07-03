@@ -8,8 +8,11 @@ import scala.util.matching.Regex
 /**
  * Created by pat on 6/25/14.
  */
-object Regexer
+class Regexer(thing: String)
 {
+
+  val patternUrl = this.getClass.getResource("/patterns")
+  val regex = generateSurfacePatternRegexes(thing)
 
   def extractRegexFromSentences(sentences : Iterable[Sentence], thing : String, outputLocation : String)
   {
@@ -29,17 +32,13 @@ object Regexer
 
   def extractRegexFromString(documentString : String, thing : String) : Iterator[scala.util.matching.Regex.Match] =
   {
-    // set file defining patterns
-    val patternUrl = this.getClass.getResource("/patterns")
     // convert patterns to regex
-    val regexList = generateSurfacePatternRegexes(patternUrl, thing.toLowerCase())
-
-    regexList.mkString("|").r.findAllMatchIn(documentString.toLowerCase())
+    regex.findAllMatchIn(documentString.toLowerCase())
   }
 
-  def generateSurfacePatternRegexes(patternListURL: java.net.URL, thing: String): collection.mutable.MutableList[Regex] =
+  def generateSurfacePatternRegexes(thing: String): Regex =
   {
-    val patternList = collection.mutable.MutableList[Regex]()
+//    val patternList = collection.mutable.MutableList[Regex]()
 
 //    val anyWordsRegex = "((?:\\s*\\S+\\s*){1,4})"
 //    val thingRegEx = "((?:\\s*\\S+\\s*){0,4}"+thing+"(?:\\s*\\S+\\s*){0,4})"
@@ -47,18 +46,22 @@ object Regexer
     val anyWordsRegex = ".*"
     val thingRegEx = s"(?:^$thing |(?:.* $thing\\W.*)|(?:.* $thing$$))"
 
-    io.Source.fromURL(patternListURL).getLines().foreach(pattern => {
-      if (!pattern.startsWith("#") && pattern != "") {
+    io.Source.fromURL(patternUrl).getLines.filter(!_.startsWith("#")).filter(_ != "")
+      .map(pattern => s"($anyWordsRegex$pattern$thingRegEx)|($thingRegEx$pattern$anyWordsRegex)")
+      .mkString("|").r
 
-        val pattern1 = (s"($anyWordsRegex$pattern$thingRegEx)").r
-        val pattern2 = (s"($thingRegEx$pattern$anyWordsRegex)").r
-        //        println(pattern1)
-        //        println(pattern2)
-        patternList += pattern1
-        patternList += pattern2
-      }
-    })
-    patternList
+//    io.Source.fromURL(patternListURL).getLines().foreach(pattern => {
+//      if (!pattern.startsWith("#") && pattern != "") {
+//
+//        val pattern1 = (s"($anyWordsRegex$pattern$thingRegEx)").r
+//        val pattern2 = (s"($thingRegEx$pattern$anyWordsRegex)").r
+//        //        println(pattern1)
+//        //        println(pattern2)
+//        patternList += pattern1
+//        patternList += pattern2
+//      }
+//    })
+//    patternList
   }
 
   def extractRelationForArgs(arg1 : String, arg2 : String, sentence : String)
@@ -92,8 +95,6 @@ object Regexer
 
   def testRegexMaker()
   {
-    val regexList = generateSurfacePatternRegexes(this.getClass.getResource("/patterns"), "actor")
-
     val testStringList = Seq(
       "actor looks like you",
       "you look like an actor",
@@ -106,7 +107,7 @@ object Regexer
     testStringList.foreach( sentence =>
     {
       val lowerCase = sentence.toLowerCase()
-      regexList.mkString("|").r.findAllMatchIn(lowerCase).foreach( matches =>
+      regex.findAllMatchIn(lowerCase).foreach( matches =>
         {
           println(matches.group(0))
         })

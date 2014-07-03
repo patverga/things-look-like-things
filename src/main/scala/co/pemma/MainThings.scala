@@ -5,6 +5,8 @@ import cc.factorie.app.nlp._
 object MainThings
 {
 
+  var regexerObject : Regexer = null
+
   def findThingsThatLookLikeThisThingFromFile(thing : String, inputFileLocation : String)
   {
     // load the data
@@ -12,7 +14,8 @@ object MainThings
     val doc = load.LoadPlainText.fromSource(source)
     val documentString = processDocument(doc.head).flatMap(_.tokens).toString()
     source.close()
-    Regexer.extractRegexFromString(documentString, thing).foreach(m =>
+
+    regexerObject.extractRegexFromString(documentString, thing).foreach(m =>
       println(s"${m.group(1)} - ${m.group(2)} - ${m.group(3)}")
     )
   }
@@ -29,7 +32,7 @@ object MainThings
         //        Regexer.extractRegexFromString(document, thing, output)
         val doc = load.LoadPlainText.fromString(document).head
         val sentences = processDocument(doc)
-        Regexer.extractRegexFromSentences(sentences, thing, output)
+        regexerObject.extractRegexFromSentences(sentences, thing, output)
       })
     })
   }
@@ -46,7 +49,7 @@ object MainThings
       val doc = load.LoadPlainText.fromString(document).head
       processDocument(doc).foreach(sentence =>
       {
-        val extract = Regexer.extractRelationForArgs(arg1, arg2, sentence.string)
+        val extract = regexerObject.extractRelationForArgs(arg1, arg2, sentence.string)
         left ++= extract._1
         center ++= extract._2
         right ++= extract._3
@@ -75,7 +78,9 @@ object MainThings
     if (args.length > 0)
       thing = args(0)
 
-//    extractContextsBetweenThings("whippet", "greyhound")
+    regexerObject = new Regexer(thing)
+
+    //    extractContextsBetweenThings("whippet", "greyhound")
 //    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp2"
     //    val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
 //    findThingsThatLookLikeThisThingFromFile(thing, fileLocation)
