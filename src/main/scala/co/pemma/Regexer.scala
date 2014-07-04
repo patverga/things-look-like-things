@@ -19,7 +19,6 @@ class Regexer(thing1: String, thing2: String)
 
   def extractRegexFromSentences(sentences : Iterable[Sentence], thing : String, outputLocation : String)
   {
-    println("Looking for things that look like " + thing)
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
     sentences.foreach(sentence =>
     {

@@ -5,6 +5,7 @@ import cc.factorie.util.CmdOptions
 
 object MainThings
 {
+  val pipeline = new DocumentAnnotationPipeline(Seq(segment.DeterministicTokenizer, segment.DeterministicSentenceSegmenter))
 
   def findThingsThatLookLikeThisThingFromFile(thing : String, inputFileLocation : String)
   {
@@ -12,8 +13,8 @@ object MainThings
 
     // load the data
     val source = io.Source.fromFile(inputFileLocation)
-    val doc = load.LoadPlainText.fromSource(source)
-    val documentString = processDocument(doc.head).flatMap(_.tokens).toString()
+    val doc = load.LoadPlainText.fromSource(source).head
+    val documentString = pipeline.process(doc).sentences.flatMap(_.tokens).toString()
     source.close()
 
     regexerObject.patternRegex.findAllMatchIn(documentString).foreach(m =>
@@ -29,12 +30,18 @@ object MainThings
     {
       GalagoClueWeb12.getDocumentsForQueryTerms(s"${pattern.replaceAll("\\?", "")} $thing")
     })
+
     // load the data
-    documents.toSet[String].foreach(document =>
+    var i = 0
+    val docSet = documents.toSet[String]
+    println("Processing Documents...")
+    docSet.foreach(document =>
     {
       val doc = load.LoadPlainText.fromString(document).head
-      val sentences = processDocument(doc)
+      val sentences = pipeline.process(doc).sentences
       regexerObject.extractRegexFromSentences(sentences, thing, output)
+      i += 1
+      Utilities.printPercentProgress(i, docSet.size)
     })
   }
 
@@ -46,26 +53,14 @@ object MainThings
 
     val matches = documents.flatMap(doc =>
     {
-      processDocument(load.LoadPlainText.fromString(doc).head).flatMap(sentence =>
+      val sentences =  pipeline.process(load.LoadPlainText.fromString(doc).head).sentences
+      sentences.flatMap(sentence =>
       {
         regexerObject.extractContextsForRelation(sentence.string)
       })
     })
 
     matches.foreach(m => println(s"${m.group(1)}:${m.group(2)}:${m.group(3)}:${m.group(4)}:${m.group(5)}"))
-  }
-
-  def processDocument(doc : Document) : Iterable[Sentence] =
-  {
-    //set up tokenizer / segmenter
-    val pipeline = new DocumentAnnotationPipeline(Seq(segment.DeterministicTokenizer, segment.DeterministicSentenceSegmenter))
-
-    // process the document
-    print("Processing document...")
-    pipeline.process(doc)
-    val documentString = doc.sentences
-    println("Done")
-    documentString
   }
 
   class ProcessSlotFillingCorpusOpts extends CmdOptions {
