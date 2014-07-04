@@ -10,9 +10,8 @@ import scala.util.matching.Regex
  */
 class Regexer(thing1: String, thing2: String)
 {
-
   val patternUrl = this.getClass.getResource("/patterns")
-  val patternList = io.Source.fromURL(patternUrl).getLines.filterNot(_.startsWith("#")).filter(_ != "")
+  val patternList = io.Source.fromURL(patternUrl).getLines.filterNot(_.startsWith("#")).filter(_ != "").toSeq
   val patternRegex = generateSurfacePatternRegexes(thing1)
 
   val context1Regex =  s"(?:(.*)($thing1)(\\s*(?:\\S+\\s*){0,10})($thing2)(.*))".r
