@@ -38,11 +38,18 @@ class Regexer(thing1: String, thing2: String)
     val anyWordsRegex = ".*"
     val thingRegEx = s"(?:^$thing |(?:.* $thing\\W.*)|(?:.* $thing$$))"
 
-    val lines = io.Source.fromURL(patternUrl).getLines.toArray
-
-    lines.filter(!_.startsWith("#")).filter(_ != "")
-      .map(pattern => s"($anyWordsRegex$pattern$thingRegEx)|($thingRegEx$pattern$anyWordsRegex)")
-      .mkString("|").r
+    //    val lines = io.Source.fromURL(patternUrl).getLines.toArray
+    //
+    //    lines.filter(!_.startsWith("#")).filter(_ != "")
+    //      .map(pattern => s"($anyWordsRegex$pattern$thingRegEx)|($thingRegEx$pattern$anyWordsRegex)")
+    //      .mkString("|").r
+    val regex = (for (pattern <- io.Source.fromURL(patternUrl).getLines)
+      yield{
+        if (pattern.startsWith("#")) ""
+        else s"($anyWordsRegex$pattern$thingRegEx)|($thingRegEx$pattern$anyWordsRegex)"
+      }).filterNot(_ == "").mkString("|")
+    println(regex)
+    regex.r
   }
 
   def extractContextsForRelation(sentence : String) : Iterator[Regex.Match] =
