@@ -1,6 +1,7 @@
 package co.pemma
 
 import cc.factorie.app.nlp._
+import cc.factorie.util.CmdOptions
 
 object MainThings
 {
@@ -67,25 +68,37 @@ object MainThings
     documentString
   }
 
+  class ProcessSlotFillingCorpusOpts extends CmdOptions {
+    val context = new CmdOption("context", Nil.asInstanceOf[List[String]], "STRING,STRING...", "Takes two strings as inputs then extracts the context surrounding the two things.")
+    val looksLike = new CmdOption("looks-like", "", "STRING...", "Takes as input one string and finds things that look like it.")
+  }
+
 
   def main(args: Array[String])
   {
 
-    var thing1 = "whippet"
-    if (args.length > 0)
-      thing1 = args(0)
-    var thing2 = "greyhound"
-    if (args.length > 1)
-      thing2 = args(1)
+    val opts = new ProcessSlotFillingCorpusOpts
+    opts.parse(args)
 
-//    extractContextsBetweenThings(thing1, thing2)
+    if (opts.context.wasInvoked)
+    {
+      val thingList = opts.context.value
+      extractContextsBetweenThings(thingList(0), thingList(1))
+    }
+    else if (opts.looksLike.wasInvoked)
+    {
+      val thing = opts.looksLike.value
+      val output = s"results/$thing.result"
+      println(output)
+      findThingsThatLookLikeThisThingFromGalago(thing, output)
+    }
+
+
     //    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp2"
     //    val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
     //    findThingsThatLookLikeThisThingFromFile(thing, fileLocation)
 
-            val output = s"results/$thing1.result"
-            println(output)
-            findThingsThatLookLikeThisThingFromGalago(thing1, output)
+
 
     //            Regexer.testRegexMaker()
     //        JWIWordNetWrap.allThingSynonyms()
