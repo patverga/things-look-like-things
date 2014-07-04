@@ -89,7 +89,6 @@ object MainThings
     {
       val thing = opts.looksLike.value
       val output = s"results/$thing.result"
-      println(output)
       findThingsThatLookLikeThisThingFromGalago(thing, output)
     }
 

@@ -38,7 +38,7 @@ class Regexer(thing1: String, thing2: String)
     val anyWordsRegex = ".*"
     val thingRegEx = s"(?:^$thing |(?:.* $thing\\W.*)|(?:.* $thing$$))"
 
-    io.Source.fromURL(patternUrl).getLines.filter(!_.startsWith("#")).filter(_ != "")
+    io.Source.fromURL(patternUrl).getLines.filter(_.startsWith("#")).filter(_ != "")
       .map(pattern => s"($anyWordsRegex$pattern$thingRegEx)|($thingRegEx$pattern$anyWordsRegex)")
       .mkString("|").r
   }
