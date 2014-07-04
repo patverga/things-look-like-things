@@ -78,11 +78,11 @@ object MainThings
     if (opts.context.wasInvoked)
     {
       val thingList = opts.context.value
-      extractContextsBetweenThings(thingList(0), thingList(1))
+      extractContextsBetweenThings(thingList(0).toLowerCase(), thingList(1).toLowerCase())
     }
     else if (opts.looksLike.wasInvoked)
     {
-      val thing = opts.looksLike.value
+      val thing = opts.looksLike.value.toLowerCase()
       val output = s"results/$thing.result"
       findThingsThatLookLikeThisThingFromGalago(thing, output)
     }

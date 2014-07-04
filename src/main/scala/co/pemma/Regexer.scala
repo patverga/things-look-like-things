@@ -22,7 +22,7 @@ class Regexer(thing1: String, thing2: String)
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
     sentences.foreach(sentence =>
     {
-      val matches = patternRegex.findAllMatchIn(sentence.string)
+      val matches = patternRegex.findAllMatchIn(sentence.string.toLowerCase())
       matches.foreach(m =>
       {
         println(s"${m.group(0)} \n")
