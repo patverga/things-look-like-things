@@ -12,6 +12,7 @@ class Regexer(thing1: String, thing2: String)
 {
 
   val patternUrl = this.getClass.getResource("/patterns")
+  val patternList = io.Source.fromURL(patternUrl).getLines.filterNot(_.startsWith("#")).filter(_ != "")
   val patternRegex = generateSurfacePatternRegexes(thing1)
 
   val context1Regex =  s"(?:(.*)($thing1)(\\s*(?:\\S+\\s*){0,10})($thing2)(.*))".r
@@ -38,18 +39,7 @@ class Regexer(thing1: String, thing2: String)
     val anyWordsRegex = ".*"
     val thingRegEx = s"(?:^$thing |(?:.* $thing\\W.*)|(?:.* $thing$$))"
 
-    //    val lines = io.Source.fromURL(patternUrl).getLines.toArray
-    //
-    //    lines.filter(!_.startsWith("#")).filter(_ != "")
-    //      .map(pattern => s"($anyWordsRegex$pattern$thingRegEx)|($thingRegEx$pattern$anyWordsRegex)")
-    //      .mkString("|").r
-    val regex = (for (pattern <- io.Source.fromURL(patternUrl).getLines)
-      yield{
-        if (pattern.startsWith("#")) ""
-        else s"($anyWordsRegex$pattern$thingRegEx)|($thingRegEx$pattern$anyWordsRegex)"
-      }).filterNot(_ == "").mkString("|")
-    println(regex)
-    regex.r
+    patternList.map(pattern => s"($anyWordsRegex$pattern$thingRegEx)|($thingRegEx$pattern$anyWordsRegex)").mkString("|").r
   }
 
   def extractContextsForRelation(sentence : String) : Iterator[Regex.Match] =
