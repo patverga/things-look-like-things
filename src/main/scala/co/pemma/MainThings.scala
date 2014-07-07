@@ -93,7 +93,12 @@ object MainThings
         if (sentString != "") {
           // extract relation from each sentence
           val parsed = parser.dependencyGraph(sentence.string)
-          val extractionInstances = ollie.extract(parsed)
+          try {
+            val extractionInstances = ollie.extract(parsed)
+          }
+          catch{
+            case e: Exception => println(sentString)
+          }
           for (inst <- extractionInstances) {
             val conf = confidence(inst)
             if (inst.extraction.rel.text.matches(regexerObject.patternRegex.toString())) {
