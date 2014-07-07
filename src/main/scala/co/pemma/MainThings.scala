@@ -92,7 +92,7 @@ object MainThings
         val sentString = sentence.string
         println(sentString)
         // extract relation from each sentence
-        val parsed = parser.dependencyGraph(sentence.string)
+        val parsed = parser.dependencyGraph(sentString)
         val extractionInstances = ollie.extract(parsed)
         for (inst <- extractionInstances) {
           val conf = confidence(inst)
