@@ -82,12 +82,12 @@ object MainThings
 
     // load the data
     var i = 0
-    val docSet = documents.toSet[String]
+    val docSet = documents.filter(_ != "").toSet[String]
     println("Processing Documents...")
     docSet.foreach(document =>
     {
       val doc = load.LoadPlainText.fromString(document).head
-      pipeline.process(doc).sentences.foreach(sentence =>
+      pipeline.process(doc).sentences.filter(_.size > 0).foreach(sentence =>
       {
         // extract relation from each sentence
         val parsed = parser.dependencyGraph(sentence.string)
@@ -125,6 +125,9 @@ object MainThings
     matches.foreach(m => println(s"${m.group(1)}:${m.group(2)}:${m.group(3)}:${m.group(4)}:${m.group(5)}"))
   }
 
+
+
+
   class ProcessSlotFillingCorpusOpts extends CmdOptions {
     val context = new CmdOption("context", Nil.asInstanceOf[List[String]], "STRING,STRING...", "Takes two strings as inputs then extracts the context surrounding the two things.")
     val looksLike = new CmdOption("looks-like", "", "STRING...", "Takes as input one string and finds things that look like it.")
@@ -149,7 +152,7 @@ object MainThings
       val output = s"results/$thing.result"
       findThingsThatLookLikeThisThingFromGalago(thing, output)
     }
-    else if (opts.looksLike.wasInvoked)
+    else if (opts.ollie.wasInvoked)
     {
       val output = s"results/ollie.result"
       relationsToArgsFromGalago(output)
