@@ -87,8 +87,10 @@ object MainThings
     docSet.foreach(document =>
     {
       val doc = load.LoadPlainText.fromString(document).head
-      pipeline.process(doc).sentences.filter(_.size > 0).foreach(sentence =>
+      pipeline.process(doc).sentences.foreach(sentence =>
       {
+        val sentString = sentence.string
+        println(sentString)
         // extract relation from each sentence
         val parsed = parser.dependencyGraph(sentence.string)
         val extractionInstances = ollie.extract(parsed)
@@ -100,10 +102,9 @@ object MainThings
             writer.println(("%.2f" format conf) + "\t" + inst.extraction)
           }
         }
-
-        i += 1
-        Utilities.printPercentProgress(i, docSet.size)
       })
+      i += 1
+      Utilities.printPercentProgress(i, docSet.size)
     })
   }
 
