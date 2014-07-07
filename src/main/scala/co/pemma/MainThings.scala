@@ -43,7 +43,7 @@ object MainThings
 
     val documents = regexerObject.patternList.flatMap(pattern =>
     {
-      GalagoClueWeb12.getDocumentsForQueryTerms(s"${pattern.replaceAll("\\?", "")} $thing")
+      GalagoWrapper.getDocumentsForQueryTerms(s"${pattern.replaceAll("\\?", "")} $thing")
     })
 
     // load the data
@@ -77,7 +77,7 @@ object MainThings
     // get docs from galago
     val documents = regexerObject.patternList.flatMap(pattern =>
     {
-      GalagoClueWeb12.getDocumentsForQueryTerms(pattern.replaceAll("\\?", ""))
+      GalagoWrapper.getDocumentsForQueryTerms(pattern.replaceAll("\\?", ""))
     })
 
     // load the data
@@ -111,7 +111,7 @@ object MainThings
   {
     val regexerObject = new Regexer(thing1, thing2)
 
-    val documents = GalagoClueWeb12.getDocumentsForQueryTerms(s"$thing1 $thing2")
+    val documents = GalagoWrapper.getDocumentsForQueryTerms(s"$thing1 $thing2")
 
     val matches = documents.flatMap(doc =>
     {
