@@ -1,22 +1,25 @@
 package co.pemma
 
-import scala.collection.JavaConverters._
-import org.lemurproject.galago.core.retrieval.query.{StructuredQuery, Node}
-import org.lemurproject.galago.core.retrieval.ScoredDocument
+import org.lemurproject.galago.core.parse.Document
+import org.lemurproject.galago.core.retrieval.query.{Node, StructuredQuery}
+import org.lemurproject.galago.core.retrieval.{RetrievalFactory, ScoredDocument}
 import org.lemurproject.galago.tupleflow.Parameters
 
 /**
  * Created by pat on 6/26/14.
  */
-object GalagoClueWeb12 extends GalagoWrapper("/mnt/nfs/indexes/ClueWeb12/galago/clueweb-12-B13.index/", true, false, false)
+object GalagoClueWeb12
 {
   // how many results to return from search
   val K_RESULTS = 1000
+  val indexLocation = "/mnt/nfs/indexes/ClueWeb12/galago/clueweb-12-B13.index/"
+  var retrieval = RetrievalFactory.instance(indexLocation, new Parameters)
+  var docComponents = new Document.DocumentComponents(true, false, false)
 
   def getDocumentsForQueryTerms(query : String) :  Seq[String] =
   {
     // retrieve each document and put it in a list
-      runQuery(query).map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
+    runQuery(query).map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
   }
 
   def runQuery(queryText : String) : collection.mutable.Buffer[ScoredDocument] =

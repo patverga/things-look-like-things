@@ -89,8 +89,7 @@ object MainThings
       val doc = load.LoadPlainText.fromString(document).head
       pipeline.process(doc).sentences.foreach(sentence =>
       {
-        val sentString = sentence.string
-        println(sentString)
+        val sentString = sentence.string.replaceAll("\\p{C}", "")
         // extract relation from each sentence
         val parsed = parser.dependencyGraph(sentString)
         val extractionInstances = ollie.extract(parsed)
