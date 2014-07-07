@@ -89,8 +89,8 @@ object MainThings
       val doc = load.LoadPlainText.fromString(document).head
       pipeline.process(doc).sentences.foreach(sentence =>
       {
-        val sentString = sentence.string.replaceAll("[^\\x00-\\x7F]", "")
-        if (sentString != "") {
+        val sentString = sentence.string.replaceAll("[^\\x00-\\x7F]", "").trim
+        if (sentString != "" && sentString != null && sentString.length > 5) {
           // extract relation from each sentence
           val parsed = parser.dependencyGraph(sentence.string)
           try {
@@ -105,7 +105,9 @@ object MainThings
             }
           }
           catch{
-            case e: Exception => println(sentString)
+            case  e: Exception => println(s"ERROR : $sentString")
+              println(s"ERROR : $sentString")
+
           }
         }
       })
