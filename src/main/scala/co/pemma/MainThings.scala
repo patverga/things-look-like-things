@@ -90,15 +90,16 @@ object MainThings
       pipeline.process(doc).sentences.foreach(sentence =>
       {
         val sentString = sentence.string.replaceAll("\\p{C}", "")
-        // extract relation from each sentence
-        val parsed = parser.dependencyGraph(sentString)
-        val extractionInstances = ollie.extract(parsed)
-        for (inst <- extractionInstances) {
-          val conf = confidence(inst)
-          if (inst.extraction.rel.text.matches(regexerObject.patternRegex.toString()))
-          {
-            println(("%.2f" format conf) + "\t" + inst.extraction)
-            writer.println(("%.2f" format conf) + "\t" + inst.extraction)
+        if (sentString != "") {
+          // extract relation from each sentence
+          val parsed = parser.dependencyGraph(sentString)
+          val extractionInstances = ollie.extract(parsed)
+          for (inst <- extractionInstances) {
+            val conf = confidence(inst)
+            if (inst.extraction.rel.text.matches(regexerObject.patternRegex.toString())) {
+              println(("%.2f" format conf) + "\t" + inst.extraction)
+              writer.println(("%.2f" format conf) + "\t" + inst.extraction)
+            }
           }
         }
       })
