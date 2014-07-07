@@ -95,7 +95,10 @@ object MainThings
         for (inst <- extractionInstances) {
           val conf = confidence(inst)
           if (inst.extraction.rel.text.matches(regexerObject.patternRegex.toString()))
+          {
+            println(("%.2f" format conf) + "\t" + inst.extraction)
             writer.println(("%.2f" format conf) + "\t" + inst.extraction)
+          }
         }
 
         i += 1
@@ -151,7 +154,7 @@ object MainThings
       val output = s"results/ollie.result"
       relationsToArgsFromGalago(output)
     }
-    
+
     println("Done.")
   }
 }
