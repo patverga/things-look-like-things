@@ -95,16 +95,17 @@ object MainThings
           val parsed = parser.dependencyGraph(sentence.string)
           try {
             val extractionInstances = ollie.extract(parsed)
+
+            for (inst <- extractionInstances) {
+              val conf = confidence(inst)
+              if (inst.extraction.rel.text.matches(regexerObject.patternRegex.toString())) {
+                println(("%.2f" format conf) + "\t" + inst.extraction)
+                writer.println(("%.2f" format conf) + "\t" + inst.extraction)
+              }
+            }
           }
           catch{
             case e: Exception => println(sentString)
-          }
-          for (inst <- extractionInstances) {
-            val conf = confidence(inst)
-            if (inst.extraction.rel.text.matches(regexerObject.patternRegex.toString())) {
-              println(("%.2f" format conf) + "\t" + inst.extraction)
-              writer.println(("%.2f" format conf) + "\t" + inst.extraction)
-            }
           }
         }
       })
