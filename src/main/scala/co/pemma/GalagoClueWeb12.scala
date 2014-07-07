@@ -11,7 +11,7 @@ import org.lemurproject.galago.tupleflow.Parameters
 object GalagoClueWeb12 extends GalagoWrapper("/mnt/nfs/indexes/ClueWeb12/galago/clueweb-12-B13.index/", true, false, false)
 {
   // how many results to return from search
-  val K_RESULTS = 100
+  val K_RESULTS = 1000
 
   def getDocumentsForQueryTerms(query : String) :  Seq[String] =
   {

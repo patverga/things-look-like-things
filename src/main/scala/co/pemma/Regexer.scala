@@ -1,7 +1,8 @@
 package co.pemma
 
-import cc.factorie.app.nlp.{Token, load, Sentence}
-import java.io.{FileWriter, BufferedWriter, PrintWriter}
+import java.io.{BufferedWriter, FileWriter, PrintWriter}
+
+import cc.factorie.app.nlp.Sentence
 
 import scala.util.matching.Regex
 

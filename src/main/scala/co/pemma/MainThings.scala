@@ -1,12 +1,22 @@
 package co.pemma
 
+import java.io.{BufferedWriter, FileWriter, PrintWriter}
+
 import cc.factorie.app.nlp._
 import cc.factorie.util.CmdOptions
+import edu.knowitall.ollie.Ollie
+import edu.knowitall.ollie.confidence.OllieConfidenceFunction
+import edu.knowitall.tool.parse.MaltParser
 
 object MainThings
 {
   val pipeline = new DocumentAnnotationPipeline(Seq(segment.DeterministicTokenizer, segment.DeterministicSentenceSegmenter))
 
+  /**
+   * given a thing and a file, find all 'looks like' relations involving that thing
+   * @param thing
+   * @param inputFileLocation
+   */
   def findThingsThatLookLikeThisThingFromFile(thing : String, inputFileLocation : String)
   {
     val regexerObject = new Regexer(thing, ".*")
@@ -22,6 +32,11 @@ object MainThings
     )
   }
 
+  /**
+   * given a thing, find all 'looks like' relations involving that thing
+   * @param thing
+   * @param output
+   */
   def findThingsThatLookLikeThisThingFromGalago(thing : String, output : String)
   {
     val regexerObject = new Regexer(thing, ".*")
@@ -42,6 +57,50 @@ object MainThings
       regexerObject.extractRegexFromSentences(sentences, thing, output)
       i += 1
       Utilities.printPercentProgress(i, docSet.size)
+    })
+  }
+
+  /**
+   * uses Ollie relation extractor to find all 'looks like' relations from the top 1000 galago results for each pattern
+   * @param outputLocation
+   */
+  def relationsToArgsFromGalago(outputLocation : String)
+  {
+    val regexerObject = new Regexer(".*", ".*")
+    // initialize Ollie
+    val parser =  new MaltParser
+    val ollie = new Ollie
+    val confidence = OllieConfidenceFunction.loadDefaultClassifier()
+
+    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
+
+    // get docs from galago
+    val documents = regexerObject.patternList.flatMap(pattern =>
+    {
+      GalagoClueWeb12.getDocumentsForQueryTerms(pattern.replaceAll("\\?", ""))
+    })
+
+    // load the data
+    var i = 0
+    val docSet = documents.toSet[String]
+    println("Processing Documents...")
+    docSet.foreach(document =>
+    {
+      val doc = load.LoadPlainText.fromString(document).head
+      pipeline.process(doc).sentences.foreach(sentence =>
+      {
+        // extract relation from each sentence
+        val parsed = parser.dependencyGraph(sentence.string)
+        val extractionInstances = ollie.extract(parsed)
+        for (inst <- extractionInstances) {
+          val conf = confidence(inst)
+          if (inst.extraction.rel.text.matches(regexerObject.patternRegex.toString()))
+            writer.println(("%.2f" format conf) + "\t" + inst.extraction)
+        }
+
+        i += 1
+        Utilities.printPercentProgress(i, docSet.size)
+      })
     })
   }
 
@@ -66,6 +125,7 @@ object MainThings
   class ProcessSlotFillingCorpusOpts extends CmdOptions {
     val context = new CmdOption("context", Nil.asInstanceOf[List[String]], "STRING,STRING...", "Takes two strings as inputs then extracts the context surrounding the two things.")
     val looksLike = new CmdOption("looks-like", "", "STRING...", "Takes as input one string and finds things that look like it.")
+    val ollie = new CmdOption("ollie", "", "",  "Uses Ollie to extract relations for our seed patterns from a galago search of those patterns.")
   }
 
 
@@ -86,25 +146,12 @@ object MainThings
       val output = s"results/$thing.result"
       findThingsThatLookLikeThisThingFromGalago(thing, output)
     }
-
-
-    //    val fileLocation = "/home/pat/things-look-like-things/target/classes/wsj/tmp2"
-    //    val fileLocation = "/home/pat/things-look-like-things/target/classes/looks-like.data"
-    //    findThingsThatLookLikeThisThingFromFile(thing, fileLocation)
-
-
-
-    //            Regexer.testRegexMaker()
-    //        JWIWordNetWrap.allThingSynonyms()
-
-    // set file defining patterns
-    //    val patternUrl = this.getClass.getResource("/patterns")
-    // convert patterns to regex
-    //   println(Regexer.generateSurfacePatternRegexes(patternUrl, thing.toLowerCase()).mkString("|").toString())
-
-    //    regexerObject.testContextExtractor()
-
-
+    else if (opts.looksLike.wasInvoked)
+    {
+      val output = s"results/ollie.result"
+      relationsToArgsFromGalago(output)
+    }
+    
     println("Done.")
   }
 }

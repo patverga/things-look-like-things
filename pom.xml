@@ -10,6 +10,7 @@
 
     <properties>
         <scala.version>2.10.4</scala.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <repositories>
@@ -131,6 +132,24 @@
             <artifactId>reverb-models</artifactId>
             <version>1.4.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>edu.washington.cs.knowitall.ollie</groupId>
+            <artifactId>ollie-core_2.10</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.washington.cs.knowitall.nlptools</groupId>
+            <artifactId>nlptools-parse-malt_2.10</artifactId>
+            <version>2.4.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>edu.washington.cs.knowitall.nlptools</groupId>
+            <artifactId>nlptools-core_2.10</artifactId>
+            <version>2.4.4</version>
+        </dependency>
+
 
 
     </dependencies>

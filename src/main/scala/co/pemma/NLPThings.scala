@@ -1,31 +1,44 @@
 package co.pemma
 
-import cc.factorie.app.nlp.load.ChunkTag
 import cc.factorie.app.nlp._
+import cc.factorie.app.nlp.load.ChunkTag
 import cc.factorie.app.nlp.phrase.BILOUChainChunker
+import edu.knowitall.ollie.Ollie
+import edu.knowitall.ollie.confidence.OllieConfidenceFunction
+import edu.knowitall.tool.parse.MaltParser
 import edu.washington.cs.knowitall.extractor.ReVerbExtractor
-import edu.washington.cs.knowitall.extractor.conf.{ReVerbOpenNlpConfFunction, ConfidenceFunction}
-import edu.washington.cs.knowitall.nlp.{ChunkedSentence, OpenNlpSentenceChunker}
+import edu.washington.cs.knowitall.extractor.conf.ReVerbOpenNlpConfFunction
+import edu.washington.cs.knowitall.nlp.OpenNlpSentenceChunker
 
 /**
  * Created by pat on 6/30/14.
  */
-object NLPThings {
+object NLPThings
+{
 
-  def main(args: Array[String]) 
+  def main(args: Array[String])
   {
-    NLPThings.relationExtractor("your glasses are awesome and my mommy and i can t wait to see what you look like in them.")
-
+  val sentences = Array(
+  "Whippets look like small greyhouds.",
+  "I think it looked like a dog.",
+  "People are tall.",
+  "This sentence is a test."
+  )
+    sentences.foreach(s => {
+      println(s)
+      NLPThings.ollieExtraction(s)
+      NLPThings.reverbExtraction(s)
+    })
   }
-  
+
   def chunkNounPhrase()
   {
     val pipeline = new DocumentAnnotationPipeline(
       Seq(segment.DeterministicTokenizer,
-      segment.DeterministicSentenceSegmenter,
-      pos.OntonotesForwardPosTagger,
-      BILOUChainChunker
-    ))
+        segment.DeterministicSentenceSegmenter,
+        pos.OntonotesForwardPosTagger,
+        BILOUChainChunker
+      ))
 
     val source = io.Source.fromFile("/home/pat/things-look-like-things/target/classes/things")
     val fileDoc = load.LoadPlainText.fromSource(source)
@@ -59,7 +72,7 @@ object NLPThings {
     })
   }
 
-  def relationExtractor(sentStr : String)
+  def reverbExtraction(sentStr : String)
   {
     // Looks on the classpath for the default model files.
     val chunker = new OpenNlpSentenceChunker()
@@ -75,10 +88,25 @@ object NLPThings {
     {
       val extr = extractions.next()
       val conf = confFunc.getConf(extr)
-      println("Arg1=" + extr.getArgument1())
-      println("Rel=" + extr.getRelation())
-      println("Arg2=" + extr.getArgument2())
+      println(s"${extr.getArgument1}; ${extr.getRelation}; ${extr.getArgument2}")
       println("Conf=" + conf)
+    }
+  }
+
+  def ollieExtraction(sentStr : String)
+  {
+    // initialize MaltParser
+    val parser =  new MaltParser
+
+    val ollie = new Ollie
+    val confidence = OllieConfidenceFunction.loadDefaultClassifier()
+
+    val parsed = parser.dependencyGraph(sentStr)
+    val extractionInstances = ollie.extract(parsed)
+    println("Extractions:")
+    for (inst <- extractionInstances) {
+      val conf = confidence(inst)
+      println(("%.2f" format conf) + "\t" + inst.extraction.rel.text)
     }
   }
 }
