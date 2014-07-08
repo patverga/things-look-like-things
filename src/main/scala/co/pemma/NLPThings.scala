@@ -3,7 +3,7 @@ package co.pemma
 import cc.factorie.app.nlp._
 import cc.factorie.app.nlp.load.ChunkTag
 import cc.factorie.app.nlp.phrase.BILOUChainChunker
-import edu.knowitall.ollie.Ollie
+import edu.knowitall.ollie.{OllieExtraction, Ollie}
 import edu.knowitall.ollie.confidence.OllieConfidenceFunction
 import edu.knowitall.tool.parse.MaltParser
 import edu.washington.cs.knowitall.extractor.ReVerbExtractor
@@ -15,6 +15,10 @@ import edu.washington.cs.knowitall.nlp.OpenNlpSentenceChunker
  */
 object NLPThings
 {
+  // initialize MaltParser
+  val parser =  new MaltParser
+  val ollie = new Ollie
+  val confidence = OllieConfidenceFunction.loadDefaultClassifier()
 
   def main(args: Array[String])
   {
@@ -93,20 +97,21 @@ object NLPThings
     }
   }
 
-  def ollieExtraction(sentStr : String)
+  def ollieExtraction(sentStr : String) : Iterable[(String, OllieExtraction)] =
   {
-    // initialize MaltParser
-    val parser =  new MaltParser
-
-    val ollie = new Ollie
-    val confidence = OllieConfidenceFunction.loadDefaultClassifier()
-
-    val parsed = parser.dependencyGraph(sentStr)
-    val extractionInstances = ollie.extract(parsed)
-    println("Extractions:")
-    for (inst <- extractionInstances) {
-      val conf = confidence(inst)
-      println(("%.2f" format conf) + "\t" + inst.extraction.rel.text)
+    try {
+      val parsed = parser.dependencyGraph(sentStr)
+      val extractionInstances = ollie.extract(parsed)
+      println("Extractions:")
+      val result = extractionInstances.map(inst => {
+        val conf = confidence(inst)
+        (("%.2f" format conf), inst.extraction)
+      })
+      result
+    }
+    catch{
+      case  e: Exception => println(s"MALT ERROR : $sentStr")
+        null
     }
   }
 }

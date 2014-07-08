@@ -4,9 +4,7 @@ import java.io.{BufferedWriter, FileWriter, PrintWriter}
 
 import cc.factorie.app.nlp._
 import cc.factorie.util.CmdOptions
-import edu.knowitall.ollie.Ollie
-import edu.knowitall.ollie.confidence.OllieConfidenceFunction
-import edu.knowitall.tool.parse.MaltParser
+import edu.knowitall.ollie.OllieExtraction
 
 object MainThings
 {
@@ -60,63 +58,72 @@ object MainThings
     })
   }
 
-  /**
-   * uses Ollie relation extractor to find all 'looks like' relations from the top 1000 galago results for each pattern
-   * @param outputLocation
-   */
-  def relationsToArgsFromGalago(query : String, outputLocation : String)
+  def exportRelationsByThing(thing : String, outputLocation : String)
+  {
+    val extractions = relationsWithThingFromGalago(thing)
+
+    // filter relations that do not involve the 'thing'
+    val filteredExtractions = extractions.filter(x => (x._2.arg1.text.contains(thing) || x._2.arg2.text.contains(thing)) )
+    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
+    filteredExtractions.foreach(extract =>
+    {
+      println(s"${extract._1} ${extract._2}")
+      writer.println(s"${extract._1} ${extract._2}")
+    })
+    writer.close()
+  }
+
+  def exportRelationsByPattern(query : String, outputLocation : String)
   {
     val patternRegex = new Regexer(".*", ".*").patternList.mkString("(?:.*",".*)|(?:.*",")")
     val omitArgRegex = "(?:you)|(?:he)|(?:she)|(?:it)|(?:we)|(?:they)|(?:him)|(?:her)|(?:i)|(?:\\W)"
-    println(patternRegex)
-    // initialize Ollie
-    val parser =  new MaltParser
-    val ollie = new Ollie
-    val confidence = OllieConfidenceFunction.loadDefaultClassifier()
 
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
 
-    // get docs from galago
+    val extractions = relationsWithThingFromGalago(query)
+    // filter relations that do not match any predefined pattern
+    val filteredExtractions = extractions.filter(x =>
+      (x._2.rel.text.matches(patternRegex) &&
+        x._2.arg1.text.matches(omitArgRegex) &&
+        x._2.arg2.text.matches(omitArgRegex))
+    )
+    filteredExtractions.foreach(extract =>
+    {
+      println(s"${extract._1} ${extract._2}")
+      writer.println(s"${extract._1} ${extract._2}")
+    })
+    writer.close()
+  }
+
+  /**
+   * given a query, find all relations from the documents
+   */
+  def relationsWithThingFromGalago(query : String) : Iterable[(String, OllieExtraction)] =
+  {
     val documents = GalagoWrapper.getDocumentsForQueryTerms(query)
 
     // load the data
     var i = 0
     println("Processing Documents...")
-    documents.foreach(document =>
+    val allExtractions = documents.flatMap(document =>
     {
-      //      try{
+      i += 1
+      Utilities.printPercentProgress(i, documents.size)
+
       val doc = load.LoadPlainText.fromString(document).head
       val sentences = pipeline.process(doc).sentences
-      sentences.foreach(sentence =>
+      val extractions : Iterable[(String, OllieExtraction)] = sentences.flatMap(sentence =>
       {
         val sentString = sentence.string.replaceAll("[^\\x00-\\x7F]", "").trim
         if (sentString != "" && sentString != null && sentString.length > 5) {
-          // extract relation from each sentence
-          try {
-            val parsed = parser.dependencyGraph(sentence.string.toLowerCase())
-            val extractionInstances = ollie.extract(parsed)
-
-            for (inst <- extractionInstances) {
-              val conf = confidence(inst)
-              if ((inst.extraction.rel.text.matches(patternRegex)) &&
-                (!inst.extraction.arg1.text.matches(omitArgRegex)) &&
-                (!inst.extraction.arg2.text.matches(omitArgRegex))) {
-                println(inst.extraction.arg2.text, inst.extraction.rel.text)
-                println(("%.2f" format conf) + "\t" + inst.extraction)
-                writer.println(("%.2f" format conf) + "\t" + inst.extraction)
-              }
-            }
-          }
-          catch{
-            case  e: Exception => println(s"MALT ERROR : $sentString")
-              writer.close()
-          }
+          NLPThings.ollieExtraction(sentence.string.toLowerCase())
         }
-      })
-      i += 1
-      Utilities.printPercentProgress(i, documents.size)
+        else
+          null
+      }).filter(_ != null)
+      extractions
     })
-    writer.close()
+    allExtractions
   }
 
   def extractContextsBetweenThings(thing1 : String, thing2 :String)
@@ -142,8 +149,8 @@ object MainThings
 
   class ProcessSlotFillingCorpusOpts extends CmdOptions {
     val context = new CmdOption("context", Nil.asInstanceOf[List[String]], "STRING,STRING...", "Takes two strings as inputs then extracts the context surrounding the two things.")
-    val looksLike = new CmdOption("looks-like", "", "STRING...", "Takes as input one string and finds things that look like it.")
-    val ollie = new CmdOption("ollie", "", "STRING...",  "Uses Ollie to extract relations for our seed patterns from a galago search of those patterns.")
+    val thing = new CmdOption("thing", "", "STRING...", "Takes as input one string and finds things that look like it.")
+    val pattern = new CmdOption("pattern", "", "STRING...",  "Uses Ollie to extract relations for our seed patterns from a galago search of those patterns.")
   }
 
 
@@ -158,17 +165,17 @@ object MainThings
       val thingList = opts.context.value
       extractContextsBetweenThings(thingList(0).toLowerCase(), thingList(1).toLowerCase())
     }
-    else if (opts.looksLike.wasInvoked)
+    else if (opts.thing.wasInvoked)
     {
-      val thing = opts.looksLike.value.toLowerCase()
-      val output = s"results/$thing.result"
-      findThingsThatLookLikeThisThingFromGalago(thing, output)
+      val thing = opts.thing.value.toLowerCase()
+      val output = s"results/thing/$thing.result"
+      exportRelationsByThing(thing, output)
     }
-    else if (opts.ollie.wasInvoked) {
-      val query = opts.ollie.value.replaceAll("?","")
+    else if (opts.pattern.wasInvoked) {
+      val query = opts.pattern.value.replaceAll("\\?","")
       if (!query.startsWith("#") && query != "") {
-        val output = s"results/ollie/$query.result"
-        relationsToArgsFromGalago(query, output)
+        val output = s"results/pattern/$query.result"
+        exportRelationsByPattern(query, output)
       }
     }
 
