@@ -64,7 +64,7 @@ object MainThings
    * uses Ollie relation extractor to find all 'looks like' relations from the top 1000 galago results for each pattern
    * @param outputLocation
    */
-  def relationsToArgsFromGalago(outputLocation : String)
+  def relationsToArgsFromGalago(query : String, outputLocation : String)
   {
     val regexerObject = new Regexer(".*", ".*")
     // initialize Ollie
@@ -75,25 +75,21 @@ object MainThings
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
 
     // get docs from galago
-    val documents = regexerObject.patternList.flatMap(pattern =>
-    {
-      GalagoWrapper.getDocumentsForQueryTerms(pattern.replaceAll("\\?", ""))
-    })
+    val documents = GalagoWrapper.getDocumentsForQueryTerms(query.replaceAll("\\?", ""))
 
     // load the data
     var i = 0
-    val docSet = documents.filter(_ != "").toSet[String]
     println("Processing Documents...")
-    docSet.foreach(document =>
+    documents.foreach(document =>
     {
       val doc = load.LoadPlainText.fromString(document).head
       pipeline.process(doc).sentences.foreach(sentence =>
       {
         val sentString = sentence.string.replaceAll("[^\\x00-\\x7F]", "").trim
         if (sentString != "" && sentString != null && sentString.length > 5) {
-          // extract relation from each sentence
-          val parsed = parser.dependencyGraph(sentence.string)
           try {
+            // extract relation from each sentence
+            val parsed = parser.dependencyGraph(sentence.string)
             val extractionInstances = ollie.extract(parsed)
 
             for (inst <- extractionInstances) {
@@ -140,7 +136,7 @@ object MainThings
   class ProcessSlotFillingCorpusOpts extends CmdOptions {
     val context = new CmdOption("context", Nil.asInstanceOf[List[String]], "STRING,STRING...", "Takes two strings as inputs then extracts the context surrounding the two things.")
     val looksLike = new CmdOption("looks-like", "", "STRING...", "Takes as input one string and finds things that look like it.")
-    val ollie = new CmdOption("ollie", "", "",  "Uses Ollie to extract relations for our seed patterns from a galago search of those patterns.")
+    val ollie = new CmdOption("ollie", "", "STRING...",  "Uses Ollie to extract relations for our seed patterns from a galago search of those patterns.")
   }
 
 
@@ -163,8 +159,9 @@ object MainThings
     }
     else if (opts.ollie.wasInvoked)
     {
+      val query = opts.ollie.value
       val output = s"results/ollie.result"
-      relationsToArgsFromGalago(output)
+      relationsToArgsFromGalago(query, output)
     }
 
     println("Done.")
