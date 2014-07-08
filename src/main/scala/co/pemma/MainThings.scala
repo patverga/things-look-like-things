@@ -66,7 +66,9 @@ object MainThings
    */
   def relationsToArgsFromGalago(query : String, outputLocation : String)
   {
-    val regexerObject = new Regexer(".*", ".*")
+    val patternRegex = new Regexer(".*", ".*").patternList.mkString("(?:.*",".*)|(?:.*",")")
+    val omitArgRegex = "(?:you)|(?:he)|(?:she)|(?:it)|(?:we)|(?:they)"
+    println(patternRegex)
     // initialize Ollie
     val parser =  new MaltParser
     val ollie = new Ollie
@@ -96,7 +98,10 @@ object MainThings
 
             for (inst <- extractionInstances) {
               val conf = confidence(inst)
-              if (inst.extraction.rel.text.matches(regexerObject.patternRegex.toString())) {
+              if ((inst.extraction.rel.text.matches(patternRegex)) &&
+                (!inst.extraction.arg1.text.matches(omitArgRegex)) &&
+                (!inst.extraction.arg2.text.matches(omitArgRegex))) {
+                println(inst.extraction.arg2.text, inst.extraction.rel.text)
                 println(("%.2f" format conf) + "\t" + inst.extraction)
                 writer.println(("%.2f" format conf) + "\t" + inst.extraction)
               }
