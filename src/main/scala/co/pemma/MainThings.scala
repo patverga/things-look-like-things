@@ -62,7 +62,7 @@ object MainThings
   def exportRelationsByThing(thing : String, outputLocation : String)
   {
     val patternRegex = new Regexer(".*", ".*").patternList.mkString("(?:.*",".*)|(?:.*",")")
-    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
+    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
 
     val extractions = relationsWithThingFromGalago(thing)
     // filter relations that do not involve the 'thing'
@@ -80,7 +80,7 @@ object MainThings
   def exportRelationsByPattern(query : String, outputLocation : String)
   {
     val patternRegex = new Regexer(".*", ".*").patternList.mkString("(?:.*",".*)|(?:.*",")")
-    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
+    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
 
     val extractions = relationsWithThingFromGalago(query)
     // filter relations that do not match any predefined pattern
