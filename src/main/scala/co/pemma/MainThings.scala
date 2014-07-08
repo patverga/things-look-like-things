@@ -82,38 +82,36 @@ object MainThings
     println("Processing Documents...")
     documents.foreach(document =>
     {
-//      try{
-        val doc = load.LoadPlainText.fromString(document).head
-        val sentences = pipeline.process(doc).sentences
-        sentences.foreach(sentence =>
-        {
-          val sentString = sentence.string.replaceAll("[^\\x00-\\x7F]", "").trim
-          if (sentString != "" && sentString != null && sentString.length > 5) {
-            // extract relation from each sentence
-            try {
-              val parsed = parser.dependencyGraph(sentence.string)
-              val extractionInstances = ollie.extract(parsed)
+      //      try{
+      val doc = load.LoadPlainText.fromString(document).head
+      val sentences = pipeline.process(doc).sentences
+      sentences.foreach(sentence =>
+      {
+        val sentString = sentence.string.replaceAll("[^\\x00-\\x7F]", "").trim
+        if (sentString != "" && sentString != null && sentString.length > 5) {
+          // extract relation from each sentence
+          try {
+            val parsed = parser.dependencyGraph(sentence.string)
+            val extractionInstances = ollie.extract(parsed)
 
-              for (inst <- extractionInstances) {
-                val conf = confidence(inst)
-                if (inst.extraction.rel.text.matches(regexerObject.patternRegex.toString())) {
-                  println(("%.2f" format conf) + "\t" + inst.extraction)
-                  writer.println(("%.2f" format conf) + "\t" + inst.extraction)
-                }
+            for (inst <- extractionInstances) {
+              val conf = confidence(inst)
+              if (inst.extraction.rel.text.matches(regexerObject.patternRegex.toString())) {
+                println(("%.2f" format conf) + "\t" + inst.extraction)
+                writer.println(("%.2f" format conf) + "\t" + inst.extraction)
               }
             }
-            catch{
-              case  e: Exception => println(s"MALT ERROR : $sentString")
-            }
           }
-        })
-        i += 1
-        Utilities.printPercentProgress(i, documents.size)
-//      }
-//      catch {
-//        case e: Exception => println(s"FACTORIE ERROR : $doc.string")
-//      }
+          catch{
+            case  e: Exception => println(s"MALT ERROR : $sentString")
+              writer.close()
+          }
+        }
+      })
+      i += 1
+      Utilities.printPercentProgress(i, documents.size)
     })
+    writer.close()
   }
 
   def extractContextsBetweenThings(thing1 : String, thing2 :String)
@@ -161,11 +159,12 @@ object MainThings
       val output = s"results/$thing.result"
       findThingsThatLookLikeThisThingFromGalago(thing, output)
     }
-    else if (opts.ollie.wasInvoked)
-    {
+    else if (opts.ollie.wasInvoked) {
       val query = opts.ollie.value
-      val output = s"results/ollie.result"
-      relationsToArgsFromGalago(query, output)
+      if (!query.startsWith("#") && query != "") {
+        val output = s"results/ollie/$query.result"
+        relationsToArgsFromGalago(query, output)
+      }
     }
 
     println("Done.")
