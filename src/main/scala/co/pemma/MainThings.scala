@@ -9,6 +9,7 @@ import edu.knowitall.ollie.OllieExtraction
 object MainThings
 {
   val pipeline = new DocumentAnnotationPipeline(Seq(segment.DeterministicTokenizer, segment.DeterministicSentenceSegmenter))
+  val omitArgRegex = "(?:you)|(?:he)|(?:she)|(?:it)|(?:we)|(?:they)|(?:him)|(?:her)|(?:i)|(?:\\W)"
 
   /**
    * given a thing and a file, find all 'looks like' relations involving that thing
@@ -60,11 +61,13 @@ object MainThings
 
   def exportRelationsByThing(thing : String, outputLocation : String)
   {
-    val extractions = relationsWithThingFromGalago(thing)
-
-    // filter relations that do not involve the 'thing'
-    val filteredExtractions = extractions.filter(x => (x._2.arg1.text.contains(thing) || x._2.arg2.text.contains(thing)) )
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
+
+    val extractions = relationsWithThingFromGalago(thing)
+    // filter relations that do not involve the 'thing'
+    val filteredExtractions = extractions.filter(x =>
+      (x._2.arg1.text.contains(thing) || x._2.arg2.text.contains(thing) &&
+        !x._2.arg1.text.matches(omitArgRegex) && !x._2.arg2.text.matches(omitArgRegex)) )
     filteredExtractions.foreach(extract =>
     {
       println(s"${extract._1} ${extract._2}")
@@ -76,16 +79,14 @@ object MainThings
   def exportRelationsByPattern(query : String, outputLocation : String)
   {
     val patternRegex = new Regexer(".*", ".*").patternList.mkString("(?:.*",".*)|(?:.*",")")
-    val omitArgRegex = "(?:you)|(?:he)|(?:she)|(?:it)|(?:we)|(?:they)|(?:him)|(?:her)|(?:i)|(?:\\W)"
-
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
 
     val extractions = relationsWithThingFromGalago(query)
     // filter relations that do not match any predefined pattern
     val filteredExtractions = extractions.filter(x =>
       (x._2.rel.text.matches(patternRegex) &&
-        x._2.arg1.text.matches(omitArgRegex) &&
-        x._2.arg2.text.matches(omitArgRegex))
+        !x._2.arg1.text.matches(omitArgRegex) &&
+        !x._2.arg2.text.matches(omitArgRegex))
     )
     filteredExtractions.foreach(extract =>
     {
