@@ -77,7 +77,7 @@ object MainThings
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
 
     // get docs from galago
-    val documents = GalagoWrapper.getDocumentsForQueryTerms(query.replaceAll("\\?", ""))
+    val documents = GalagoWrapper.getDocumentsForQueryTerms(query)
 
     // load the data
     var i = 0
@@ -165,7 +165,7 @@ object MainThings
       findThingsThatLookLikeThisThingFromGalago(thing, output)
     }
     else if (opts.ollie.wasInvoked) {
-      val query = opts.ollie.value
+      val query = opts.ollie.value.replaceAll("?","")
       if (!query.startsWith("#") && query != "") {
         val output = s"results/ollie/$query.result"
         relationsToArgsFromGalago(query, output)
