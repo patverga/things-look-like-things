@@ -61,13 +61,14 @@ object MainThings
 
   def exportRelationsByThing(thing : String, outputLocation : String)
   {
+    val patternRegex = new Regexer(".*", ".*").patternList.mkString("(?:.*",".*)|(?:.*",")")
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)))
 
     val extractions = relationsWithThingFromGalago(thing)
     // filter relations that do not involve the 'thing'
     val filteredExtractions = extractions.filter(x =>
-      (x._2.arg1.text.contains(thing) || x._2.arg2.text.contains(thing) &&
-        !x._2.arg1.text.matches(omitArgRegex) && !x._2.arg2.text.matches(omitArgRegex)) )
+      ((x._2.arg1.text.contains(thing) || x._2.arg2.text.contains(thing)) &&
+        !x._2.arg1.text.matches(omitArgRegex) && !x._2.arg2.text.matches(omitArgRegex)) && x._2.rel.text.matches(patternRegex))
     filteredExtractions.foreach(extract =>
     {
       println(s"${extract._1} ${extract._2}")
