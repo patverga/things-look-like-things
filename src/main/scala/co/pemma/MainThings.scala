@@ -67,7 +67,7 @@ object MainThings
   def relationsToArgsFromGalago(query : String, outputLocation : String)
   {
     val patternRegex = new Regexer(".*", ".*").patternList.mkString("(?:.*",".*)|(?:.*",")")
-    val omitArgRegex = "(?:you)|(?:he)|(?:she)|(?:it)|(?:we)|(?:they)"
+    val omitArgRegex = "(?:you)|(?:he)|(?:she)|(?:it)|(?:we)|(?:they)|(?:him)|(?:her)|(?:i)|(?:\\W)"
     println(patternRegex)
     // initialize Ollie
     val parser =  new MaltParser
@@ -93,7 +93,7 @@ object MainThings
         if (sentString != "" && sentString != null && sentString.length > 5) {
           // extract relation from each sentence
           try {
-            val parsed = parser.dependencyGraph(sentence.string)
+            val parsed = parser.dependencyGraph(sentence.string.toLowerCase())
             val extractionInstances = ollie.extract(parsed)
 
             for (inst <- extractionInstances) {
