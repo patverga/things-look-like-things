@@ -101,7 +101,6 @@ object MainThings
   def relationsWithThingFromGalago(query : String) : Iterable[(String, OllieExtraction)] =
   {
     val documents = GalagoWrapper.getDocumentsForQueryTerms(query)
-
     // load the data
     var i = 0
     println("Processing Documents...")
@@ -112,14 +111,9 @@ object MainThings
 
       val doc = load.LoadPlainText.fromString(document).head
       val sentences = pipeline.process(doc).sentences
-      val extractions : Iterable[(String, OllieExtraction)] = sentences.flatMap(sentence =>
+      val extractions = sentences.filter(s => {s.string != "" && s.string != null && s.string.length > 5 }).flatMap(sentence =>
       {
-        val sentString = sentence.string.replaceAll("[^\\x00-\\x7F]", "").trim
-        if (sentString != "" && sentString != null && sentString.length > 5) {
           NLPThings.ollieExtraction(sentence.string.toLowerCase())
-        }
-        else
-          null
       }).filter(_ != null)
       extractions
     })
@@ -163,16 +157,16 @@ object MainThings
     if (opts.context.wasInvoked)
     {
       val thingList = opts.context.value
-      extractContextsBetweenThings(thingList(0).toLowerCase(), thingList(1).toLowerCase())
+      extractContextsBetweenThings(thingList(0).toLowerCase, thingList(1).toLowerCase)
     }
     else if (opts.thing.wasInvoked)
     {
-      val thing = opts.thing.value.toLowerCase()
+      val thing = opts.thing.value.toLowerCase
       val output = s"results/thing/$thing.result"
       exportRelationsByThing(thing, output)
     }
     else if (opts.pattern.wasInvoked) {
-      val query = opts.pattern.value.replaceAll("\\?","")
+      val query = opts.pattern.value.toLowerCase.replaceAll("\\?","")
       if (!query.startsWith("#") && query != "") {
         val output = s"results/pattern/$query.result"
         exportRelationsByPattern(query, output)

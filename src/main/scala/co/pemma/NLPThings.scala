@@ -102,7 +102,6 @@ object NLPThings
     try {
       val parsed = parser.dependencyGraph(sentStr)
       val extractionInstances = ollie.extract(parsed)
-      println("Extractions:")
       val result = extractionInstances.map(inst => {
         val conf = confidence(inst)
         (("%.2f" format conf), inst.extraction)
