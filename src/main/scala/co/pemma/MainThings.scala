@@ -111,10 +111,16 @@ object MainThings
 
       val doc = load.LoadPlainText.fromString(document).head
       val sentences = pipeline.process(doc).sentences
-      val extractions = sentences.filter(s => {s.string != "" && s.string != null && s.string.length > 5 }).flatMap(sentence =>
+      val extractions = sentences.flatMap(sentence =>
       {
+        val sentString = sentence.string.replaceAll("[^\\x00-\\x7F]", "").trim
+        if (sentString != "" && sentString != null && sentString.length > 5)
+        {
           NLPThings.ollieExtraction(sentence.string.toLowerCase())
-      }).filter(_ != null)
+        }
+        else
+          Seq()
+      })
       extractions
     })
     allExtractions

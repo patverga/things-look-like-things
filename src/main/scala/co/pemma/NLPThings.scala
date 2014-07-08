@@ -110,7 +110,7 @@ object NLPThings
     }
     catch{
       case  e: Exception => println(s"MALT ERROR : $sentStr")
-        null
+        Seq()
     }
   }
 }
