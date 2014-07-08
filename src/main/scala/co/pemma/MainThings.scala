@@ -108,7 +108,7 @@ object MainThings
         }
       })
       i += 1
-      Utilities.printPercentProgress(i, docSet.size)
+      Utilities.printPercentProgress(i, documents.size)
     })
   }
 
