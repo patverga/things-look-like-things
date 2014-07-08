@@ -83,32 +83,37 @@ object MainThings
     documents.foreach(document =>
     {
       val doc = load.LoadPlainText.fromString(document).head
-      pipeline.process(doc).sentences.foreach(sentence =>
-      {
-        val sentString = sentence.string.replaceAll("[^\\x00-\\x7F]", "").trim
-        if (sentString != "" && sentString != null && sentString.length > 5) {
-          try {
-            // extract relation from each sentence
-            val parsed = parser.dependencyGraph(sentence.string)
-            val extractionInstances = ollie.extract(parsed)
+      try{
 
-            for (inst <- extractionInstances) {
-              val conf = confidence(inst)
-              if (inst.extraction.rel.text.matches(regexerObject.patternRegex.toString())) {
-                println(("%.2f" format conf) + "\t" + inst.extraction)
-                writer.println(("%.2f" format conf) + "\t" + inst.extraction)
+        val sentences = pipeline.process(doc).sentences
+        sentences.foreach(sentence =>
+        {
+          val sentString = sentence.string.replaceAll("[^\\x00-\\x7F]", "").trim
+          if (sentString != "" && sentString != null && sentString.length > 5) {
+            // extract relation from each sentence
+            try {
+              val parsed = parser.dependencyGraph(sentence.string)
+              val extractionInstances = ollie.extract(parsed)
+
+              for (inst <- extractionInstances) {
+                val conf = confidence(inst)
+                if (inst.extraction.rel.text.matches(regexerObject.patternRegex.toString())) {
+                  println(("%.2f" format conf) + "\t" + inst.extraction)
+                  writer.println(("%.2f" format conf) + "\t" + inst.extraction)
+                }
               }
             }
+            catch{
+              case  e: Exception => println(s"MALT ERROR : $sentString")
+            }
           }
-          catch{
-            case  e: Exception => println(s"ERROR : $sentString")
-              println(s"ERROR : $sentString")
-
-          }
-        }
-      })
-      i += 1
-      Utilities.printPercentProgress(i, documents.size)
+        })
+        i += 1
+        Utilities.printPercentProgress(i, documents.size)
+      }
+      catch {
+        case e: Exception => println(s"FACTORIE ERROR : $doc.string")
+      }
     })
   }
 
