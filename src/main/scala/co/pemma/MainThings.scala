@@ -82,9 +82,8 @@ object MainThings
     println("Processing Documents...")
     documents.foreach(document =>
     {
-      val doc = load.LoadPlainText.fromString(document).head
-      try{
-
+//      try{
+        val doc = load.LoadPlainText.fromString(document).head
         val sentences = pipeline.process(doc).sentences
         sentences.foreach(sentence =>
         {
@@ -110,10 +109,10 @@ object MainThings
         })
         i += 1
         Utilities.printPercentProgress(i, documents.size)
-      }
-      catch {
-        case e: Exception => println(s"FACTORIE ERROR : $doc.string")
-      }
+//      }
+//      catch {
+//        case e: Exception => println(s"FACTORIE ERROR : $doc.string")
+//      }
     })
   }
 
