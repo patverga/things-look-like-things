@@ -12,37 +12,29 @@ import scala.collection.JavaConverters._
 object GalagoWrapper
 {
   // how many results to return from search
-  val K_RESULTS = 1000
+  val DEFAULT_K = 1000
   val indexLocation = "/mnt/nfs/indexes/ClueWeb12/galago/clueweb-12-B13.index/"
   var retrieval = RetrievalFactory.instance(indexLocation, new Parameters)
   var docComponents = new Document.DocumentComponents(true, false, false)
 
-  def getDocumentsForQueryTerms(query : String) :  Seq[String] =
+  def runQuery(queryText : String) : Seq[String] =
   {
-    // retrieve each document and put it in a list
-    runQuery(query).map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
+    runQuery(queryText, DEFAULT_K)
   }
 
-  def runQuery(queryText : String) : collection.mutable.Buffer[ScoredDocument] =
+  def runQuery(queryText : String, kResults : Int) : Seq[String] =
   {
-
     val query = new Parameters()
     query.set("text", s"#combine($queryText)")
-    query.set("requested", K_RESULTS)
+    query.set("requested", kResults)
 
     // parse and transform query into runnable form
     val root: Node = StructuredQuery.parse(queryText)
     val transformed: Node = retrieval.transformQuery(root, query)
 
-    println(s"Querying galago for top $K_RESULTS results for '$queryText' ")
+    println(s"Querying galago for top $kResults results for '$queryText' ")
     // run query
     val results = retrieval.executeQuery(transformed, query).scoredDocuments
-    results.asScala
-  }
-
-  def main(args: Array[String])
-  {
-    val docList = getDocumentsForQueryTerms("test")
-    println(docList.size)
+    results.asScala.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
   }
 }

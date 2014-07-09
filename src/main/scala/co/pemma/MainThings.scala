@@ -41,7 +41,7 @@ object MainThings
 
     val documents = regexerObject.patternList.flatMap(pattern =>
     {
-      GalagoWrapper.getDocumentsForQueryTerms(s"${pattern.replaceAll("\\?", "")} $thing")
+      GalagoWrapper.runQuery(s"${pattern.replaceAll("\\?", "")} $thing")
     })
 
     // load the data
@@ -101,7 +101,7 @@ object MainThings
    */
   def relationsWithThingFromGalago(query : String) : Iterable[(String, OllieExtraction)] =
   {
-    val documents = GalagoWrapper.getDocumentsForQueryTerms(query)
+    val documents = GalagoWrapper.runQuery(query)
     // load the data
     var i = 0
     println("Processing Documents...")
@@ -131,7 +131,7 @@ object MainThings
   {
     val regexerObject = new Regexer(thing1, thing2)
 
-    val documents = GalagoWrapper.getDocumentsForQueryTerms(s"$thing1 $thing2")
+    val documents = GalagoWrapper.runQuery(s"$thing1 $thing2")
 
     val matches = documents.flatMap(doc =>
     {
@@ -158,6 +158,7 @@ object MainThings
 
   def main(args: Array[String])
   {
+    println(s"Input Args : ${args.mkString(" ")}")
 
     val opts = new ProcessSlotFillingCorpusOpts
     opts.parse(args)
@@ -179,9 +180,9 @@ object MainThings
         val output = s"results/pattern/$query.result"
         exportRelationsByPattern(query, output)
       }
-      else if(opts.snowBall.wasInvoked)
-        SnowBall.run()
     }
+    else if(opts.snowBall.wasInvoked)
+      SnowBall.run()
 
     println("Done.")
   }

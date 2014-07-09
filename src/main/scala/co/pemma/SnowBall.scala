@@ -45,7 +45,7 @@ object SnowBall
   def extractSeedOccurances(queries : Seq[String]) : Set[Sentence] =
   {
     // run queries and process results
-    val docs = queries.flatMap(q => GalagoWrapper.getDocumentsForQueryTerms(q)).toSet[String]
+    val docs = queries.flatMap(q => GalagoWrapper.runQuery(q)).toSet[String]
     val allSentences = docs.flatMap(d => {
       val doc = load.LoadPlainText.fromString(d).head
       NLPThings.pipeline.process(doc).sentences
