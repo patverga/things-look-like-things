@@ -8,7 +8,6 @@ import edu.knowitall.ollie.OllieExtraction
 
 object MainThings
 {
-  val pipeline = new DocumentAnnotationPipeline(Seq(segment.DeterministicTokenizer, segment.DeterministicSentenceSegmenter))
   val omitArgRegex = "(?:you)|(?:he)|(?:she)|(?:it)|(?:we)|(?:they)|(?:him)|(?:her)|(?:i)|(?:\\W)"
 
   /**
@@ -23,7 +22,7 @@ object MainThings
     // load the data
     val source = io.Source.fromFile(inputFileLocation)
     val doc = load.LoadPlainText.fromSource(source).head
-    val documentString = pipeline.process(doc).sentences.flatMap(_.tokens).toString()
+    val documentString = NLPThings.pipeline.process(doc).sentences.flatMap(_.tokens).toString()
     source.close()
 
     regexerObject.patternRegex.findAllMatchIn(documentString).foreach(m =>
@@ -52,7 +51,7 @@ object MainThings
     docSet.foreach(document =>
     {
       val doc = load.LoadPlainText.fromString(document).head
-      val sentences = pipeline.process(doc).sentences
+      val sentences = NLPThings.pipeline.process(doc).sentences
       regexerObject.extractRegexFromSentences(sentences, thing, output)
       i += 1
       Utilities.printPercentProgress(i, docSet.size)
@@ -112,7 +111,7 @@ object MainThings
       Utilities.printPercentProgress(i, documents.size)
 
       val doc = load.LoadPlainText.fromString(document).head
-      val sentences = pipeline.process(doc).sentences
+      val sentences = NLPThings.pipeline.process(doc).sentences
       val extractions = sentences.flatMap(sentence =>
       {
         val sentString = sentence.string.replaceAll("[^\\x00-\\x7F]", "").trim
@@ -136,7 +135,7 @@ object MainThings
 
     val matches = documents.flatMap(doc =>
     {
-      val sentences =  pipeline.process(load.LoadPlainText.fromString(doc).head).sentences
+      val sentences =  NLPThings.pipeline.process(load.LoadPlainText.fromString(doc).head).sentences
       sentences.flatMap(sentence =>
       {
         regexerObject.extractContextsForRelation(sentence.string)
@@ -153,6 +152,7 @@ object MainThings
     val context = new CmdOption("context", Nil.asInstanceOf[List[String]], "STRING,STRING...", "Takes two strings as inputs then extracts the context surrounding the two things.")
     val thing = new CmdOption("thing", "", "STRING...", "Takes as input one string and finds things that look like it.")
     val pattern = new CmdOption("pattern", "", "STRING...",  "Uses Ollie to extract relations for our seed patterns from a galago search of those patterns.")
+    val snowBall = new CmdOption("snowball", "", "",  "Google : 'snowball urban dictionary'. You're welcome.")
   }
 
 
@@ -179,6 +179,8 @@ object MainThings
         val output = s"results/pattern/$query.result"
         exportRelationsByPattern(query, output)
       }
+      else if(opts.snowBall.wasInvoked)
+        SnowBall.run()
     }
 
     println("Done.")

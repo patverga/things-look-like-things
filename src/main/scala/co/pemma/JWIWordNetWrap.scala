@@ -109,35 +109,35 @@ object JWIWordNetWrap {
     synonyms
   }
 
-  def getHypernyms(inputWord : String): collection.mutable.MutableList[String] =
-  {
-    dict.open()
-    // get the synset
-    val idxWord = dict.getIndexWord(inputWord, POS.NOUN)
-    val wordID = idxWord.getWordIDs().get(0) // 1st meaning
-  val word = dict.getWord(wordID)
-    val synset = word.getSynset()
-
-    // get the hypernyms
-    val hypernyms = synset.getRelatedSynsets(Pointer.HYPERNYM).toArray[ISynsetID](Array())
-
-    // print out each hypernym’s id and synonyms
-    var i = 0
-    val results = collection.mutable.MutableList[String]()
-    while (i < hypernyms.size)
-    {
-      val sid = hypernyms(i)
-      i += 1
-      val words = dict.getSynset(sid).getWords()
-      var j = 0
-      while ( j < words.size())
-      {
-        val w = words.get(j)
-        j += 1
-        results += w.getLemma()
-      }
-    }
-  }
+//  def getHypernyms(inputWord : String): collection.mutable.MutableList[String] =
+//  {
+//    dict.open()
+//    // get the synset
+//    val idxWord = dict.getIndexWord(inputWord, POS.NOUN)
+//    val wordID = idxWord.getWordIDs().get(0) // 1st meaning
+//  val word = dict.getWord(wordID)
+//    val synset = word.getSynset()
+//
+//    // get the hypernyms
+//    val hypernyms = synset.getRelatedSynsets(Pointer.HYPERNYM).toArray[ISynsetID](Array())
+//
+//    // print out each hypernym’s id and synonyms
+//    var i = 0
+//    val results = collection.mutable.MutableList[String]()
+//    while (i < hypernyms.size)
+//    {
+//      val sid = hypernyms(i)
+//      i += 1
+//      val words = dict.getSynset(sid).getWords()
+//      var j = 0
+//      while ( j < words.size())
+//      {
+//        val w = words.get(j)
+//        j += 1
+//        results += w.getLemma()
+//      }
+//    }
+//  }
 
   def testDictionary() {
     // construct the dictionary object and open it
@@ -170,7 +170,7 @@ object JWIWordNetWrap {
       "Whippet")
 
     words.foreach(w => {
-      val syn = JWIWordNetWrap.getHypernyms(w.toLowerCase())
+      val syn = JWIWordNetWrap.getSynonyms(w.toLowerCase())
       print(s"$w :")
       if (!syn.isEmpty)
         print(syn.mkString(":"))

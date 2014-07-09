@@ -15,6 +15,8 @@ import edu.washington.cs.knowitall.nlp.OpenNlpSentenceChunker
  */
 object NLPThings
 {
+  val pipeline = new DocumentAnnotationPipeline(Seq(segment.DeterministicTokenizer, segment.DeterministicSentenceSegmenter))
+
   // initialize MaltParser
   val parser =  new MaltParser
   val ollie = new Ollie
