@@ -79,7 +79,6 @@ object SnowBall
 
     print("extracting context...")
     // get context matches
-    filteredSentences.flatMap(s => contextRegex.findAllIn(s.string))
-    println("done.")
+    filteredSentences.flatMap(s => contextRegex.findAllMatchIn(s.string))
   }
 }
