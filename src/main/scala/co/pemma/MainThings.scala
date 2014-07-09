@@ -141,7 +141,6 @@ object MainThings
         regexerObject.extractContextsForRelation(sentence.string)
       })
     })
-
     matches.foreach(m => println(s"${m.group(1)}:${m.group(2)}:${m.group(3)}:${m.group(4)}:${m.group(5)}"))
   }
 

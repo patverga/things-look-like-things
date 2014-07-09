@@ -16,13 +16,15 @@ object SnowBall
     val lines = io.Source.fromURL(file).getLines.filterNot(_.startsWith("#")).filter(_ != "").toSeq
     val queries = lines.flatMap(l => parseInputLineToQueries(l))
 
-    val filteredSentences = extractSeedOccurances(queries)
+    val matches = extractSeedOccurances(queries)
     var i = 0
-    filteredSentences.foreach(s => {
+    matches.foreach(s => {
       println(s)
-      i += 1
-      Utilities.printPercentProgress(i, filteredSentences.size)
+      //      i += 1
+      //      Utilities.printPercentProgress(i, filteredSentences.size)
     })
+
+
   }
 
   /**
@@ -42,7 +44,7 @@ object SnowBall
     queries
   }
 
-  def extractSeedOccurances(queries : Seq[String]) : Set[Sentence] =
+  def extractSeedOccurances(queries : Seq[String]) : Set[String] =
   {
     // run queries and process results
     val docs = queries.flatMap(q => GalagoWrapper.runQuery(q)).toSet[String]
@@ -52,14 +54,28 @@ object SnowBall
     })
 
     // extract lines that match the seed relations
-    val regex = queries.flatMap(q => {
+    val matchRegex = queries.map(q => {
       val words = q.split(" ", 2)
       s"(?:.*${words(0)}.*${words(1)}.*)"
     }).mkString("|")
+    println(s"MATCH: $matchRegex")
+    val filteredSentences = allSentences.filter(_.string.matches(matchRegex))
 
-    // extract relations from docs
-   allSentences.filter(_.string.matches(regex))
+    // extract contexts around matches
+    val used = collection.mutable.HashSet[String]()
+    val contextRegex = queries.map(q => {
+      val words = q.split(" ", 2)
+      var line = words(1)
+      if (!used.contains(words(0)))
+      {
+        line += s"|${words(0)}"
+        used.+=(words(0))
+      }
+      line
+    }).mkString("(.*)(?:", "|", ")(.*)").r
+    println(s"CONTEXT: $contextRegex")
+
+    // get context matches
+    filteredSentences.flatMap(s => contextRegex.findAllIn(s.string))
   }
-
-
 }
