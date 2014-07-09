@@ -151,7 +151,7 @@ object MainThings
     val context = new CmdOption("context", Nil.asInstanceOf[List[String]], "STRING,STRING...", "Takes two strings as inputs then extracts the context surrounding the two things.")
     val thing = new CmdOption("thing", "", "STRING...", "Takes as input one string and finds things that look like it.")
     val pattern = new CmdOption("pattern", "", "STRING...",  "Uses Ollie to extract relations for our seed patterns from a galago search of those patterns.")
-    val snowBall = new CmdOption("snowball", "", "",  "Google : 'snowball urban dictionary'. You're welcome.")
+    val snowBall = new CmdOption("snowball", "", "STRING...",  "Google : 'snowball urban dictionary'. You're welcome.")
   }
 
 
@@ -180,9 +180,11 @@ object MainThings
         exportRelationsByPattern(query, output)
       }
     }
-    else if(opts.snowBall.wasInvoked)
-      SnowBall.run()
-
+    else if(opts.snowBall.wasInvoked) {
+      val line = opts.snowBall.value
+      val output = s"results/snowball/$line.result"
+      SnowBall.run(line, output)
+    }
     println("Done.")
   }
 }

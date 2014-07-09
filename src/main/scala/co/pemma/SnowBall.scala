@@ -1,5 +1,7 @@
 package co.pemma
 
+import java.io.{FileWriter, BufferedWriter, PrintWriter}
+
 import cc.factorie.app.nlp.load
 import cc.factorie.app.nlp.Sentence
 
@@ -11,22 +13,18 @@ import scala.util.matching.Regex
 object SnowBall
 {
 
-  def run()
+  def run(line : String, outputLocation : String)
   {
-    // turn input file to queries
-    val file = this.getClass.getResource("/things-look-like-these")
-    val lines = io.Source.fromURL(file).getLines.filterNot(_.startsWith("#")).filter(_ != "").toSeq
-    val queries = lines.flatMap(l => parseInputLineToQueries(l))
+    val queries = parseInputLineToQueries(line)
 
     val matches = extractSeedOccurances(queries)
-    var i = 0
+
+    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
     matches.foreach(s => {
       println(s"\n\n ${s.group(0)}")
-      //      i += 1
-      //      Utilities.printPercentProgress(i, filteredSentences.size)
+      writer.println(s"\n\n ${s.group(0)}")
     })
-
-
+    writer.close()
   }
 
   /**
@@ -50,12 +48,13 @@ object SnowBall
   {
     // run queries and process results
     val docs = queries.flatMap(q => GalagoWrapper.runQuery(q)).toSet[String]
+    print("Processing Docs...")
     val allSentences = docs.flatMap(d => {
       val doc = load.LoadPlainText.fromString(d).head
       NLPThings.pipeline.process(doc).sentences
     })
 
-    print("Extracting seed relation matches from retrieved documents...")
+    print("...Extracting seed relation matches...")
     // extract lines that match the seed relations
     val matchRegex = queries.map(q => {
       val words = q.split(" ", 2)
