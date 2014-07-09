@@ -3,6 +3,8 @@ package co.pemma
 import cc.factorie.app.nlp.load
 import cc.factorie.app.nlp.Sentence
 
+import scala.util.matching.Regex
+
 /**
  * Created by pat on 7/9/14.
  */
@@ -19,7 +21,7 @@ object SnowBall
     val matches = extractSeedOccurances(queries)
     var i = 0
     matches.foreach(s => {
-      println(s)
+      println(s"\n\n ${s.group(0)}")
       //      i += 1
       //      Utilities.printPercentProgress(i, filteredSentences.size)
     })
@@ -44,7 +46,7 @@ object SnowBall
     queries
   }
 
-  def extractSeedOccurances(queries : Seq[String]) : Set[String] =
+  def extractSeedOccurances(queries : Seq[String]) : Set[Regex.Match] =
   {
     // run queries and process results
     val docs = queries.flatMap(q => GalagoWrapper.runQuery(q)).toSet[String]
@@ -53,12 +55,13 @@ object SnowBall
       NLPThings.pipeline.process(doc).sentences
     })
 
+    print("Extracting seed relation matches from retrieved documents...")
     // extract lines that match the seed relations
     val matchRegex = queries.map(q => {
       val words = q.split(" ", 2)
       s"(?:.*${words(0)}.*${words(1)}.*)"
     }).mkString("|")
-    println(s"MATCH: $matchRegex")
+    print("filtering...")
     val filteredSentences = allSentences.filter(_.string.matches(matchRegex))
 
     // extract contexts around matches
@@ -73,9 +76,10 @@ object SnowBall
       }
       line
     }).mkString("(.*)(?:", "|", ")(.*)").r
-    println(s"CONTEXT: $contextRegex")
 
+    print("extracting context...")
     // get context matches
     filteredSentences.flatMap(s => contextRegex.findAllIn(s.string))
+    println("done.")
   }
 }
