@@ -10,25 +10,50 @@ object MainThings
 {
   val omitArgRegex = "(?:you)|(?:he)|(?:she)|(?:it)|(?:we)|(?:they)|(?:him)|(?:her)|(?:i)|(?:\\W)"
 
-  /**
-   * given a thing and a file, find all 'looks like' relations involving that thing
-   * @param thing
-   * @param inputFileLocation
-   */
-  def findThingsThatLookLikeThisThingFromFile(thing : String, inputFileLocation : String)
+   def exportRelationsByThing(thing : String, outputLocation : String)
   {
-    val regexerObject = new Regexer(thing, ".*")
+    val regexer = new Regexer(".*", ".*")
+    val patternRegex = regexer.patternList.mkString("|")
+    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
 
-    // load the data
-    val source = io.Source.fromFile(inputFileLocation)
-    val doc = load.LoadPlainText.fromSource(source).head
-    val documentString = NLPThings.pipeline.process(doc).sentences.flatMap(_.tokens).toString()
-    source.close()
+    val documents = GalagoWrapper.runQuery(thing, 5000)
+    val extractions = RelationExtractor.extractRelations(documents)
 
-    regexerObject.patternRegex.findAllMatchIn(documentString).foreach(m =>
-      println(s"${m.group(0)}")
-    )
+    // filter relations that do not involve the 'thing'
+    val filteredExtractions = extractions.filter(x => {
+      ( (x._2.arg1.text.contains(thing) || x._2.arg2.text.contains(thing))
+        && !x._2.arg1.text.matches(omitArgRegex) && !x._2.arg2.text.matches(omitArgRegex)) && x._2.rel.text.matches(patternRegex)
+    })
+    filteredExtractions.foreach(extract =>
+    {
+      println(s"${extract._1} ${extract._2}")
+      writer.println(s"${extract._1} ${extract._2}")
+    })
+    writer.close()
   }
+
+  def exportRelationsByPattern(query : String, outputLocation : String)
+  {
+    val patternRegex = new Regexer(".*", ".*").patternList.mkString("(?:.*",".*)|(?:.*",")")
+    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
+
+    val documents = GalagoWrapper.runQuery(query, 5000)
+    val extractions = RelationExtractor.extractRelations(documents)
+
+    // filter relations that do not match any predefined pattern
+    val filteredExtractions = extractions.filter(x =>
+      (x._2.rel.text.matches(patternRegex) &&
+        !x._2.arg1.text.matches(omitArgRegex) &&
+        !x._2.arg2.text.matches(omitArgRegex))
+    )
+    filteredExtractions.foreach(extract =>
+    {
+      println(s"${extract._1} ${extract._2}")
+      writer.println(s"${extract._1} ${extract._2}")
+    })
+    writer.close()
+  }
+
 
   /**
    * given a thing, find all 'looks like' relations involving that thing
@@ -51,80 +76,11 @@ object MainThings
     docSet.foreach(document =>
     {
       val doc = load.LoadPlainText.fromString(document).head
-      val sentences = NLPThings.pipeline.process(doc).sentences
+      val sentences = FactorieFunctions.pipeline.process(doc).sentences
       regexerObject.extractRegexFromSentences(sentences, thing, output)
       i += 1
       Utilities.printPercentProgress(i, docSet.size)
     })
-  }
-
-  def exportRelationsByThing(thing : String, outputLocation : String)
-  {
-    val patternRegex = new Regexer(".*", ".*").patternList.mkString("(?:.*",".*)|(?:.*",")")
-    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
-
-    val extractions = relationsWithThingFromGalago(thing)
-    // filter relations that do not involve the 'thing'
-    val filteredExtractions = extractions.filter(x =>
-      ((x._2.arg1.text.contains(thing) || x._2.arg2.text.contains(thing)) &&
-        !x._2.arg1.text.matches(omitArgRegex) && !x._2.arg2.text.matches(omitArgRegex)) && x._2.rel.text.matches(patternRegex))
-    filteredExtractions.foreach(extract =>
-    {
-      println(s"${extract._1} ${extract._2}")
-      writer.println(s"${extract._1} ${extract._2}")
-    })
-    writer.close()
-  }
-
-  def exportRelationsByPattern(query : String, outputLocation : String)
-  {
-    val patternRegex = new Regexer(".*", ".*").patternList.mkString("(?:.*",".*)|(?:.*",")")
-    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
-
-    val extractions = relationsWithThingFromGalago(query)
-    // filter relations that do not match any predefined pattern
-    val filteredExtractions = extractions.filter(x =>
-      (x._2.rel.text.matches(patternRegex) &&
-        !x._2.arg1.text.matches(omitArgRegex) &&
-        !x._2.arg2.text.matches(omitArgRegex))
-    )
-    filteredExtractions.foreach(extract =>
-    {
-      println(s"${extract._1} ${extract._2}")
-      writer.println(s"${extract._1} ${extract._2}")
-    })
-    writer.close()
-  }
-
-  /**
-   * given a query, find all relations from the documents
-   */
-  def relationsWithThingFromGalago(query : String) : Iterable[(String, OllieExtraction)] =
-  {
-    val documents = GalagoWrapper.runQuery(query)
-    // load the data
-    var i = 0
-    println("Processing Documents...")
-    val allExtractions = documents.flatMap(document =>
-    {
-      i += 1
-      Utilities.printPercentProgress(i, documents.size)
-
-      val doc = load.LoadPlainText.fromString(document).head
-      val sentences = NLPThings.pipeline.process(doc).sentences
-      val extractions = sentences.flatMap(sentence =>
-      {
-        val sentString = sentence.string.replaceAll("[^\\x00-\\x7F]", "").trim
-        if (sentString != "" && sentString != null && sentString.length > 5)
-        {
-          NLPThings.ollieExtraction(sentence.string.toLowerCase())
-        }
-        else
-          Seq()
-      })
-      extractions
-    })
-    allExtractions
   }
 
   def extractContextsBetweenThings(thing1 : String, thing2 :String)
@@ -135,7 +91,7 @@ object MainThings
 
     val matches = documents.flatMap(doc =>
     {
-      val sentences =  NLPThings.pipeline.process(load.LoadPlainText.fromString(doc).head).sentences
+      val sentences =  FactorieFunctions.pipeline.process(load.LoadPlainText.fromString(doc).head).sentences
       sentences.flatMap(sentence =>
       {
         regexerObject.extractContextsForRelation(sentence.string)

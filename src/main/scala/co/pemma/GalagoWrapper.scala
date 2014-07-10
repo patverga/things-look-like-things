@@ -24,17 +24,36 @@ object GalagoWrapper
 
   def runQuery(queryText : String, kResults : Int) : Seq[String] =
   {
-    val query = new Parameters()
-    query.set("text", s"#combine($queryText)")
-    query.set("requested", kResults)
+    val results = getTopResults(queryText, kResults)
+    // return the actual documents
+    results.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
+  }
+
+  def runBatchQueries(queries : Seq[String])
+  {
+    val results = queries.flatMap(q => getTopResults(q, DEFAULT_K)).toSet[ScoredDocument]
+    // return the actual documents
+    results.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
+  }
+
+  def getTopResults(queryText : String, kResults : Int) : Seq[ScoredDocument] =
+  {
+    val queryParams = mkQueryParams(queryText, kResults)
 
     // parse and transform query into runnable form
     val root: Node = StructuredQuery.parse(queryText)
-    val transformed: Node = retrieval.transformQuery(root, query)
+    val transformed: Node = retrieval.transformQuery(root, queryParams)
 
     println(s"Querying galago for top $kResults results for '$queryText' ")
     // run query
-    val results = retrieval.executeQuery(transformed, query).scoredDocuments
-    results.asScala.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
+    retrieval.executeQuery(transformed, queryParams).scoredDocuments.asScala
+  }
+
+  def mkQueryParams(queryText :String, kResults : Int) : Parameters =
+  {
+    val query = new Parameters()
+    query.set("text", s"#combine($queryText)")
+    query.set("requested", kResults)
+    query
   }
 }

@@ -25,6 +25,8 @@ object SnowBall
       writer.println(s"\n\n ${s.group(0)}")
     })
     writer.close()
+
+//    val contexts = extractContextsFromMatches(matches)
   }
 
   /**
@@ -47,25 +49,26 @@ object SnowBall
   def extractSeedOccurances(queries : Seq[String]) : Set[Regex.Match] =
   {
     // run queries and process results
-    val docs = queries.flatMap(q => GalagoWrapper.runQuery(q)).toSet[String]
-    print("Processing Docs...")
-    val allSentences = docs.flatMap(d => {
-      val doc = load.LoadPlainText.fromString(d).head
-      NLPThings.pipeline.process(doc).sentences
-    })
+//    val docs = queries.flatMap(q => GalagoWrapper.runQuery(q)).toSet[String]
+//    print("Processing Docs...")
+//    val allSentences = docs.flatMap(d => {
+//      val doc = load.LoadPlainText.fromString(d).head
+//      NLPThings.pipeline.process(doc).sentences
+//    })
 
     print("...Extracting seed relation matches...")
     // extract lines that match the seed relations
     val matchRegex = queries.map(q => {
       val words = q.split(" ", 2)
-      s"(?:.*${words(0)}.*${words(1)}.*)"
+      s"(?:.*${words(0)}.*${words(1)}.*)|(?:.*${words(1)}.*${words(0)}.*)"
     }).mkString("|")
+
     print("filtering...")
-    val filteredSentences = allSentences.filter(_.string.matches(matchRegex))
+//    val filteredSentences = allSentences.filter(_.string.matches(matchRegex))
 
     // extract contexts around matches
     val used = collection.mutable.HashSet[String]()
-    val contextRegex = queries.map(q => {
+    val contextRegexString = queries.map(q => {
       val words = q.split(" ", 2)
       var line = words(1)
       if (!used.contains(words(0)))
@@ -74,10 +77,18 @@ object SnowBall
         used.+=(words(0))
       }
       line
-    }).mkString("(.*)(?:", "|", ")(.*)").r
+    }).mkString("(.*)(", "|", ")")
+    val contextRegex = contextRegexString + contextRegexString + "(.*)"
+    println(s"\n${matchRegex.toString()} \n${contextRegex.toString()}")
 
     print("extracting context...")
     // get context matches
-    filteredSentences.flatMap(s => contextRegex.findAllMatchIn(s.string))
+//    filteredSentences.flatMap(s => contextRegex.findAllMatchIn(s.string))
+    Set()
   }
+
+//  def extractContextsFromMatches(matches : Set[Regex.Match] )
+//  {
+//    matches.
+//  }
 }
