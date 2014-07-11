@@ -4,7 +4,6 @@ import java.io.{BufferedWriter, FileWriter, PrintWriter}
 
 import cc.factorie.app.nlp._
 import cc.factorie.util.CmdOptions
-import edu.knowitall.ollie.OllieExtraction
 
 object MainThings
 {
@@ -16,7 +15,8 @@ object MainThings
     val patternRegex = regexer.patternList.mkString("|")
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
 
-    val documents = GalagoWrapper.runQuery(thing, 5000)
+    val queries = regexer.patternList.map(p => thing + p.replaceAll("\\?", ""))
+    val documents = GalagoWrapper.runBatchQueries(queries)
     val extractions = RelationExtractor.extractRelations(documents)
 
     // filter relations that do not involve the 'thing'

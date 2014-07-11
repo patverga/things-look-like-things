@@ -29,9 +29,9 @@ object GalagoWrapper
     results.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
   }
 
-  def runBatchQueries(queries : Seq[String])
+  def runBatchQueries(queries : Seq[String]) : Seq[String] =
   {
-    val results = queries.flatMap(q => getTopResults(q, DEFAULT_K)).toSet[ScoredDocument]
+    val results = queries.flatMap(q => getTopResults(q, DEFAULT_K)).toSet[ScoredDocument].toSeq
     // return the actual documents
     results.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
   }
