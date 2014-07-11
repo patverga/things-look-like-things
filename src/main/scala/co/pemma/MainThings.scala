@@ -15,7 +15,7 @@ object MainThings
     val patternRegex = regexer.patternList.mkString("|")
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
 
-    val queries = regexer.patternList.map(p => thing + p.replaceAll("\\?", ""))
+    val queries = regexer.patternList.map(p => s"$thing ${p.replaceAll("\\?", "")}")
     val documents = GalagoWrapper.runBatchQueries(queries)
     val extractions = RelationExtractor.extractRelations(documents)
 
