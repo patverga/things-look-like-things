@@ -87,8 +87,20 @@ object SnowBall
     Set()
   }
 
-//  def extractContextsFromMatches(matches : Set[Regex.Match] )
-//  {
-//    matches.
-//  }
+  def extractContextsBetweenThings(thing1 : String, thing2 :String)
+  {
+    val regexerObject = new Regexer(thing1, thing2)
+
+    val documents = GalagoWrapper.runQuery(s"$thing1 $thing2")
+
+    val matches = documents.flatMap(doc =>
+    {
+      val sentences =  FactorieFunctions.extractSentences(load.LoadPlainText.fromString(doc).head)
+      sentences.flatMap(sentence =>
+      {
+        regexerObject.extractContextsForRelation(sentence.string)
+      })
+    })
+    matches.foreach(m => println(s"${m.group(1)}:${m.group(2)}:${m.group(3)}:${m.group(4)}:${m.group(5)}"))
+  }
 }
