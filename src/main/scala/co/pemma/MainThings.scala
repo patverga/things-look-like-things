@@ -21,8 +21,7 @@ object MainThings
 
     // filter relations that do not involve the 'thing'
     val filteredExtractions = extractions.filter(x => {
-      ( (x._2.arg1.text.contains(thing) || x._2.arg2.text.contains(thing))
-        && !x._2.arg1.text.matches(omitArgRegex) && !x._2.arg2.text.matches(omitArgRegex)) && x._2.rel.text.matches(patternRegex)
+       (x._2.arg1.text.contains(thing) || x._2.arg2.text.contains(thing)) && !x._2.arg1.text.matches(omitArgRegex) && !x._2.arg2.text.matches(omitArgRegex) && x._2.rel.text.matches(patternRegex)
     })
     filteredExtractions.foreach(extract =>
     {
@@ -76,7 +75,7 @@ object MainThings
     docSet.foreach(document =>
     {
       val doc = load.LoadPlainText.fromString(document).head
-      val sentences = FactorieFunctions.pipeline.process(doc).sentences
+      val sentences = FactorieFunctions.extractSentences(doc)
       regexerObject.extractRegexFromSentences(sentences, thing, output)
       i += 1
       Utilities.printPercentProgress(i, docSet.size)
@@ -91,7 +90,7 @@ object MainThings
 
     val matches = documents.flatMap(doc =>
     {
-      val sentences =  FactorieFunctions.pipeline.process(load.LoadPlainText.fromString(doc).head).sentences
+      val sentences =  FactorieFunctions.extractSentences(load.LoadPlainText.fromString(doc).head)
       sentences.flatMap(sentence =>
       {
         regexerObject.extractContextsForRelation(sentence.string)

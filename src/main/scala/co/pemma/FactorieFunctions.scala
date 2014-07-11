@@ -2,7 +2,7 @@ package co.pemma
 
 import cc.factorie.app.nlp.load.ChunkTag
 import cc.factorie.app.nlp.phrase.BILOUChainChunker
-import cc.factorie.app.nlp.{load, pos, segment, DocumentAnnotationPipeline}
+import cc.factorie.app.nlp._
 
 /**
  * Created by pat on 7/10/14.
@@ -27,6 +27,20 @@ object FactorieFunctions
     //    })
     chunkNounPhrase()
   }
+
+  def extractSentences(doc :Document) : Iterable[Sentence] =
+  {
+    try {
+      val processedDoc = FactorieFunctions.pipeline.process(doc)
+      processedDoc.sentences
+    }
+    catch
+      {
+        case  e: Exception => println(s"FACTORIE ERROR : ${doc.string}")
+          Iterable()
+      }
+  }
+
 
   def chunkNounPhrase()
   {

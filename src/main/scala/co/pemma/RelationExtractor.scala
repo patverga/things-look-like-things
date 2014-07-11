@@ -1,10 +1,8 @@
 package co.pemma
 
 import cc.factorie.app.nlp._
-import cc.factorie.app.nlp.load.ChunkTag
-import cc.factorie.app.nlp.phrase.BILOUChainChunker
-import edu.knowitall.ollie.{OllieExtraction, Ollie}
 import edu.knowitall.ollie.confidence.OllieConfidenceFunction
+import edu.knowitall.ollie.{Ollie, OllieExtraction}
 import edu.knowitall.tool.parse.MaltParser
 import edu.washington.cs.knowitall.extractor.ReVerbExtractor
 import edu.washington.cs.knowitall.extractor.conf.ReVerbOpenNlpConfFunction
@@ -69,7 +67,7 @@ object RelationExtractor
       Utilities.printPercentProgress(i, documents.size)
 
       val doc = load.LoadPlainText.fromString(document).head
-      val sentences = FactorieFunctions.pipeline.process(doc).sentences
+      val sentences = FactorieFunctions.extractSentences(doc)
       val extractions = sentences.flatMap(sentence =>
       {
         val sentString = sentence.string.replaceAll("[^\\x00-\\x7F]", "").trim
