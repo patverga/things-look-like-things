@@ -9,20 +9,24 @@ object MainThings
 {
   val omitArgRegex = "(?:you)|(?:he)|(?:she)|(?:it)|(?:we)|(?:they)|(?:him)|(?:her)|(?:i)|(?:\\W)"
 
-   def exportRelationsByThing(thing : String, outputLocation : String)
+  def exportRelationsByThing(thing : String, outputLocation : String)
   {
+//    val thingRegex = s"(?:the|a)?${thing}[s]?"
     val regexer = new Regexer(".*", ".*")
     val patternRegex = regexer.patternList.mkString("|")
+    println(patternRegex)
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
 
     val queries = regexer.patternList.map(p => s"$thing ${p.replaceAll("\\?", "")}")
     val documents = GalagoWrapper.runBatchQueries(queries)
     val extractions = RelationExtractor.extractRelations(documents)
 
-    val thingRegex = s"(?:the|a)?${thing}[s]?"
     // filter relations that do not involve the 'thing'
     val filteredExtractions = extractions.filter(x => {
-       (x._2.arg1.text.matches(thingRegex) || x._2.arg2.text.matches(thingRegex)) && !x._2.arg1.text.matches(omitArgRegex) && !x._2.arg2.text.matches(omitArgRegex) && x._2.rel.text.matches(patternRegex)
+      (x._2.arg1.text.contains(thing) || x._2.arg2.text.contains(thing)) &&
+        x._2.rel.text.matches(patternRegex) &&
+        !x._2.arg1.text.matches(omitArgRegex) &&
+        !x._2.arg2.text.matches(omitArgRegex)
     })
     filteredExtractions.foreach(extract =>
     {
@@ -34,7 +38,7 @@ object MainThings
 
   def exportRelationsByPattern(query : String, outputLocation : String)
   {
-    val patternRegex = new Regexer(".*", ".*").patternList.mkString("(","|",")")
+    val patternRegex = new Regexer(".*", ".*").patternList.mkString("|")
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
 
     val documents = GalagoWrapper.runQuery(query, 5000)

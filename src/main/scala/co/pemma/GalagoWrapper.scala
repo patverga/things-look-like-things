@@ -14,8 +14,8 @@ object GalagoWrapper
   // how many results to return from search
   val DEFAULT_K = 1000
   val indexLocation = "/mnt/nfs/indexes/ClueWeb12/galago/clueweb-12-B13.index/"
-  var retrieval = RetrievalFactory.instance(indexLocation, new Parameters)
-  var docComponents = new Document.DocumentComponents(true, false, false)
+  val retrieval = RetrievalFactory.instance(indexLocation, new Parameters)
+  val docComponents = new Document.DocumentComponents(true, false, false)
 
   def runQuery(queryText : String) : Seq[String] =
   {

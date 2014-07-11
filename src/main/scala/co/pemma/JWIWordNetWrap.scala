@@ -156,18 +156,9 @@ object JWIWordNetWrap {
   def main(args: Array[String]) {
     val words = Seq(
       "canoe",
-      "Labrador Retriever",
-      "German Shepherd",
+      "cloud",
+      "bagel",
       "Beagle",
-      "Golden Retriever",
-      "Yorkshire Terrier",
-      "Boxer",
-      "Poodle",
-      "Dachshund",
-      "Rottweiler",
-      "Bulldog",
-      "Golden Retriever",
-      "Xoloitzcuintle",
       "Whippet"
     )
 
