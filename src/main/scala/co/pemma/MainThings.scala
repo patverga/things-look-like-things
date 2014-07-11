@@ -7,8 +7,8 @@ import cc.factorie.util.CmdOptions
 
 object MainThings
 {
-  val omitArgRegex = "(?:you)|(?:he)|(?:she)|(?:it)|(?:we)|(?:they)|(?:him)|(?:her)|(?:i)|(?:\\W)"
-  val patternRegex = "(?:appear(?:ance is)?|look(?:s|ed)?) (?:exactly |almost| pretty much)?(?:the same as|identical to|similar to|like)"
+  val omitArgRegex = "(?:you)|(?:he)|(?:she)|(?:it)|(?:we)|(?:they)|(?:him)|(?:her)|(?:i)|(?:\\W)".r
+  val patternRegex = "(?:appear(?:ance is)?|look(?:s|ed)?) (?:exactly |almost| pretty much)?(?:the same as|identical to|similar to|like)".r
 
   def exportRelationsByThing(thing : String, outputLocation : String)
   {
@@ -17,21 +17,22 @@ object MainThings
     println(patternRegex)
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
 
-    val queries = regexer.patternList.map(p => s"$thing ${p.replaceAll("\\?", "")}")
-    val documents = GalagoWrapper.runBatchQueries(queries)
+//    val queries = regexer.patternList.map(p => s"$thing ${p.replaceAll("\\?", "")}")
+//    val documents = GalagoWrapper.runBatchQueries(queries)
+    val documents = GalagoWrapper.runQuery(s"$thing looks like", 10000)
     val extractions = RelationExtractor.extractRelations(documents)
 
     // filter relations that do not involve the 'thing'
     val filteredExtractions = extractions.filter(x => {
       (x._2.arg1.text.contains(thing) || x._2.arg2.text.contains(thing)) &&
-        x._2.rel.text.matches(patternRegex) &&
-        !x._2.arg1.text.matches(omitArgRegex) &&
-        !x._2.arg2.text.matches(omitArgRegex)
+        patternRegex.pattern.matcher(x._2.rel.text).matches &&
+        !omitArgRegex.pattern.matcher(x._2.arg1.text).matches &&
+        !omitArgRegex.pattern.matcher(x._2.arg2.text).matches
     })
     filteredExtractions.foreach(extract =>
     {
-      println(s"${extract._1} ${extract._2}")
-      writer.println(s"${extract._1} ${extract._2}")
+      println(s"\n ${extract._3} \n ${extract._1} ${extract._2}")
+      writer.println(s"\n ${extract._3} \n ${extract._1} ${extract._2}")
     })
     writer.close()
   }
@@ -44,15 +45,15 @@ object MainThings
     val extractions = RelationExtractor.extractRelations(documents)
 
     // filter relations that do not match any predefined pattern
-    val filteredExtractions = extractions.filter(x =>
-      (x._2.rel.text.matches(patternRegex) &&
-        !x._2.arg1.text.matches(omitArgRegex) &&
-        !x._2.arg2.text.matches(omitArgRegex))
-    )
+    val filteredExtractions = extractions.filter(x => {
+      patternRegex.pattern.matcher(x._2.rel.text).matches &&
+        !omitArgRegex.pattern.matcher(x._2.arg1.text).matches &&
+        !omitArgRegex.pattern.matcher(x._2.arg2.text).matches
+    })
     filteredExtractions.foreach(extract =>
     {
-      println(s"${extract._1} ${extract._2}")
-      writer.println(s"${extract._1} ${extract._2}")
+      println(s"\n ${extract._3} \n ${extract._1} ${extract._2}")
+      writer.println(s"\n ${extract._3} \n ${extract._1} ${extract._2}")
     })
     writer.close()
   }
@@ -135,7 +136,7 @@ object MainThings
     else if (opts.pattern.wasInvoked) {
       val query = opts.pattern.value.toLowerCase.replaceAll("\\?","")
       if (!query.startsWith("#") && query != "") {
-        val output = s"results/pattern/${query.replaceAll(" ","-")}.result"
+        val output = s"results/pattern/${query.replaceAll("\\s+","-")}.result"
         exportRelationsByPattern(query, output)
       }
     }

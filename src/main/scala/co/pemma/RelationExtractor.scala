@@ -39,14 +39,14 @@ object RelationExtractor
     }
   }
 
-  def ollieExtraction(sentStr : String) : Iterable[(String, OllieExtraction)] =
+  def ollieExtraction(sentStr : String) : Iterable[(String, OllieExtraction, String)] =
   {
     try {
       val parsed = parser.dependencyGraph(sentStr)
       val extractionInstances = ollie.extract(parsed)
       val result = extractionInstances.map(inst => {
         val conf = confidence(inst)
-        (("%.2f" format conf), inst.extraction)
+        (("%.2f" format conf), inst.extraction, sentStr)
       })
       result
     }
@@ -56,7 +56,12 @@ object RelationExtractor
     }
   }
 
-  def extractRelations(documents : Seq[String]) : Iterable[(String, OllieExtraction)] =
+  /**
+   *
+   * @param documents
+   * @return Iterable[(confidence, relation, full sentence)]
+   */
+  def extractRelations(documents : Seq[String]) : Iterable[(String, OllieExtraction, String)] =
   {
     // load the data
     var i = 0
