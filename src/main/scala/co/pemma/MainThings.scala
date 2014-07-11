@@ -19,9 +19,10 @@ object MainThings
     val documents = GalagoWrapper.runBatchQueries(queries)
     val extractions = RelationExtractor.extractRelations(documents)
 
+    val thingRegex = s"(?:the|a)?${thing}[s]?"
     // filter relations that do not involve the 'thing'
     val filteredExtractions = extractions.filter(x => {
-       (x._2.arg1.text.contains(thing) || x._2.arg2.text.contains(thing)) && !x._2.arg1.text.matches(omitArgRegex) && !x._2.arg2.text.matches(omitArgRegex) && x._2.rel.text.matches(patternRegex)
+       (x._2.arg1.text.matches(thingRegex) || x._2.arg2.text.matches(thingRegex)) && !x._2.arg1.text.matches(omitArgRegex) && !x._2.arg2.text.matches(omitArgRegex) && x._2.rel.text.matches(patternRegex)
     })
     filteredExtractions.foreach(extract =>
     {
@@ -33,7 +34,7 @@ object MainThings
 
   def exportRelationsByPattern(query : String, outputLocation : String)
   {
-    val patternRegex = new Regexer(".*", ".*").patternList.mkString("(?:.*",".*)|(?:.*",")")
+    val patternRegex = new Regexer(".*", ".*").patternList.mkString("(","|",")")
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
 
     val documents = GalagoWrapper.runQuery(query, 5000)
@@ -131,7 +132,7 @@ object MainThings
     else if (opts.pattern.wasInvoked) {
       val query = opts.pattern.value.toLowerCase.replaceAll("\\?","")
       if (!query.startsWith("#") && query != "") {
-        val output = s"results/pattern/$query.result"
+        val output = s"results/pattern/${query.replaceAll(" ","-")}.result"
         exportRelationsByPattern(query, output)
       }
     }
