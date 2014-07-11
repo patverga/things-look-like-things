@@ -8,12 +8,12 @@ import cc.factorie.util.CmdOptions
 object MainThings
 {
   val omitArgRegex = "(?:you)|(?:he)|(?:she)|(?:it)|(?:we)|(?:they)|(?:him)|(?:her)|(?:i)|(?:\\W)"
+  val patternRegex = "(?:appear(?:ance is)?|look(?:s|ed)?) (?:exactly |almost| pretty much)?(?:the same as|identical to|similar to|like)"
 
   def exportRelationsByThing(thing : String, outputLocation : String)
   {
 //    val thingRegex = s"(?:the|a)?${thing}[s]?"
     val regexer = new Regexer(".*", ".*")
-    val patternRegex = regexer.patternList.mkString("|")
     println(patternRegex)
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
 
@@ -38,7 +38,6 @@ object MainThings
 
   def exportRelationsByPattern(query : String, outputLocation : String)
   {
-    val patternRegex = new Regexer(".*", ".*").patternList.mkString("|")
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
 
     val documents = GalagoWrapper.runQuery(query, 5000)
