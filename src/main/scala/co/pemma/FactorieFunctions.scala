@@ -36,9 +36,9 @@ object FactorieFunctions
     }
     catch
       {
-        case  e: Exception => println(s"FACTORIE ERROR : ${doc.string}")
+        case  e: Exception => System.err.println(s"FACTORIE ERROR : ${doc.string}")
           Iterable()
-        case  e: StackOverflowError => println(s"FACTORIE ERROR : ${doc.string}")
+        case  e: StackOverflowError => System.err.println(s"FACTORIE ERROR : ${doc.string}")
           Iterable()
       }
   }

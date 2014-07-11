@@ -51,7 +51,7 @@ object RelationExtractor
       result
     }
     catch{
-      case  e: Exception => println(s"MALT ERROR : $sentStr")
+      case  e: Exception => System.err.println(s"MALT ERROR : $sentStr")
         Seq()
     }
   }
