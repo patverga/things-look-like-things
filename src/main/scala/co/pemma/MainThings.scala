@@ -1,7 +1,7 @@
 package co.pemma
 
 import java.io.{BufferedWriter, FileWriter, PrintWriter}
-import co.pemma.RelationExtractors.{OllieExtractor, ReverbExtractor, RelationExtractor, Extraction}
+import co.pemma.RelationExtractors._
 import cc.factorie.app.nlp._
 import cc.factorie.util.CmdOptions
 
@@ -68,7 +68,7 @@ object MainThings
     val thing = new CmdOption("thing", "", "STRING...", "Takes as input one string and finds things that look like it.")
     val pattern = new CmdOption("pattern", "", "STRING...",  "Uses Ollie to extract relations for our seed patterns from a galago search of those patterns.")
     val snowBall = new CmdOption("snowball", "", "STRING...",  "Google : 'snowball urban dictionary'. You're welcome.")
-    val reverb = new CmdOption("reverb", "", "",  "Use reverb extractor instead of ollie.")
+    val extractor = new CmdOption("extractor", "", "STRING...",  "Choose which openIE system to use. reverb, ollie, or clauseie")
   }
 
   def main(args: Array[String])
@@ -78,14 +78,15 @@ object MainThings
     val opts = new ProcessSlotFillingCorpusOpts
     opts.parse(args)
 
-    var output = "results/"
-    val extractor = if (opts.reverb.wasInvoked) {
-      output += "reverb/"
-      new ReverbExtractor
-    }
-    else {
-      output += "ollie/"
-      new OllieExtractor
+    val extractorType = if (opts.extractor.wasInvoked)
+      opts.extractor.value.toLowerCase
+    else
+      "clauseie"
+    val output = s"results/${extractorType}/"
+    val extractor = extractorType match{
+      case "reverb" => new ReverbExtractor
+      case "ollie" => new OllieExtractor
+      case "clauseie" => new ClauseIEExtractor
     }
 
     if (opts.thing.wasInvoked)

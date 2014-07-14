@@ -3,7 +3,6 @@ package co.pemma
 import java.io.{FileWriter, BufferedWriter, PrintWriter}
 
 import cc.factorie.app.nlp.load
-import cc.factorie.app.nlp.Sentence
 
 import scala.util.matching.Regex
 

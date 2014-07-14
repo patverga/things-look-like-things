@@ -72,7 +72,6 @@
             <artifactId>factorie</artifactId>
             <version>1.1-SNAPSHOT</version>
         </dependency>
-
         <dependency>
             <groupId>cc.factorie.app.nlp</groupId>
             <artifactId>all-models</artifactId>
@@ -85,54 +84,65 @@
             <version>2.2.3</version>
         </dependency>
 
+        <!-- GALAGO -->
         <dependency>
             <groupId>org.lemurproject</groupId>
             <artifactId>galago-core</artifactId>
             <version>3.6</version>
         </dependency>
-
         <dependency>
             <groupId>org.lemurproject</groupId>
             <artifactId>galago-tupleflow</artifactId>
             <version>3.6</version>
         </dependency>
-
         <dependency>
             <groupId>org.lemurproject</groupId>
             <artifactId>galago-tupleflow-builder</artifactId>
             <version>3.6</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
             <version>1.8</version>
         </dependency>
-
         <dependency>
             <groupId>org.xerial.snappy</groupId>
             <artifactId>snappy-java</artifactId>
             <version>1.1.0.1</version>
         </dependency>
-
         <dependency>
             <groupId>net.sf.trove4j</groupId>
             <artifactId>trove4j</artifactId>
             <version>3.0.3</version>
         </dependency>
+        <!-- /GALAGO -->
 
+
+        <!-- CLAUSEIE -->
         <dependency>
-            <groupId>edu.washington.cs.knowitall</groupId>
-            <artifactId>reverb-core</artifactId>
-            <version>1.4.3</version>
+            <groupId>de.mpii</groupId>
+            <artifactId>clauseie</artifactId>
+            <version>1.0</version>
         </dependency>
-
         <dependency>
-            <groupId>edu.washington.cs.knowitall</groupId>
-            <artifactId>reverb-models</artifactId>
-            <version>1.4.0</version>
+            <groupId>de.mpii</groupId>
+            <artifactId>clauseie-stanford-models</artifactId>
+            <version>1.0</version>
         </dependency>
+        <dependency>
+            <groupId>de.mpii</groupId>
+            <artifactId>clauseie-stanford-parser</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jopt-simple</groupId>
+            <artifactId>jopt-simple</artifactId>
+            <version>4.4</version>
+        </dependency>
+        <!-- /CLAUSEIE -->
 
+
+        <!-- OLLIE+REVERB -->
         <dependency>
             <groupId>edu.washington.cs.knowitall.ollie</groupId>
             <artifactId>ollie-core_2.10</artifactId>
@@ -143,12 +153,23 @@
             <artifactId>nlptools-parse-malt_2.10</artifactId>
             <version>2.4.4</version>
         </dependency>
-
         <dependency>
             <groupId>edu.washington.cs.knowitall.nlptools</groupId>
             <artifactId>nlptools-core_2.10</artifactId>
             <version>2.4.4</version>
         </dependency>
+
+        <dependency>
+            <groupId>edu.washington.cs.knowitall</groupId>
+            <artifactId>reverb-core</artifactId>
+            <version>1.4.3</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.washington.cs.knowitall</groupId>
+            <artifactId>reverb-models</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+        <!-- /OLLIE+REVERB -->
 
 
 
