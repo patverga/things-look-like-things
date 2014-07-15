@@ -28,6 +28,8 @@ class ClauseIEExtractor  () extends RelationExtractor {
     catch {
       case e: Exception => System.err.println(s"CLAUSE IE ERRORED SOMEWHERE : $sentence")
         Seq()
+      case  e: StackOverflowError => System.err.println(s"STANFORD ERROR : $sentence")
+        Seq()
     }
   }
 }
