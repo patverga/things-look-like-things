@@ -9,7 +9,7 @@ import co.pemma.{FactorieFunctions, Utilities}
 abstract class RelationExtractor
 {
   val omitArgRegex = "(?:you)|(?:he)|(?:she)|(?:it)|(?:we)|(?:they)|(?:him)|(?:her)|(?:i)|(?:\\W)".r
-  val patternRegex = "(?:appear(?:ed|ance is)?|look(?:s|ed)?) (?:exactly |almost| pretty much)?(?:the same as|identical to|similar to|like)".r
+  val patternRegex = "(?:(?:appear(?:s|ed|ance is)?|look(?:s|ed)?) (?:exactly |almost| pretty much)?(?:the same as|identical to|similar to|like)|(?:resemble(?:s|d)))".r
 
 
   def extractRelations(documents : Seq[String]) : Iterable[Extraction] = {

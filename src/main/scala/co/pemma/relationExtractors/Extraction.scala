@@ -5,9 +5,9 @@ package co.pemma.relationExtractors
  */
 class Extraction(c : Double, a1 : String, r : String, a2 : String, s : String)
 {
-  val arg1 = a1
-  val rel = r
-  val arg2 = a2
+  val arg1 = a1.trim
+  val rel = r.trim
+  val arg2 = a2.trim
   val sentence = s
   val confidence = ("%.2f" format c)
 
