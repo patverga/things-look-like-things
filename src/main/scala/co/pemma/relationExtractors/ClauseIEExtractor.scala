@@ -1,14 +1,13 @@
-package co.pemma.RelationExtractors
+package co.pemma.relationExtractors
 
 import de.mpii.clausie.{Proposition, ClausIE}
+import collection.JavaConversions._
 
 /**
  * Created by pat on 7/14/14.
  */
-class ClauseIEExtractor  () extends RelationExtractor {
-
-  import collection.JavaConversions._
-
+class ClauseIEExtractor  () extends RelationExtractor
+{
   val clausIE = new ClausIE
   clausIE.initParser
 
@@ -20,7 +19,6 @@ class ClauseIEExtractor  () extends RelationExtractor {
 
       val results = clausIE.getPropositions.toSet[Proposition].map(prop =>
       {
-        println(s"${prop.subject()}  ${prop.relation()}  ${prop.argument(0)}")
         new Extraction(1., prop.subject, prop.relation, prop.argument(0), sentence)
       })
       results

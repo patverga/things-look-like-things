@@ -3,7 +3,7 @@ package co.pemma
 import cc.factorie.app.nlp.load.ChunkTag
 import cc.factorie.app.nlp.phrase.BILOUChainChunker
 import cc.factorie.app.nlp._
-import co.pemma.RelationExtractors.ClauseIEExtractor
+import co.pemma.relationExtractors.ClauseIEExtractor
 
 /**
  * Created by pat on 7/10/14.

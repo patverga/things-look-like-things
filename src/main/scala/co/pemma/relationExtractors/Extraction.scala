@@ -1,4 +1,4 @@
-package co.pemma.RelationExtractors
+package co.pemma.relationExtractors
 
 /**
  * Created by pat on 7/11/14.

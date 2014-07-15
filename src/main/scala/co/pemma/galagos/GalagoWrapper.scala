@@ -1,21 +1,22 @@
-package co.pemma
+package co.pemma.galagos
 
 import org.lemurproject.galago.core.parse.Document
 import org.lemurproject.galago.core.retrieval.query.{Node, StructuredQuery}
-import org.lemurproject.galago.core.retrieval.{RetrievalFactory, ScoredDocument}
+import org.lemurproject.galago.core.retrieval.{Retrieval, RetrievalFactory, ScoredDocument}
 import org.lemurproject.galago.tupleflow.Parameters
-import scala.collection.JavaConverters._
+import collection.JavaConversions._
+
 
 /**
  * Created by pat on 6/26/14.
  */
-object GalagoWrapper
+abstract class GalagoWrapper
 {
   // how many results to return from search
   val DEFAULT_K = 1000
-  val indexLocation = "/mnt/nfs/indexes/ClueWeb12/galago/clueweb-12-B13.index/"
-  val retrieval = RetrievalFactory.instance(indexLocation, new Parameters)
   val docComponents = new Document.DocumentComponents(true, false, false)
+  val indexLocation : String
+  val retrieval : Retrieval
 
   def runQuery(queryText : String) : Seq[String] =
   {
@@ -46,7 +47,7 @@ object GalagoWrapper
 
     println(s"Querying galago for top $kResults results for '$queryText' ")
     // run query
-    retrieval.executeQuery(transformed, queryParams).scoredDocuments.asScala
+    retrieval.executeQuery(transformed, queryParams).scoredDocuments.toList
   }
 
   def mkQueryParams(queryText :String, kResults : Int) : Parameters =

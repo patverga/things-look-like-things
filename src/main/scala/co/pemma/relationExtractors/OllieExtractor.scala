@@ -1,4 +1,4 @@
-package co.pemma.RelationExtractors
+package co.pemma.relationExtractors
 
 import edu.knowitall.ollie.Ollie
 import edu.knowitall.ollie.confidence.OllieConfidenceFunction

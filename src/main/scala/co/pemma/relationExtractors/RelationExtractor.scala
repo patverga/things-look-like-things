@@ -1,4 +1,4 @@
-package co.pemma.RelationExtractors
+package co.pemma.relationExtractors
 
 import cc.factorie.app.nlp._
 import co.pemma.{FactorieFunctions, Utilities}
@@ -9,15 +9,22 @@ import co.pemma.{FactorieFunctions, Utilities}
 abstract class RelationExtractor
 {
   val omitArgRegex = "(?:you)|(?:he)|(?:she)|(?:it)|(?:we)|(?:they)|(?:him)|(?:her)|(?:i)|(?:\\W)".r
-  val patternRegex = "(?:appear(?:ance is)?|look(?:s|ed)?) (?:exactly |almost| pretty much)?(?:the same as|identical to|similar to|like)".r
+  val patternRegex = "(?:appear(?:ed|ance is)?|look(?:s|ed)?) (?:exactly |almost| pretty much)?(?:the same as|identical to|similar to|like)".r
 
-  /**
-   *
-   * @param documents
-   * @return Iterable[(confidence, relation, full sentence)]
-   */
-  def extractRelations(documents : Seq[String]) : Iterable[Extraction] =
+
+  def extractRelations(documents : Seq[String]) : Iterable[Extraction] = {
+    return extractRelations(documents, "")
+  }
+
+  def extractRelations(documents : Seq[String], thing : String) : Iterable[Extraction] =
   {
+    // use to filter sentences before extraction for efficiency
+    val filterRegex = if (thing == null | thing == "")
+      s".*${patternRegex.toString}.*".r
+    else
+      s"(?:.*$thing.*${patternRegex.toString}.*)|(?:.*${patternRegex.toString}.*$thing.*)".r
+
+    println(filterRegex.toString())
     // load the data
     var i = 0
     println("Processing Documents...")
@@ -27,13 +34,14 @@ abstract class RelationExtractor
       Utilities.printPercentProgress(i, documents.size)
 
       val doc = load.LoadPlainText.fromString(document).head
-      val sentences = FactorieFunctions.extractSentences(doc)
+      // doc -> sentences with factorie, keep only sentences that match our pattern
+      val sentences = FactorieFunctions.extractSentences(doc).map(_.string).filter(filterRegex.pattern.matcher(_).matches)
       val extractions = sentences.flatMap(sentence =>
       {
-        val sentString = sentence.string.replaceAll("[^\\x00-\\x7F]", "").trim
+        val sentString = sentence.replaceAll("[^\\x00-\\x7F]", "").trim
         if (sentString != "" && sentString != null && sentString.length > 10)
         {
-          extract(sentence.string.toLowerCase())
+          extract(sentence.toLowerCase())
         }
         else
           Seq()
@@ -52,6 +60,4 @@ abstract class RelationExtractor
   {
       Seq()
   }
-
-
 }

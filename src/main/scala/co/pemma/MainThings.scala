@@ -1,25 +1,25 @@
 package co.pemma
 
 import java.io.{BufferedWriter, FileWriter, PrintWriter}
-import co.pemma.RelationExtractors._
-import cc.factorie.app.nlp._
+import co.pemma.galagos.{ClueWebQuery, WikipediaQuery, GalagoWrapper}
+import co.pemma.relationExtractors._
 import cc.factorie.util.CmdOptions
 
 object MainThings
 {
-  def exportRelationsByThing(thing : String, outputLocation : String, extractor : RelationExtractor)
+  def exportRelationsByThing(thing : String, outputLocation : String, extractor : RelationExtractor, galago : GalagoWrapper)
   {
-    val documents = GalagoWrapper.runQuery(s"$thing looks like", 10000)
+    val documents = galago.runQuery(s"$thing looks like", 10000)
     // filter relations that do not involve the 'thing'
-    val extractions = extractor.extractRelations(documents).filter(x => {
+    val extractions = extractor.extractRelations(documents, thing).filter(x => {
       (x.arg1.contains(thing) || x.arg2.contains(thing))
     })
     printExtractions(extractions, outputLocation)
   }
 
-  def exportRelationsByPattern(query : String, outputLocation : String, extractor : RelationExtractor)
+  def exportRelationsByPattern(query : String, outputLocation : String, extractor : RelationExtractor, galago : GalagoWrapper)
   {
-    val documents = GalagoWrapper.runQuery(query, 5000)
+    val documents = galago.runQuery(query, 5000)
     val extractions = extractor.extractRelations(documents)
     printExtractions(extractions, outputLocation)
   }
@@ -36,48 +36,25 @@ object MainThings
   }
 
 
-  /**
-   * given a thing, find all 'looks like' relations involving that thing
-   * @param thing
-   * @param output
-   */
-  def findThingsThatLookLikeThisThingFromGalago(thing : String, output : String)
-  {
-    val regexerObject = new Regexer(thing, ".*")
 
-    val documents = regexerObject.patternList.flatMap(pattern =>
-    {
-      GalagoWrapper.runQuery(s"${pattern.replaceAll("\\?", "")} $thing")
-    })
 
-    // load the data
-    var i = 0
-    val docSet = documents.toSet[String]
-    println("Processing Documents...")
-    docSet.foreach(document =>
-    {
-      val doc = load.LoadPlainText.fromString(document).head
-      val sentences = FactorieFunctions.extractSentences(doc)
-      regexerObject.extractRegexFromSentences(sentences, thing, output)
-      i += 1
-      Utilities.printPercentProgress(i, docSet.size)
-    })
-  }
 
-  class ProcessSlotFillingCorpusOpts extends CmdOptions {
+  class ThingsLookeLikeThingsCmdParser extends CmdOptions {
     val thing = new CmdOption("thing", "", "STRING...", "Takes as input one string and finds things that look like it.")
     val pattern = new CmdOption("pattern", "", "STRING...",  "Uses Ollie to extract relations for our seed patterns from a galago search of those patterns.")
     val snowBall = new CmdOption("snowball", "", "STRING...",  "Google : 'snowball urban dictionary'. You're welcome.")
-    val extractor = new CmdOption("extractor", "", "STRING...",  "Choose which openIE system to use. reverb, ollie, or clauseie")
+    val extractor = new CmdOption("extractor", "", "STRING...",  "Choose which openIE system to use: reverb, ollie, or clauseie (Default = ClauseIE)")
+    val data = new CmdOption("data", "", "STRING...",  "Choose which index to use: clueweb or wikipedia. (Default = clueweb)")
   }
 
   def main(args: Array[String])
   {
     println(s"Input Args : ${args.mkString(" ")}")
 
-    val opts = new ProcessSlotFillingCorpusOpts
+    val opts = new ThingsLookeLikeThingsCmdParser
     opts.parse(args)
 
+    // choose extractor, set output
     val extractorType = if (opts.extractor.wasInvoked)
       opts.extractor.value.toLowerCase
     else
@@ -87,17 +64,30 @@ object MainThings
       case "reverb" => new ReverbExtractor
       case "ollie" => new OllieExtractor
       case "clauseie" => new ClauseIEExtractor
+      case _ => new ClauseIEExtractor
     }
 
+    // choose data set galago index
+    val galago = if (opts.data.wasInvoked)
+      opts.data.value match {
+        case "wikipedia" => new WikipediaQuery
+        case "clueweb" => new ClueWebQuery
+        case _ => new ClueWebQuery
+      }
+    else
+      new ClueWebQuery
+
+
+    // run the chosen method
     if (opts.thing.wasInvoked)
     {
       val thing = opts.thing.value.toLowerCase
-      exportRelationsByThing(thing, s"${output}thing/$thing.result", extractor)
+      exportRelationsByThing(thing, s"${output}thing/$thing.result", extractor, galago)
     }
     else if (opts.pattern.wasInvoked) {
       val query = opts.pattern.value.toLowerCase.replaceAll("\\?","")
       if (!query.startsWith("#") && query != "") {
-        exportRelationsByPattern(query, s"${output}pattern/${query.replaceAll("\\s+","-")}.result", extractor)
+        exportRelationsByPattern(query, s"${output}pattern/${query.replaceAll("\\s+","-")}.result", extractor, galago)
       }
     }
 

@@ -1,4 +1,4 @@
-package co.pemma.RelationExtractors
+package co.pemma.relationExtractors
 
 import edu.washington.cs.knowitall.extractor.ReVerbExtractor
 import edu.washington.cs.knowitall.extractor.conf.ReVerbOpenNlpConfFunction
