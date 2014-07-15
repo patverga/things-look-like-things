@@ -19,7 +19,7 @@ object MainThings
 
   def exportRelationsByPattern(query : String, outputLocation : String, extractor : RelationExtractor, galago : GalagoWrapper)
   {
-    val documents = galago.runQuery(query, 5000)
+    val documents = galago.runQuery(query, 101)
     val extractions = extractor.extractRelations(documents)
     printExtractions(extractions, outputLocation)
   }

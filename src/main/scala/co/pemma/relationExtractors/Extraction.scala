@@ -15,4 +15,9 @@ class Extraction(c : Double, a1 : String, r : String, a2 : String, s : String)
   {
     s"$confidence ($arg1; $rel; $arg2)"
   }
+
+  override def toString() : String =
+  {
+    s"$arg1 $rel $arg2"
+  }
 }

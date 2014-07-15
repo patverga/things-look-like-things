@@ -14,7 +14,7 @@ object Utilities
    */
   def printPercentProgress(iteration : Double, total : Double) : Double =
   {
-    val it = iteration + 1
+    val it = iteration + 1.
     if (it == total)
       println(" Done ")
     else if (total >= 100)
