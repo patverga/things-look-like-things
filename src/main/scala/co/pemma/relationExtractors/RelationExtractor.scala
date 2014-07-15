@@ -48,16 +48,18 @@ abstract class RelationExtractor
       })
       extractions
     })
+    filter(allExtractions)
+  }
+
+  def extract(sentStr : String) : Iterable[Extraction]
+
+  def filter(extractions : Iterable[Extraction]) : Iterable[Extraction] =
+  {
     // filter out relations that we dont want
-    allExtractions.filter(x => {
+    extractions.filter(x => {
       patternRegex.pattern.matcher(x.rel).matches &&
         !omitArgRegex.pattern.matcher(x.arg1).matches &&
         !omitArgRegex.pattern.matcher(x.arg2).matches
     })
-  }
-
-  def extract(sentStr : String) : Iterable[Extraction] =
-  {
-      Seq()
   }
 }

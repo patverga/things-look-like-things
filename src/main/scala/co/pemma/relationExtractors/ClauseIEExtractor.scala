@@ -8,6 +8,8 @@ import collection.JavaConversions._
  */
 class ClauseIEExtractor  () extends RelationExtractor
 {
+  val relationRegex = ".*(?:appear(?:ed|ance is)?|look(?:s|ed)?) (?:exactly |almost| pretty much)?(?:the same as|identical to|similar to|like).*".r
+
   val clausIE = new ClausIE
   clausIE.initParser
 
@@ -17,18 +19,31 @@ class ClauseIEExtractor  () extends RelationExtractor
       clausIE.detectClauses
       clausIE.generatePropositions
 
-      val results = clausIE.getPropositions.toSet[Proposition].map(prop =>
+      val results = clausIE.getPropositions.toSet[Proposition].filter(_.noArguments() > 0).map(prop =>
       {
-        new Extraction(1., prop.subject, prop.relation, prop.argument(0), sentence)
+          new Extraction(1., prop.subject, prop.relation, prop.argument(0), sentence)
       })
       results
     }
     catch {
-      case e: Exception => System.err.println(s"CLAUSE IE ERRORED SOMEWHERE : $sentence")
+      case e: Exception =>
+        System.err.println(s"CLAUSE IE ERRORED SOMEWHERE : $sentence")
+        System.err.println(e.printStackTrace)
         Seq()
-      case  e: StackOverflowError => System.err.println(s"STANFORD ERROR : $sentence")
+      case  e: StackOverflowError =>
+        System.err.println(s"STANFORD ERROR : $sentence")
         Seq()
     }
+  }
+
+  override def filter(extractions : Iterable[Extraction]) : Iterable[Extraction] =
+  {
+    // filter out relations that we dont want
+    extractions.filter(x => {
+      relationRegex.pattern.matcher(x.toString).matches &&
+        !omitArgRegex.pattern.matcher(x.arg1).matches &&
+        !omitArgRegex.pattern.matcher(x.arg2).matches
+    })
   }
 }
 

@@ -2,7 +2,7 @@ package co.pemma.galagos
 
 import org.lemurproject.galago.core.parse.Document
 import org.lemurproject.galago.core.retrieval.query.{Node, StructuredQuery}
-import org.lemurproject.galago.core.retrieval.{Retrieval, RetrievalFactory, ScoredDocument}
+import org.lemurproject.galago.core.retrieval.{Retrieval, ScoredDocument}
 import org.lemurproject.galago.tupleflow.Parameters
 import collection.JavaConversions._
 
