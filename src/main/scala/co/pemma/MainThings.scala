@@ -54,12 +54,22 @@ object MainThings
     val opts = new ThingsLookeLikeThingsCmdParser
     opts.parse(args)
 
-    // choose extractor, set output
+    // choose data set galago index
+    val dataset = if (opts.data.wasInvoked)
+      opts.data.value.toLowerCase
+    else
+      "clueweb"
+    val galago = dataset match {
+        case "wikipedia" => new WikipediaQuery
+        case "clueweb" => new ClueWebQuery
+        case _ => new ClueWebQuery
+      }
+
+    // choose extractor
     val extractorType = if (opts.extractor.wasInvoked)
       opts.extractor.value.toLowerCase
     else
       "clauseie"
-    val output = s"results/${extractorType}/"
     val extractor = extractorType match{
       case "reverb" => new ReverbExtractor
       case "ollie" => new OllieExtractor
@@ -67,16 +77,8 @@ object MainThings
       case _ => new ClauseIEExtractor
     }
 
-    // choose data set galago index
-    val galago = if (opts.data.wasInvoked)
-      opts.data.value match {
-        case "wikipedia" => new WikipediaQuery
-        case "clueweb" => new ClueWebQuery
-        case _ => new ClueWebQuery
-      }
-    else
-      new ClueWebQuery
-
+    // set output
+    val output = s"results/${dataset}/${extractorType}/"
 
     // run the chosen method
     if (opts.thing.wasInvoked)
