@@ -22,7 +22,7 @@ object MainThings
 
   def exportRelationsByThingAndSynonyms(thing : String, outputLocation : String, extractor : RelationExtractor, galago : GalagoWrapper)
   {
-    val hypos = JWIWordNetWrap.getHypnym(thing, Pointer.HYPONYM) ++ JWIWordNetWrap.getHypnym(thing, Pointer.HYPERNYM) ++ thing
+    val hypos = List(thing) ++ JWIWordNetWrap.getHypnym(thing, Pointer.HYPONYM) ++ JWIWordNetWrap.getHypnym(thing, Pointer.HYPERNYM)
     val thingRegex = hypos.mkString("(?:","|",")")
     val queries = hypos.map(h => s"$h looks like")
     val documents = galago.runBatchQueries(queries)
