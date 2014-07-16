@@ -26,7 +26,9 @@ class OllieExtractor () extends RelationExtractor
       result
     }
     catch{
-      case  e: Exception => System.err.println(s"MALT ERROR : $sentStr")
+      case  e: Exception =>
+        System.err.println(s"MALT ERROR : $sentStr")
+        System.err.println(e.printStackTrace())
         Seq()
     }
   }

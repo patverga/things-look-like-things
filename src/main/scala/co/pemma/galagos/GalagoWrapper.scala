@@ -28,7 +28,7 @@ abstract class GalagoWrapper
   {
     val results = getTopResults(queryText, kResults)
     // return the actual documents
-    results.par.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
+    results.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
   }
 
   def runBatchQueries(queries : Seq[String]) : GenSeq[String] =
