@@ -6,9 +6,9 @@ set -e
 
 # file where each line contains a thing we want to find things that look like
 ROOT=/home/pat/things-look-like-things
-THING_FILE=$ROOT/src/main/resources/dogs
+THING_FILE=$ROOT/src/main/resources/things-subset
 while read THING
 do
    echo $THING
-   qsub -cwd -l mem_free=32G -v ARGS="--thing=$THING|--data=$1|--extractor=$2" qsub-job.sh
+   qsub -cwd -l mem_free=32G -v ARGS="--all=$THING|--data=$1|--extractor=$2" qsub-job.sh
 done < ${THING_FILE}
