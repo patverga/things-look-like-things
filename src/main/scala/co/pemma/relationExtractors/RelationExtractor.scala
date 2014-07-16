@@ -3,6 +3,9 @@ package co.pemma.relationExtractors
 import cc.factorie.app.nlp._
 import co.pemma.{FactorieFunctions, Utilities}
 
+import scala.collection.GenSeq
+import scala.collection.parallel.ParSeq
+
 /**
  * Created by pat on 6/30/14.
  */
@@ -12,11 +15,11 @@ abstract class RelationExtractor
   val patternRegex = "(?:(?:appear(?:s|ed|ance is)?|look(?:s|ed)?) (?:exactly |almost| pretty much)?(?:the same as|identical to|similar to|like)|(?:resemble(?:s|d)))".r
 
 
-  def extractRelations(documents : Seq[String]) : Iterable[Extraction] = {
+  def extractRelations(documents : Seq[String]) : GenSeq[Extraction] = {
     return extractRelations(documents, "")
   }
 
-  def extractRelations(documents : Seq[String], thing : String) : Iterable[Extraction] =
+  def extractRelations(documents : Seq[String], thing : String) : GenSeq[Extraction] =
   {
     // use to filter sentences before extraction for efficiency
     val filterRegex = if (thing == null | thing == "")
@@ -28,7 +31,7 @@ abstract class RelationExtractor
     // load the data
     var i = 0
     println("Processing Documents...")
-    val allExtractions = documents.flatMap(document =>
+    val allExtractions = documents.par.flatMap(document =>
     {
       i += 1
       Utilities.printPercentProgress(i, documents.size)
@@ -41,7 +44,7 @@ abstract class RelationExtractor
         val sentString = sentence.replaceAll("[^\\x00-\\x7F]", "").trim
         if (sentString != "" && sentString != null && sentString.length > 10)
         {
-          extract(sentence.toLowerCase())
+          extract(sentence)
         }
         else
           Seq()
@@ -53,7 +56,7 @@ abstract class RelationExtractor
 
   def extract(sentStr : String) : Iterable[Extraction]
 
-  def filter(extractions : Iterable[Extraction]) : Iterable[Extraction] =
+  def filter(extractions : GenSeq[Extraction]) : GenSeq[Extraction] =
   {
     // filter out relations that we dont want
     extractions.filter(x => {

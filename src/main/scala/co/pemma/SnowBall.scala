@@ -4,6 +4,7 @@ import java.io.{FileWriter, BufferedWriter, PrintWriter}
 
 import cc.factorie.app.nlp.load
 import co.pemma.galagos.GalagoWrapper
+import co.pemma.relationExtractors.RelationExtractor
 
 import scala.util.matching.Regex
 
@@ -13,18 +14,23 @@ import scala.util.matching.Regex
 object SnowBall
 {
 
-  def run(line : String, outputLocation : String)
+  def run(thing : String, outputLocation : String, extractor : RelationExtractor, galago : GalagoWrapper)
   {
-    val queries = parseInputLineToQueries(line)
-
-    val matches = extractSeedOccurances(queries)
-
-    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
-    matches.foreach(s => {
-      println(s"\n\n ${s.group(0)}")
-      writer.println(s"\n\n ${s.group(0)}")
+    val thingRegex = s"\\s*(?:the |a |an )$thing(?:s)?\\s*".r
+    val documents = galago.runQuery(s"$thing looks like", 10000)
+    // filter relations that do not involve the 'thing'
+    val extractions = extractor.extractRelations(documents, thing).filter(x => {
+      (thingRegex.pattern.matcher(x.arg1).matches() || thingRegex.pattern.matcher(x.arg2).matches())
     })
-    writer.close()
+
+//    val matches = extractSeedOccurances(queries)
+
+//    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
+//    matches.foreach(s => {
+//      println(s"\n\n ${s.group(0)}")
+//      writer.println(s"\n\n ${s.group(0)}")
+//    })
+//    writer.close()
 
 //    val contexts = extractContextsFromMatches(matches)
   }

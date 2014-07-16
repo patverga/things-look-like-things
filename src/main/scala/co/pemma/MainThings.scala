@@ -5,6 +5,8 @@ import co.pemma.galagos.{ClueWebQuery, WikipediaQuery, GalagoWrapper}
 import co.pemma.relationExtractors._
 import cc.factorie.util.CmdOptions
 
+import scala.collection.GenSeq
+
 object MainThings
 {
   def exportRelationsByThing(thing : String, outputLocation : String, extractor : RelationExtractor, galago : GalagoWrapper)
@@ -24,7 +26,7 @@ object MainThings
     printExtractions(extractions, outputLocation)
   }
 
-  def printExtractions(extractions : Iterable[Extraction], outputLocation : String)
+  def printExtractions(extractions : GenSeq[Extraction], outputLocation : String)
   {
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
     extractions.foreach(extract =>

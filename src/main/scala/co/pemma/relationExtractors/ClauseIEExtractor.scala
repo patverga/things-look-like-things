@@ -2,6 +2,7 @@ package co.pemma.relationExtractors
 
 import de.mpii.clausie.{Proposition, ClausIE}
 import collection.JavaConversions._
+import scala.collection.GenSeq
 
 /**
  * Created by pat on 7/14/14.
@@ -36,7 +37,7 @@ class ClauseIEExtractor  () extends RelationExtractor
     }
   }
 
-  override def filter(extractions : Iterable[Extraction]) : Iterable[Extraction] =
+  override def filter(extractions : GenSeq[Extraction]) : GenSeq[Extraction] =
   {
     // filter out relations that we dont want
     extractions.filter(x => {
