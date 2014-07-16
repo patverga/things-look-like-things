@@ -4,6 +4,7 @@ import java.io.{BufferedWriter, FileWriter, PrintWriter}
 import co.pemma.galagos.{ClueWebQuery, WikipediaQuery, GalagoWrapper}
 import co.pemma.relationExtractors._
 import cc.factorie.util.CmdOptions
+import edu.mit.jwi.item.Pointer
 
 import scala.collection.GenSeq
 
@@ -15,6 +16,20 @@ object MainThings
     // filter relations that do not involve the 'thing'
     val extractions = extractor.extractRelations(documents, thing).filter(x => {
       (x.arg1.contains(thing) || x.arg2.contains(thing))
+    })
+    printExtractions(extractions, outputLocation)
+  }
+
+  def exportRelationsByThingAndSynonyms(thing : String, outputLocation : String, extractor : RelationExtractor, galago : GalagoWrapper)
+  {
+    val hypos = JWIWordNetWrap.getHypnym(thing, Pointer.HYPONYM) ++ JWIWordNetWrap.getHypnym(thing, Pointer.HYPERNYM) ++ thing
+    val thingRegex = hypos.mkString("(?:","|",")")
+    val queries = hypos.map(h => s"$h looks like")
+    val documents = galago.runBatchQueries(queries)
+
+    // filter relations that do not involve the 'thing'
+    val extractions = extractor.extractRelations(documents, thingRegex).filter(x => {
+      (x.arg1.matches(thingRegex) || x.arg2.matches(thingRegex))
     })
     printExtractions(extractions, outputLocation)
   }
@@ -43,6 +58,7 @@ object MainThings
 
   class ThingsLookeLikeThingsCmdParser extends CmdOptions {
     val thing = new CmdOption("thing", "", "STRING...", "Takes as input one string and finds things that look like it.")
+    val syns = new CmdOption("syns", "", "STRING...", "Takes as input one string and finds things that look like it and its synonyms.")
     val pattern = new CmdOption("pattern", "", "STRING...",  "Uses Ollie to extract relations for our seed patterns from a galago search of those patterns.")
     val snowBall = new CmdOption("snowball", "", "STRING...",  "Google : 'snowball urban dictionary'. You're welcome.")
     val extractor = new CmdOption("extractor", "", "STRING...",  "Choose which openIE system to use: reverb, ollie, or clauseie (Default = ClauseIE)")
@@ -87,6 +103,11 @@ object MainThings
     {
       val thing = opts.thing.value.toLowerCase
       exportRelationsByThing(thing, s"${output}thing/$thing.result", extractor, galago)
+    }
+    if (opts.syns.wasInvoked)
+    {
+      val thing = opts.syns.value.toLowerCase
+      exportRelationsByThingAndSynonyms(thing, s"${output}synonyms/$thing.result", extractor, galago)
     }
     else if (opts.pattern.wasInvoked) {
       val query = opts.pattern.value.toLowerCase.replaceAll("\\?","")

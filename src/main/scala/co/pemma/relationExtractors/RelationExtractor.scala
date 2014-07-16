@@ -18,13 +18,13 @@ abstract class RelationExtractor
     return extractRelations(documents, "")
   }
 
-  def extractRelations(documents : GenSeq[String], thing : String) : GenSeq[Extraction] =
+  def extractRelations(documents : GenSeq[String], thingRegex : String) : GenSeq[Extraction] =
   {
     // use to filter sentences before extraction for efficiency
-    val filterRegex = if (thing == null | thing == "")
+    val filterRegex = if (thingRegex == null | thingRegex == "")
       s".*${patternRegex.toString}.*".r
     else
-      s"(?:.*$thing.*${patternRegex.toString}.*)|(?:.*${patternRegex.toString}.*$thing.*)".r
+      s"(?:.*$thingRegex.*${patternRegex.toString}.*)|(?:.*${patternRegex.toString}.*$thingRegex.*)".r
 
     println(filterRegex.toString())
     // load the data

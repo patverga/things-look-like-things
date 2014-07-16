@@ -2,7 +2,7 @@ package co.pemma
 
 import cc.factorie.app.nlp.lemma.PorterLemmatizer
 import edu.mit.jwi.Dictionary
-import edu.mit.jwi.item.{IWord, ISynsetID, POS, Pointer}
+import edu.mit.jwi.item.{POS, Pointer}
 import collection.JavaConversions._
 
 
@@ -61,7 +61,6 @@ object JWIWordNetWrap {
       phrases += phraseSoFar
     }
     else {
-
       wordSynonyms(i).foreach(w => {
         val newPhrase = phraseSoFar + " " + w
         phrases ++= recursivePhraseBuilder(wordSynonyms, i + 1, newPhrase)
@@ -111,11 +110,14 @@ object JWIWordNetWrap {
     synonyms
   }
 
-  def getHypnym(inputWord : String, hypType : Pointer): List[IWord] =
+  def getHypnym(inputWord : String, hypType : Pointer): List[String] =
   {
     dict.open()
     // get the synset
+//    val lemma = PorterLemmatizer.lemmatize(inputWord)
+//    val idxWord = dict.getIndexWord(lemma, POS.NOUN)
     val idxWord = dict.getIndexWord(inputWord, POS.NOUN)
+
     if (idxWord != null)
     {
       val wordID = idxWord.getWordIDs()
@@ -130,12 +132,13 @@ object JWIWordNetWrap {
 
         val results = hyps.map(h => {
           val words = dict.getSynset(h).getWords
-          val w = words.get(0)
+          val w = words.get(0).getLemma.replaceAll("_"," ")
           w
         })
         return (results)
       }
     }
+    dict.close()
     return (List())
   }
 
