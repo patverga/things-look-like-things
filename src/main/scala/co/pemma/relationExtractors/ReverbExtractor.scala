@@ -15,6 +15,7 @@ class ReverbExtractor extends RelationExtractor{
 
   override def extract(sentStr : String): Iterable[Extraction] =
   {
+    try{
     // Looks on the classpath for the default model files.
     val sent = chunker.chunkSentence(sentStr)
 
@@ -29,6 +30,11 @@ class ReverbExtractor extends RelationExtractor{
       result += new Extraction(conf, extr.getArgument1.getText, extr.getRelation.getText, extr.getArgument2.getText, sentStr)
     }
     result
+    }
+    catch{
+      case  e: Exception => System.err.println(s"REVERB ERROR : $sentStr")
+        Seq()
+    }
   }
 
 }

@@ -62,7 +62,7 @@ object MainThings
     val pattern = new CmdOption("pattern", "", "STRING...",  "Uses Ollie to extract relations for our seed patterns from a galago search of those patterns.")
     val snowBall = new CmdOption("snowball", "", "STRING...",  "Google : 'snowball urban dictionary'. You're welcome.")
     val extractor = new CmdOption("extractor", "", "STRING...",  "Choose which openIE system to use: reverb, ollie, or clauseie (Default = ClauseIE)")
-    val data = new CmdOption("data", "", "STRING...",  "Choose which index to use: clueweb or wikipedia. (Default = clueweb)")
+    val data = new CmdOption("data", "", "STRING...",  "Choose which index to use: clueweb or wikipedia. (Default = ollie)")
   }
 
   def main(args: Array[String])
@@ -90,9 +90,9 @@ object MainThings
       "clauseie"
     val extractor = extractorType match{
       case "reverb" => new ReverbExtractor
-      case "ollie" => new OllieExtractor
       case "clauseie" => new ClauseIEExtractor
-      case _ => new ClauseIEExtractor
+      case "ollie" => new OllieExtractor
+      case _ => new OllieExtractor
     }
 
     // set output
