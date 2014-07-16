@@ -30,27 +30,27 @@ abstract class RelationExtractor
     // load the data
     var i = 0
     println("Processing Documents...")
-    val allExtractions = documents.flatMap(document =>
+    val sentences = documents.par.flatMap(document =>
     {
       i += 1
       Utilities.printPercentProgress(i, documents.size)
 
       val doc = load.LoadPlainText.fromString(document).head
       // doc -> sentences with factorie, keep only sentences that match our pattern
-      val sentences = FactorieFunctions.extractSentences(doc).map(_.string).filter(filterRegex.pattern.matcher(_).matches)
-      val extractions = sentences.flatMap(sentence =>
-      {
-        val sentString = sentence.replaceAll("[^\\x00-\\x7F]", "").trim
-        if (sentString != "" && sentString != null && sentString.length > 10)
-        {
-          extract(sentence)
-        }
-        else
-          Seq()
-      })
-      extractions
+      FactorieFunctions.extractSentences(doc).map(_.string).filter(filterRegex.pattern.matcher(_).matches)
     })
-    filter(allExtractions)
+    println(s"Extracting relations from ${sentences.size} sentences")
+    val extractions = sentences.flatMap(sentence =>
+    {
+      val sentString = sentence.replaceAll("[^\\x00-\\x7F]", "").trim
+      if (sentString != "" && sentString != null && sentString.length > 10)
+      {
+        extract(sentence)
+      }
+      else
+        Seq()
+    })
+    filter(extractions)
   }
 
   def extract(sentStr : String) : Iterable[Extraction]

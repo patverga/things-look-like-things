@@ -1,6 +1,6 @@
 package co.pemma
 
-import java.io.{BufferedWriter, FileWriter, PrintWriter}
+import java.io._
 import co.pemma.galagos.{ClueWebQuery, WikipediaQuery, GalagoWrapper}
 import co.pemma.relationExtractors._
 import cc.factorie.util.CmdOptions
@@ -12,7 +12,7 @@ object MainThings
 {
   def exportRelationsByThing(thing : String, outputLocation : String, extractor : RelationExtractor, galago : GalagoWrapper)
   {
-    val documents = galago.runQuery(s"$thing looks like", 10000)
+    val documents = galago.runQuery(s"$thing looks like", 2500)
     // filter relations that do not involve the 'thing'
     val extractions = extractor.extractRelations(documents, thing).filter(x => {
       (x.arg1.contains(thing) || x.arg2.contains(thing))
@@ -44,6 +44,10 @@ object MainThings
   def printExtractions(extractions : GenSeq[Extraction], outputLocation : String)
   {
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
+    val parent = new File(outputLocation).getParentFile()
+    if(!parent.exists() && !parent.mkdirs()) {
+      throw new IllegalStateException("Couldn't create dir: " + parent)
+    }
     extractions.foreach(extract =>
     {
       println(s"\n ${extract.sentence} \n ${extract.relation}")
