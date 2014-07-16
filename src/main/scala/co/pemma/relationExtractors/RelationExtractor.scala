@@ -4,7 +4,6 @@ import cc.factorie.app.nlp._
 import co.pemma.{FactorieFunctions, Utilities}
 
 import scala.collection.GenSeq
-import scala.collection.parallel.ParSeq
 
 /**
  * Created by pat on 6/30/14.
@@ -15,11 +14,11 @@ abstract class RelationExtractor
   val patternRegex = "(?:(?:appear(?:s|ed|ance is)?|look(?:s|ed)?) (?:exactly |almost| pretty much)?(?:the same as|identical to|similar to|like)|(?:resemble(?:s|d)))".r
 
 
-  def extractRelations(documents : Seq[String]) : GenSeq[Extraction] = {
+  def extractRelations(documents : GenSeq[String]) : GenSeq[Extraction] = {
     return extractRelations(documents, "")
   }
 
-  def extractRelations(documents : Seq[String], thing : String) : GenSeq[Extraction] =
+  def extractRelations(documents : GenSeq[String], thing : String) : GenSeq[Extraction] =
   {
     // use to filter sentences before extraction for efficiency
     val filterRegex = if (thing == null | thing == "")

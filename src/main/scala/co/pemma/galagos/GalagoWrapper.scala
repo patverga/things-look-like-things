@@ -5,6 +5,7 @@ import org.lemurproject.galago.core.retrieval.query.{Node, StructuredQuery}
 import org.lemurproject.galago.core.retrieval.{Retrieval, ScoredDocument}
 import org.lemurproject.galago.tupleflow.Parameters
 import collection.JavaConversions._
+import scala.collection.GenSeq
 
 
 /**
@@ -18,23 +19,23 @@ abstract class GalagoWrapper
   val indexLocation : String
   val retrieval : Retrieval
 
-  def runQuery(queryText : String) : Seq[String] =
+  def runQuery(queryText : String) : GenSeq[String] =
   {
     runQuery(queryText, DEFAULT_K)
   }
 
-  def runQuery(queryText : String, kResults : Int) : Seq[String] =
+  def runQuery(queryText : String, kResults : Int) : GenSeq[String] =
   {
     val results = getTopResults(queryText, kResults)
     // return the actual documents
-    results.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
+    results.par.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
   }
 
-  def runBatchQueries(queries : Seq[String]) : Seq[String] =
+  def runBatchQueries(queries : Seq[String]) : GenSeq[String] =
   {
     val results = queries.flatMap(q => getTopResults(q, DEFAULT_K)).toSet[ScoredDocument].toSeq
     // return the actual documents
-    results.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
+    results.par.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
   }
 
   def getTopResults(queryText : String, kResults : Int) : Seq[ScoredDocument] =
