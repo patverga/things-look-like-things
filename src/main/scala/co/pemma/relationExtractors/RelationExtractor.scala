@@ -38,10 +38,14 @@ abstract class RelationExtractor
       val doc = load.LoadPlainText.fromString(document).head
       // doc -> sentences with factorie, keep only sentences that match our pattern
       FactorieFunctions.extractSentences(doc).map(_.string).filter(filterRegex.pattern.matcher(_).matches)
-    }).toSeq
+    })
+
+    i = 0
     println(s"Extracting relations from ${sentences.size} sentences")
     val extractions = sentences.flatMap(sentence =>
     {
+      i += 1
+      Utilities.printPercentProgress(i, documents.size)
       if (sentence != null && sentence.length > 10)
       {
         extract(sentence)
