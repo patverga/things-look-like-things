@@ -30,7 +30,7 @@ abstract class RelationExtractor
     // load the data
     var i = 0
     println("Processing Documents...")
-    val sentences = documents.par.flatMap(document =>
+    val sentences = documents.flatMap(document =>
     {
       i += 1
       Utilities.printPercentProgress(i, documents.size)
