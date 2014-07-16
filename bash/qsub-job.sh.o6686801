@@ -1,0 +1,153 @@
+Warning: no access to tty (Bad file descriptor).
+Thus no job control in this shell.
+--syns=German Shepherd|--data=clueweb|--extractor=ollie
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for co.pemma:things-look-like-things:jar:1.0-SNAPSHOT
+[WARNING] 'build.plugins.plugin.version' for org.scala-tools:maven-scala-plugin is missing. @ line 51, column 21
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building things-look-like-things 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:resources (default-resources) @ things-look-like-things ---
+[debug] execute contextualize
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 2533 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.3.2:compile (default-compile) @ things-look-like-things ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- maven-scala-plugin:2.15.2:compile (default) @ things-look-like-things ---
+[INFO] Checking for multiple versions of scala
+[WARNING]  Expected all dependencies to require Scala version: 2.10.4
+[WARNING]  cc.factorie:factorie:1.1-20140707.164012-22 requires scala version: 2.10.4
+[WARNING]  com.typesafe.akka:akka-actor_2.10:2.1.4 requires scala version: 2.10.1
+[WARNING] Multiple versions of scala libraries detected!
+[INFO] includes = [**/*.scala,**/*.java,]
+[INFO] excludes = []
+[INFO] Nothing to compile - all classes are up to date
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 7.939s
+[INFO] Finished at: Wed Jul 16 16:27:15 EDT 2014
+[INFO] Final Memory: 15M/913M
+[INFO] ------------------------------------------------------------------------
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for co.pemma:things-look-like-things:jar:1.0-SNAPSHOT
+[WARNING] 'build.plugins.plugin.version' for org.scala-tools:maven-scala-plugin is missing. @ line 51, column 21
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building things-look-like-things 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] >>> maven-scala-plugin:2.15.2:run (default-cli) @ things-look-like-things >>>
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:resources (default-resources) @ things-look-like-things ---
+[debug] execute contextualize
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 2533 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.3.2:compile (default-compile) @ things-look-like-things ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- maven-scala-plugin:2.15.2:compile (default) @ things-look-like-things ---
+[INFO] Checking for multiple versions of scala
+[WARNING]  Expected all dependencies to require Scala version: 2.10.4
+[WARNING]  cc.factorie:factorie:1.1-20140707.164012-22 requires scala version: 2.10.4
+[WARNING]  com.typesafe.akka:akka-actor_2.10:2.1.4 requires scala version: 2.10.1
+[WARNING] Multiple versions of scala libraries detected!
+[INFO] includes = [**/*.scala,**/*.java,]
+[INFO] excludes = []
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:testResources (default-testResources) @ things-look-like-things ---
+[debug] execute contextualize
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/pat/things-look-like-things/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.3.2:testCompile (default-testCompile) @ things-look-like-things ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- maven-scala-plugin:2.15.2:testCompile (default) @ things-look-like-things ---
+[INFO] Checking for multiple versions of scala
+[WARNING]  Expected all dependencies to require Scala version: 2.10.4
+[WARNING]  cc.factorie:factorie:1.1-20140707.164012-22 requires scala version: 2.10.4
+[WARNING]  com.typesafe.akka:akka-actor_2.10:2.1.4 requires scala version: 2.10.1
+[WARNING] Multiple versions of scala libraries detected!
+[INFO] includes = [**/*.scala,**/*.java,]
+[INFO] excludes = []
+[WARNING] No source files found.
+[INFO] 
+[INFO] <<< maven-scala-plugin:2.15.2:run (default-cli) @ things-look-like-things <<<
+[INFO] 
+[INFO] --- maven-scala-plugin:2.15.2:run (default-cli) @ things-look-like-things ---
+[INFO] Checking for multiple versions of scala
+[WARNING]  Expected all dependencies to require Scala version: 2.10.4
+[WARNING]  cc.factorie:factorie:1.1-20140707.164012-22 requires scala version: 2.10.4
+[WARNING]  com.typesafe.akka:akka-actor_2.10:2.1.4 requires scala version: 2.10.1
+[WARNING] Multiple versions of scala libraries detected!
+Input Args : --syns=German Shepherd --data=clueweb --extractor=ollie  
+cluein  /mnt/nfs/indexes/ClueWeb12/galago/clueweb-12-B13.index/
+Initializing malt: -u file:/home/pat/things-look-like-things/engmalt.linear-1.7.mco -m parse -cl off
+  Transition system    : Projective
+  Parser configuration : Stack
+  Feature model        : eng-liblinear.xml
+  Classifier           : liblinear
+  Data Format          : /engmalt.linear-1.7/conllx.xml
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+.*german shepherd.*|.*shepherd dog.*)
+Querying galago for top 2500 results for 'german shepherd looks like' 
+Querying galago for top 2500 results for 'shepherd dog looks like' 
+java.lang.reflect.InvocationTargetException
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:601)
+	at org_scala_tools_maven_executions.MainHelper.runMain(MainHelper.java:161)
+	at org_scala_tools_maven_executions.MainWithArgsInFile.main(MainWithArgsInFile.java:26)
+Caused by: java.util.regex.PatternSyntaxException: Unmatched closing ')' near index 188
+(?:.*.*german shepherd.*|.*shepherd dog.*).*(?:(?:appear(?:s|ed|ance is)?|look(?:s|ed)?) (?:exactly |almost| pretty much)?(?:the same as|identical to|similar to|like)|(?:resemble(?:s|d))).*)|(?:.*(?:(?:appear(?:s|ed|ance is)?|look(?:s|ed)?) (?:exactly |almost| pretty much)?(?:the same as|identical to|similar to|like)|(?:resemble(?:s|d))).*.*german shepherd.*|.*shepherd dog.*).*)
+                                                                                                                                                                                            ^
+	at java.util.regex.Pattern.error(Pattern.java:1924)
+	at java.util.regex.Pattern.compile(Pattern.java:1669)
+	at java.util.regex.Pattern.<init>(Pattern.java:1337)
+	at java.util.regex.Pattern.compile(Pattern.java:1022)
+	at scala.util.matching.Regex.<init>(Regex.scala:153)
+	at scala.collection.immutable.StringLike$class.r(StringLike.scala:224)
+	at scala.collection.immutable.StringOps.r(StringOps.scala:31)
+	at scala.collection.immutable.StringLike$class.r(StringLike.scala:213)
+	at scala.collection.immutable.StringOps.r(StringOps.scala:31)
+	at co.pemma.relationExtractors.RelationExtractor.extractRelations(RelationExtractor.scala:27)
+	at co.pemma.MainThings$.exportRelationsByThingAndSynonyms(MainThings.scala:32)
+	at co.pemma.MainThings$.main(MainThings.scala:115)
+	at co.pemma.MainThings.main(MainThings.scala)
+	... 6 more
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 2:06.296s
+[INFO] Finished at: Wed Jul 16 16:29:23 EDT 2014
+[INFO] Final Memory: 12M/724M
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.scala-tools:maven-scala-plugin:2.15.2:run (default-cli) on project things-look-like-things: wrap: org.apache.commons.exec.ExecuteException: Process exited with an error: 240(Exit value: 240) -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
