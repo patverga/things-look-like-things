@@ -64,6 +64,7 @@ object MainThings
   class ThingsLookeLikeThingsCmdParser extends CmdOptions {
     val thing = new CmdOption("thing", "", "STRING...", "Takes as input one string and finds things that look like it.")
     val syns = new CmdOption("syns", "", "STRING...", "Takes as input one string and finds things that look like it and its synonyms.")
+    val all = new CmdOption("all", "", "STRING...", "Takes as input one string and finds all relations that it occurs in")
     val pattern = new CmdOption("pattern", "", "STRING...",  "Uses Ollie to extract relations for our seed patterns from a galago search of those patterns.")
     val snowBall = new CmdOption("snowball", "", "STRING...",  "Google : 'snowball urban dictionary'. You're welcome.")
     val extractor = new CmdOption("extractor", "", "STRING...",  "Choose which openIE system to use: reverb, ollie, or clauseie (Default = ClauseIE)")
@@ -109,10 +110,15 @@ object MainThings
       val thing = opts.thing.value.toLowerCase
       exportRelationsByThing(thing, s"${output}thing/$thing.result", extractor, galago)
     }
-    if (opts.syns.wasInvoked)
+    else if (opts.syns.wasInvoked)
     {
       val thing = opts.syns.value.toLowerCase
       exportRelationsByThingAndSynonyms(thing, s"${output}synonyms/$thing.result", extractor, galago)
+    }
+    else if (opts.all.wasInvoked)
+    {
+      val thing = opts.all.value.toLowerCase
+      StupidBullshit.getAllRelationsForThing(thing, s"${output}all/$thing.result", extractor, galago)
     }
     else if (opts.pattern.wasInvoked) {
       val query = opts.pattern.value.toLowerCase.replaceAll("\\?","")
