@@ -36,25 +36,7 @@ object FactorieFunctions {
     clause.extract(sent)
   }
 
-  /**
-   * Converts a list of documents to a list of sentences where sentences match a filter regex
-   * @param documents a list of documents
-   * @param thing a regex that sentences must match to be returned
-   * @return a single list of all sentences in all of the documents
-   */
-  def processDocuments(documents: GenSeq[String], thing : String) : GenSeq[String] =
-  {
-    var i = 0
-    println("Processing Documents...")
-    documents.flatMap(document => {
-      i += 1
-      Utilities.printPercentProgress(i, documents.size)
 
-      val doc = load.LoadPlainText.fromString(document).head
-      // doc -> sentences with factorie, keep only sentences that match our pattern
-      extractSentences(doc).map(_.string).filter(_.contains(thing))
-    })
-  }
 
   def extractSentences(doc :Document) : Iterable[Sentence] =
   {

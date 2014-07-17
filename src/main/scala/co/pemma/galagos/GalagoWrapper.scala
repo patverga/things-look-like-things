@@ -14,7 +14,7 @@ import scala.collection.GenSeq
 abstract class GalagoWrapper
 {
   // how many results to return from search
-  val DEFAULT_K = 1000
+  val DEFAULT_K = 2500
   val docComponents = new Document.DocumentComponents(true, false, false)
   val retrieval : Retrieval
 
