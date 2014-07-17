@@ -16,7 +16,6 @@ abstract class GalagoWrapper
   // how many results to return from search
   val DEFAULT_K = 2500
   val docComponents = new Document.DocumentComponents(true, false, false)
-  val indexLocation : String
   val retrieval : Retrieval
 
   def runQuery(queryText : String) : GenSeq[String] =

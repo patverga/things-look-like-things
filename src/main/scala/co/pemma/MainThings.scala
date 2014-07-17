@@ -1,7 +1,7 @@
 package co.pemma
 
 import java.io._
-import co.pemma.galagos.{ClueWebQuery, WikipediaQuery, GalagoWrapper}
+import co.pemma.galagos.{WikiClueQuery, ClueWebQuery, WikipediaQuery, GalagoWrapper}
 import co.pemma.relationExtractors._
 import cc.factorie.util.CmdOptions
 import edu.mit.jwi.item.Pointer
@@ -12,7 +12,7 @@ object MainThings
 {
   def exportRelationsByThing(thing : String, outputLocation : String, extractor : RelationExtractor, galago : GalagoWrapper)
   {
-    val documents = galago.runQuery(s"$thing looks like", 2500)
+    val documents = galago.runQuery(s"$thing looks like")
     // filter relations that do not involve the 'thing'
     val extractions = extractor.extractRelations(documents, thing).filter(x => {
       (x.arg1.contains(thing) || x.arg2.contains(thing))
@@ -86,7 +86,7 @@ object MainThings
     val galago = dataset match {
         case "wikipedia" => new WikipediaQuery
         case "clueweb" => new ClueWebQuery
-        case _ => new ClueWebQuery
+        case _ => new WikiClueQuery
       }
 
     // choose extractor
