@@ -53,7 +53,7 @@ abstract class RelationExtractor
 
     // filter out relations that we dont want
     extractions.filter(x => {
-      p.matches(x.rel) &&
+     x.rel.matches(p) &&
         !omitArgRegex.pattern.matcher(x.arg1).matches &&
         !omitArgRegex.pattern.matcher(x.arg2).matches
     })
