@@ -12,7 +12,7 @@ object MainThings
 {
   def exportRelationsByThing(thing : String, outputLocation : String, extractor : RelationExtractor, galago : GalagoWrapper)
   {
-    val documents = galago.runQuery(s"$thing looks like")
+    val documents = galago.runBatchQueries(Seq(s"$thing looks like",s"$thing appears like"))
     // filter relations that do not involve the 'thing'
     val extractions = extractor.extractRelations(documents, thing).filter(x => {
       (x.arg1.contains(thing) || x.arg2.contains(thing))

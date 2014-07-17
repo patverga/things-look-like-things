@@ -52,7 +52,7 @@ object FactorieFunctions {
 
       val doc = load.LoadPlainText.fromString(document).head
       // doc -> sentences with factorie, keep only sentences that match our pattern
-      FactorieFunctions.extractSentences(doc).map(_.string).filter(filterRegex.pattern.matcher(_).matches)
+      extractSentences(doc).map(_.string)//.filter(filterRegex.pattern.matcher(_).matches)
     })
   }
 

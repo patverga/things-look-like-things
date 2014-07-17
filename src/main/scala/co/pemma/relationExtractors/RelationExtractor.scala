@@ -25,17 +25,16 @@ abstract class RelationExtractor
 //      s".*${patternRegex.toString}.*".r
 //    else
 //      s"(?:.*$thingRegex.*${patternRegex.toString}.*)|(?:.*${patternRegex.toString}.*$thingRegex.*)".r
-    val filterRegex = s".*${patternRegex.toString}.*".r
+//    val filterRegex = s".*${patternRegex.toString}.*".r
 
-    println(filterRegex.toString())
+//    println(filterRegex.toString())
     // load the data
-    val sentences = FactorieFunctions.processDocuments(documents, filterRegex)
+    val sentences = FactorieFunctions.processDocuments(documents, "".r)
 
     var i = 0
     println(s"Extracting relations from ${sentences.size} sentences")
     val extractions = sentences.flatMap(sentence =>
     {
-      println(s":::: $sentence")
       i += 1
       Utilities.printPercentProgress(i, documents.size)
       if (sentence != null && sentence.length > 10)

@@ -162,7 +162,8 @@ object JWIWordNetWrap {
       "cloud",
       "bagel",
       "Beagle",
-      "Whippet"
+      "Whippet",
+    "running"
     )
 
     words.foreach(w => {
