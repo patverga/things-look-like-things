@@ -3,9 +3,7 @@ package co.pemma.test
 import java.io.{BufferedWriter, FileWriter, PrintWriter}
 
 import cc.factorie.app.nlp.load
-import cc.factorie.app.nlp.Sentence
-import co.pemma.FactorieFunctions
-import co.pemma.Utilities
+import co.pemma.{FactorieFunctions, Utilities}
 import co.pemma.galagos.ClueWebQuery
 
 import scala.collection.GenSeq
@@ -32,28 +30,28 @@ object DataManager
     println(documents.size)
     // convert documents to sentences
     var i = 0
-    val sentences = documents.flatMap(document => {
+    val sentences = documents.par.flatMap(document => {
       i += 1
       Utilities.printPercentProgress(i, documents.size)
       // doc -> sentences with factorie
-      FactorieFunctions.extractSentences(load.LoadPlainText.fromString(document).head)
-        // filter sentences that dont contain the thing
-        .filter(_.contains(thing))
+      val strings = FactorieFunctions.extractSentences(load.LoadPlainText.fromString(document).head).map(_.string)
+      // filter sentences that dont contain the thing
+      strings.filter(_.contains(thing))
     })
 
     println(sentences.size)
-//        val sentences = galago.retrieveMatchingSentences(Seq(s"$thing looks like", s"$thing appears like"), thing, 5000)
+    //        val sentences = galago.retrieveMatchingSentences(Seq(s"$thing looks like", s"$thing appears like"), thing, 5000)
 
     // export the sentences
     printSentences(sentences, outputLocation)
   }
 
-  def printSentences(sentences : GenSeq[Sentence], outputLocation : String)
+  def printSentences(sentences : GenSeq[String], outputLocation : String)
   {
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
     sentences.foreach(sentence =>
     {
-      val stringSent = sentence.string
+      val stringSent = sentence
       println(s"\n ${stringSent}")
       writer.println(s"\n ${stringSent}")
     })
