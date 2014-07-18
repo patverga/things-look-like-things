@@ -3,6 +3,7 @@ package co.pemma.galagos
 import cc.factorie.app.nlp.load
 import cc.factorie.app.nlp.Sentence
 import co.pemma.FactorieFunctions
+import co.pemma.Utilities
 import org.lemurproject.galago.core.parse.Document
 import org.lemurproject.galago.core.retrieval.query.{Node, StructuredQuery}
 import org.lemurproject.galago.core.retrieval.{Retrieval, ScoredDocument}
@@ -49,8 +50,12 @@ abstract class GalagoWrapper
   {
     val results = queries.flatMap(q => getTopResults(q, kResults))//.toSet[ScoredDocument].toSeq
 
-    // return the actual documents
+    // return the sentences that contain the filter term
+    println(s"Filtering sentences that match the contain the term \'$term\'")
+    var i = 0
     results.flatMap(docId => {
+      i += 1
+      Utilities.printPercentProgress(i, results.size)
       val doc = retrieval.getDocument(docId.documentName, docComponents)
       if (doc != null) {
         FactorieFunctions.extractSentences(load.LoadPlainText.fromString(doc.toString).head).filter(_.contains(term))
