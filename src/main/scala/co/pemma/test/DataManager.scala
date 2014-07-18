@@ -32,7 +32,7 @@ object DataManager
     println(documents.size)
     // convert documents to sentences
     var i = 0
-    val sentences = documents.par.flatMap(document => {
+    val sentences = documents.flatMap(document => {
       i += 1
       Utilities.printPercentProgress(i, documents.size)
       // doc -> sentences with factorie
