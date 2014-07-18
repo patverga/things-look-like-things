@@ -3,10 +3,13 @@ package co.pemma.test
 import java.io.{BufferedWriter, FileWriter, PrintWriter}
 
 import cc.factorie.app.nlp.load
-import co.pemma.{FactorieFunctions, Utilities}
 import co.pemma.galagos.ClueWebQuery
+import co.pemma.Regexer
+import co.pemma.relationExtractors.OllieExtractor
+import co.pemma.{FactorieFunctions, Utilities}
 
 import scala.collection.GenSeq
+import scala.io.Source
 
 /**
  * Created by pv on 7/18/14.
@@ -16,7 +19,12 @@ object DataManager
 
   def main(args: Array[String])
   {
-    exportSentences(args(0).toLowerCase())
+    val thing = "whippet"
+//        exportSentences(args(0).toLowerCase())
+    getRelations(readInSentences(s"data/$thing.data"), thing)
+
+//    val c = new ClauseIEExtractor
+//    println(c.extract(" the whippet is a sighthound breed that looks like a small greyhound .").mkString("\n"))
   }
 
   def exportSentences(thing : String)
@@ -25,7 +33,13 @@ object DataManager
 
     // get documents from galago
     val galago = new ClueWebQuery
-    val documents = galago.runBatchQueries(Seq(s"$thing looks like", s"$thing appears like"), 5000)
+    val regexer = new Regexer("","")
+    val queries = regexer.patternList.map(pattern =>
+    {
+      s"${pattern.replaceAll("\\?", "")} $thing"
+    })
+
+    val documents = galago.runBatchQueries(queries, 1000)
 
     println(documents.size)
     // convert documents to sentences
@@ -40,7 +54,6 @@ object DataManager
     })
 
     println(sentences.size)
-    //        val sentences = galago.retrieveMatchingSentences(Seq(s"$thing looks like", s"$thing appears like"), thing, 5000)
 
     // export the sentences
     printSentences(sentences, outputLocation)
@@ -51,18 +64,32 @@ object DataManager
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
     sentences.foreach(sentence =>
     {
-      val stringSent = sentence
-      println(s"\n ${stringSent}")
-      writer.println(s"\n ${stringSent}")
+      println(s"\n ${sentence}")
+      writer.println(s"\n ${sentence}")
     })
     writer.close()
   }
 
-  def readInSentences(dataLocation :String)
+  def readInSentences(dataLocation :String) : Seq[String] =
   {
-    val source = scala.io.Source.fromFile(dataLocation)
-    val lines = source.mkString
-    source.close()
+    val source = Source.fromFile(dataLocation, "iso-8859-1")
+    source.getLines().filter(_.length > 10).filter(_!="\n").map(_.toLowerCase).toSeq
   }
 
+  def getRelations(sentences : Seq[String], thing : String)// : Seq[Extraction] =
+  {
+    val extractor = new OllieExtractor
+    val allExtractions = sentences.flatMap(extractor.extract(_))
+    println(s" Found ${allExtractions.size} total relations")
+    val filteredExtractions = allExtractions.filter(x =>{
+      x.arg1.contains(thing) || x.arg2.contains(thing)
+    })
+//    println(s" ${filteredExtractions.size} relations involve $thing")
+//    filteredExtractions.foreach(s => println(s.toString()))
+
+    val filteredAgain = extractor.filter(filteredExtractions)
+    println(s" ${filteredAgain.size} relations involve $thing and are a \'looks like\' relation")
+
+    filteredAgain.foreach(s => println(s.sentence))
+  }
 }

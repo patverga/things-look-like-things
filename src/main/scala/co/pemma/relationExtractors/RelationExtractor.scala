@@ -11,7 +11,7 @@ import scala.collection.GenSeq
 abstract class RelationExtractor
 {
   val omitArgRegex = "(?:you)|(?:he)|(?:she)|(?:it)|(?:we)|(?:they)|(?:him)|(?:her)|(?:i)|(?:\\W)".r
-  val patternRegex = "(?:(?:appear(?:s|ed|ance is)?|look(?:s|ed)?) (?:exactly |almost| pretty much)?(?:the same as|identical to|similar to|like)|(?:resemble(?:s|d)))".r
+  val patternRegex = "(?:(?:appear(?:s|ed|ance is)?|look(?:s|ed)?) (?:exactly |almost |pretty much |just )?(?:the same as|identical to|similar to|like)|(?:resemble(?:s|d)))".r
 
 
   def extractRelations(documents : GenSeq[String]) : GenSeq[Extraction] = {
@@ -56,11 +56,9 @@ abstract class RelationExtractor
 
   def filter(extractions : GenSeq[Extraction]) : GenSeq[Extraction] =
   {
-    val p = "(?:(?:appear(?:s|ed|ance is)?|look(?:s|ed)?) (?:exactly |almost| pretty much)?(?:the same as|identical to|similar to|like)|(?:resemble(?:s|d)))"
-
     // filter out relations that we dont want
     extractions.filter(x => {
-     x.rel.matches(p) &&
+     patternRegex.pattern.matcher(x.rel).matches() &&
         !omitArgRegex.pattern.matcher(x.arg1).matches &&
         !omitArgRegex.pattern.matcher(x.arg2).matches
     })

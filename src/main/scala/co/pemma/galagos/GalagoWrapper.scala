@@ -1,15 +1,12 @@
 package co.pemma.galagos
 
-import cc.factorie.app.nlp.load
-import cc.factorie.app.nlp.Sentence
-import co.pemma.FactorieFunctions
-import co.pemma.Utilities
 import org.lemurproject.galago.core.parse.Document
 import org.lemurproject.galago.core.retrieval.query.{Node, StructuredQuery}
 import org.lemurproject.galago.core.retrieval.{Retrieval, ScoredDocument}
 import org.lemurproject.galago.tupleflow.Parameters
-import collection.JavaConversions._
+
 import scala.collection.GenSeq
+import scala.collection.JavaConversions._
 
 
 /**
@@ -31,7 +28,7 @@ abstract class GalagoWrapper
   {
     val results = getTopResults(queryText, kResults)
     // return the actual documents
-    results.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
+    results.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filter(_ != null).map(_.toString)
   }
 
   def runBatchQueries(queries : Seq[String]) : GenSeq[String] =
@@ -43,26 +40,7 @@ abstract class GalagoWrapper
   {
     val results = queries.flatMap(q => getTopResults(q, kResults)).toSet[ScoredDocument].toSeq
     // return the actual documents
-    results.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
-  }
-
-  def retrieveMatchingSentences(queries : Seq[String], term : String, kResults : Int) : GenSeq[Sentence] =
-  {
-    val results = queries.flatMap(q => getTopResults(q, kResults))//.toSet[ScoredDocument].toSeq
-
-    // return the sentences that contain the filter term
-    println(s"Filtering sentences that match the contain the term \'$term\'")
-    var i = 0
-    results.flatMap(docId => {
-      i += 1
-      Utilities.printPercentProgress(i, results.size)
-      val doc = retrieval.getDocument(docId.documentName, docComponents)
-      if (doc != null) {
-        FactorieFunctions.extractSentences(load.LoadPlainText.fromString(doc.toString).head).filter(_.contains(term))
-      }
-      else
-        Seq()
-    })
+    results.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filter(_ != null).map(_.toString)
   }
 
   def getTopResults(queryText : String, kResults : Int) : Seq[ScoredDocument] =
