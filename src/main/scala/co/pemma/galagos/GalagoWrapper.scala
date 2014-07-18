@@ -53,7 +53,7 @@ abstract class GalagoWrapper
     // return the sentences that contain the filter term
     println(s"Filtering sentences that match the contain the term \'$term\'")
     var i = 0
-    results.flatMap(docId => {
+    results.par.flatMap(docId => {
       i += 1
       Utilities.printPercentProgress(i, results.size)
       val doc = retrieval.getDocument(docId.documentName, docComponents)

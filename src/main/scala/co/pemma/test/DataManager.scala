@@ -15,7 +15,7 @@ object DataManager
 
   def main(args: Array[String])
   {
-    exportSentences("whippet")
+    exportSentences(args(0).toLowerCase())
   }
 
   def exportSentences(thing : String)
