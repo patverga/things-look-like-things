@@ -27,8 +27,9 @@ object DataManager
 
     // get documents from galago
     val galago = new ClueWebQuery
-    val documents = galago.runBatchQueries(Seq(s"$thing looks like", s"$thing appears like"), 5000)
+    val documents = galago.runBatchQueries(Seq(s"$thing looks like", s"$thing appears like"), 500)
 
+    println(documents.size)
     // convert documents to sentences
     var i = 0
     val sentences = documents.par.flatMap(document => {
@@ -40,6 +41,7 @@ object DataManager
         .filter(_.contains(thing))
     })
 
+    println(sentences.size)
 //        val sentences = galago.retrieveMatchingSentences(Seq(s"$thing looks like", s"$thing appears like"), thing, 5000)
 
     // export the sentences
