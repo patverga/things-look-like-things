@@ -1,5 +1,8 @@
 package co.pemma.galagos
 
+import cc.factorie.app.nlp.load
+import cc.factorie.app.nlp.Sentence
+import co.pemma.FactorieFunctions
 import org.lemurproject.galago.core.parse.Document
 import org.lemurproject.galago.core.retrieval.query.{Node, StructuredQuery}
 import org.lemurproject.galago.core.retrieval.{Retrieval, ScoredDocument}
@@ -40,6 +43,21 @@ abstract class GalagoWrapper
     val results = queries.flatMap(q => getTopResults(q, kResults)).toSet[ScoredDocument].toSeq
     // return the actual documents
     results.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
+  }
+
+  def retrieveMatchingSentences(queries : Seq[String], term : String, kResults : Int) : GenSeq[Sentence] =
+  {
+    val results = queries.flatMap(q => getTopResults(q, kResults))//.toSet[ScoredDocument].toSeq
+
+    // return the actual documents
+    results.flatMap(docId => {
+      val doc = retrieval.getDocument(docId.documentName, docComponents)
+      if (doc != null) {
+        FactorieFunctions.extractSentences(load.LoadPlainText.fromString(doc.toString).head).filter(_.contains(term))
+      }
+      else
+        Seq()
+    })
   }
 
   def getTopResults(queryText : String, kResults : Int) : Seq[ScoredDocument] =
