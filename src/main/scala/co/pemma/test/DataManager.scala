@@ -25,7 +25,7 @@ object DataManager
 
     // get documents from galago
     val galago = new ClueWebQuery
-    val documents = galago.runBatchQueries(Seq(s"$thing looks like", s"$thing appears like"), 500)
+    val documents = galago.runBatchQueries(Seq(s"$thing looks like", s"$thing appears like"), 5000)
 
     println(documents.size)
     // convert documents to sentences
