@@ -19,9 +19,9 @@ object DataManager
 
   def main(args: Array[String])
   {
-    val thing = "whippet"
-//        exportSentences(args(0).toLowerCase())
-    getRelations(readInSentences(s"data/$thing.data"), thing)
+//    val thing = "whippet"
+        exportSentences(args(0).toLowerCase())
+//    getRelations(readInSentences(s"data/$thing.data"), thing)
 
 //    val c = new ClauseIEExtractor
 //    println(c.extract(" the whippet is a sighthound breed that looks like a small greyhound .").mkString("\n"))
