@@ -4,6 +4,7 @@ import java.io._
 import co.pemma.galagos.{WikiClueQuery, ClueWebQuery, WikipediaQuery, GalagoWrapper}
 import co.pemma.relationExtractors._
 import cc.factorie.util.CmdOptions
+import co.pemma.test.StupidBullshit
 import edu.mit.jwi.item.Pointer
 
 import scala.collection.GenSeq

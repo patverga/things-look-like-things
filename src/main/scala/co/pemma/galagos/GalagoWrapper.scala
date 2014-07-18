@@ -32,7 +32,12 @@ abstract class GalagoWrapper
 
   def runBatchQueries(queries : Seq[String]) : GenSeq[String] =
   {
-    val results = queries.flatMap(q => getTopResults(q, DEFAULT_K)).toSet[ScoredDocument].toSeq
+    runBatchQueries(queries, DEFAULT_K)
+  }
+
+  def runBatchQueries(queries : Seq[String], kResults : Int) : GenSeq[String] =
+  {
+    val results = queries.flatMap(q => getTopResults(q, kResults)).toSet[ScoredDocument].toSeq
     // return the actual documents
     results.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filterNot(_ == null).map(_.toString)
   }
