@@ -2,7 +2,10 @@ package co.pemma.test
 
 import java.io.{BufferedWriter, FileWriter, PrintWriter}
 
+import cc.factorie.app.nlp.load
 import cc.factorie.app.nlp.Sentence
+import co.pemma.FactorieFunctions
+import co.pemma.Utilities
 import co.pemma.galagos.ClueWebQuery
 
 import scala.collection.GenSeq
@@ -24,20 +27,20 @@ object DataManager
 
     // get documents from galago
     val galago = new ClueWebQuery
-//    val documents = galago.runBatchQueries(Seq(s"$thing looks like", s"$thing appears like"), 5000)
-//
-//    // convert documents to sentences
-//    var i = 0
-//    val sentences = documents.flatMap(document => {
-//      i += 1
-//      Utilities.printPercentProgress(i, documents.size)
-//      // doc -> sentences with factorie
-//      FactorieFunctions.extractSentences(load.LoadPlainText.fromString(document).head)
-//        // filter sentences that dont contain the thing
-//        .filter(_.contains(thing))
-//    })
+    val documents = galago.runBatchQueries(Seq(s"$thing looks like", s"$thing appears like"), 5000)
 
-        val sentences = galago.retrieveMatchingSentences(Seq(s"$thing looks like", s"$thing appears like"), thing, 5000)
+    // convert documents to sentences
+    var i = 0
+    val sentences = documents.par.flatMap(document => {
+      i += 1
+      Utilities.printPercentProgress(i, documents.size)
+      // doc -> sentences with factorie
+      FactorieFunctions.extractSentences(load.LoadPlainText.fromString(document).head)
+        // filter sentences that dont contain the thing
+        .filter(_.contains(thing))
+    })
+
+//        val sentences = galago.retrieveMatchingSentences(Seq(s"$thing looks like", s"$thing appears like"), thing, 5000)
 
     // export the sentences
     printSentences(sentences, outputLocation)
