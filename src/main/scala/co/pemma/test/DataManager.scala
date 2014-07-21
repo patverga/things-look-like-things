@@ -7,6 +7,9 @@ import co.pemma.galagos.ClueWebQuery
 import co.pemma.Regexer
 import co.pemma.relationExtractors.OllieExtractor
 import co.pemma.{FactorieFunctions, Utilities}
+import edu.knowitall.ollie.{Ollie, OllieExtraction}
+import edu.knowitall.ollie.confidence.OllieConfidenceFunction
+import edu.knowitall.tool.parse.MaltParser
 
 import scala.collection.GenSeq
 import scala.io.Source
@@ -20,7 +23,8 @@ object DataManager
   def main(args: Array[String])
   {
 //    val thing = "whippet"
-            exportSentences(args(0).toLowerCase())
+//            exportSentences(args(0).toLowerCase())
+    exportRelationsByThing("whippet","whippet.result")
 //    getRelations(readInSentences(s"data/$thing.data"), thing)
 
     //    val c = new ClauseIEExtractor
@@ -91,5 +95,81 @@ object DataManager
     println(s" ${filteredAgain.size} relations involve $thing and are a \'looks like\' relation")
 
     filteredAgain.foreach(s => println(s.sentence))
+  }
+
+  val omitArgRegex = "(?:you)|(?:he)|(?:she)|(?:it)|(?:we)|(?:they)|(?:him)|(?:her)|(?:i)|(?:\\W)"
+
+  def exportRelationsByThing(thing : String, outputLocation : String)
+  {
+    val galago = new ClueWebQuery
+
+    val regexer = new Regexer(".*", ".*")
+    val patternRegex = regexer.patternList.mkString("|")
+    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
+
+    val queries = regexer.patternList.map(p => s"$thing ${p.replaceAll("\\?", "")}")
+    val documents = galago.runBatchQueries(queries)
+    val extractions = extractRelations(documents)
+
+    // filter relations that do not involve the 'thing'
+    val filteredExtractions = extractions.filter(x => {
+      (x._2.arg1.text.contains(thing) || x._2.arg2.text.contains(thing)) &&
+        !x._2.arg1.text.matches(omitArgRegex) && !x._2.arg2.text.matches(omitArgRegex) &&
+        x._2.rel.text.matches(patternRegex)
+    })
+    filteredExtractions.foreach(extract =>
+    {
+      println(s"${extract._1} ${extract._2}")
+      writer.println(s"${extract._1} ${extract._2}")
+    })
+    writer.close()
+  }
+  // initialize MaltParser
+  val parser =  new MaltParser
+  val ollie = new Ollie
+  val confidence = OllieConfidenceFunction.loadDefaultClassifier()
+
+  def ollieExtraction(sentStr : String) : GenSeq[(String, OllieExtraction)] =
+  {
+    try {
+      val parsed = parser.dependencyGraph(sentStr)
+      val extractionInstances = ollie.extract(parsed)
+      val result = extractionInstances.map(inst => {
+        val conf = confidence(inst)
+        (("%.2f" format conf), inst.extraction)
+      })
+      result.toSeq
+    }
+    catch{
+      case  e: Exception => System.err.println(s"MALT ERROR : $sentStr")
+        Seq()
+    }
+  }
+
+  def extractRelations(documents : GenSeq[String]) : GenSeq[(String, OllieExtraction)] =
+  {
+    // load the data
+    var i = 0
+    println("Processing Documents...")
+    val allExtractions = documents.flatMap(document =>
+    {
+      i += 1
+      Utilities.printPercentProgress(i, documents.size)
+
+      val doc = load.LoadPlainText.fromString(document).head
+      val sentences = FactorieFunctions.extractSentences(doc)
+      val extractions = sentences.flatMap(sentence =>
+      {
+        val sentString = sentence.string.replaceAll("[^\\x00-\\x7F]", "").trim
+        if (sentString != "" && sentString != null && sentString.length > 10)
+        {
+          ollieExtraction(sentence.string.toLowerCase())
+        }
+        else
+          Seq()
+      })
+      extractions
+    })
+    allExtractions
   }
 }
