@@ -20,11 +20,11 @@ object DataManager
   def main(args: Array[String])
   {
 //    val thing = "whippet"
-        exportSentences(args(0).toLowerCase())
+            exportSentences(args(0).toLowerCase())
 //    getRelations(readInSentences(s"data/$thing.data"), thing)
 
-//    val c = new ClauseIEExtractor
-//    println(c.extract(" the whippet is a sighthound breed that looks like a small greyhound .").mkString("\n"))
+    //    val c = new ClauseIEExtractor
+    //    println(c.extract(" the whippet is a sighthound breed that looks like a small greyhound .").mkString("\n"))
   }
 
   def exportSentences(thing : String)
@@ -34,12 +34,11 @@ object DataManager
     // get documents from galago
     val galago = new ClueWebQuery
     val regexer = new Regexer("","")
-    val queries = regexer.patternList.map(pattern =>
-    {
-      s"${pattern.replaceAll("\\?", "")} $thing"
-    })
+    val queries = regexer.patternList.map(p => s"$thing ${p.replaceAll("\\?", "")}")
+
 
     val documents = galago.runBatchQueries(queries, 1000)
+
 
     println(documents.size)
     // convert documents to sentences
@@ -58,6 +57,7 @@ object DataManager
     // export the sentences
     printSentences(sentences, outputLocation)
   }
+
 
   def printSentences(sentences : GenSeq[String], outputLocation : String)
   {
@@ -84,8 +84,8 @@ object DataManager
     val filteredExtractions = allExtractions.filter(x =>{
       x.arg1.contains(thing) || x.arg2.contains(thing)
     })
-//    println(s" ${filteredExtractions.size} relations involve $thing")
-//    filteredExtractions.foreach(s => println(s.toString()))
+    //    println(s" ${filteredExtractions.size} relations involve $thing")
+    //    filteredExtractions.foreach(s => println(s.toString()))
 
     val filteredAgain = extractor.filter(filteredExtractions)
     println(s" ${filteredAgain.size} relations involve $thing and are a \'looks like\' relation")
