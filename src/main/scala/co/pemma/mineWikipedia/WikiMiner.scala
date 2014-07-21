@@ -1,5 +1,6 @@
 package co.pemma.mineWikipedia
 
+import cc.factorie.app.nlp.lexicon.StopWords
 import co.pemma.galagos.WikipediaQuery
 import org.jsoup._
 
@@ -46,6 +47,12 @@ object WikiMiner
   {
     extractFirstSection(doc)
     extractAppearanceSection(doc)
+  }
+
+  def removeStopWords(text : String)
+  {
+    StopWords.contains("t")
+
   }
 
 

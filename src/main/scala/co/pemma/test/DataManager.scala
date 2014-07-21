@@ -24,7 +24,9 @@ object DataManager
   {
 //    val thing = "whippet"
 //            exportSentences(args(0).toLowerCase())
-    exportRelationsByThing("whippet","whippet.result")
+    exportSentences2("whippet","whippet2.result")
+
+//    exportRelationsByThing("whippet","whippet.result")
 //    getRelations(readInSentences(s"data/$thing.data"), thing)
 
     //    val c = new ClauseIEExtractor
@@ -60,6 +62,44 @@ object DataManager
 
     // export the sentences
     printSentences(sentences, outputLocation)
+  }
+
+  def exportSentences2(thing : String, outputLocation : String)
+  {
+    val galago = new ClueWebQuery
+
+    val regexer = new Regexer(".*", ".*")
+    val patternRegex = regexer.patternList.mkString("|")
+    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
+
+    val queries = regexer.patternList.map(p => s"$thing ${p.replaceAll("\\?", "")}")
+    val documents = galago.runBatchQueries(queries)
+    var i = 0
+    println("Processing Documents...")
+    val filteredSentences = documents.par.flatMap(document =>
+    {
+      i += 1
+      Utilities.printPercentProgress(i, documents.size)
+
+      val doc = load.LoadPlainText.fromString(document).head
+      val sentences = FactorieFunctions.extractSentences(doc)
+      sentences.flatMap(sentence =>
+      {
+        val sentString = sentence.string.replaceAll("[^\\x00-\\x7F]", "").trim
+        if (sentString != "" && sentString != null && sentString.length > 10&& sentString.contains(thing))
+        {
+          sentence
+        }
+        else
+          Seq()
+      })
+    })
+    filteredSentences.foreach(s =>
+    {
+      println(s"$s \n\n")
+      writer.println(s"$s \n\n")
+    })
+    writer.close()
   }
 
 
@@ -141,7 +181,7 @@ object DataManager
       result.toSeq
     }
     catch{
-      case  e: Exception => System.err.println(s"MALT ERROR : $sentStr")
+      case e: Exception => System.err.println(s"MALT ERROR : $sentStr")
         Seq()
     }
   }
