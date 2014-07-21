@@ -83,22 +83,17 @@ object DataManager
 
       val doc = load.LoadPlainText.fromString(document).head
       val sentences = FactorieFunctions.extractSentences(doc)
-      sentences.flatMap(sentence =>
+      sentences.filter(sentence =>
       {
         val sentString = sentence.string
         val s = sentString.replaceAll("[^\\x00-\\x7F]", "").trim
-        if (s != "" && s != null && s.length > 10 && sentString.contains(thing))
-        {
-          sentString
-        }
-        else
-          Seq()
+        (s != "" && s != null && s.length > 10 && sentString.contains(thing))
       })
     })
     filteredSentences.foreach(s =>
     {
-      println(s"$s \n\n")
-      writer.println(s"$s \n\n")
+      println(s"${s.string} \n\n")
+      writer.println(s"${s.string} \n\n")
     })
     writer.close()
   }
