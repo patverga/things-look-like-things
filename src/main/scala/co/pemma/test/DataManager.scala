@@ -85,10 +85,11 @@ object DataManager
       val sentences = FactorieFunctions.extractSentences(doc)
       sentences.flatMap(sentence =>
       {
-        val sentString = sentence.string.replaceAll("[^\\x00-\\x7F]", "").trim
-        if (sentString != "" && sentString != null && sentString.length > 10&& sentString.contains(thing))
+        val sentString = sentence.string
+        val s = sentString.replaceAll("[^\\x00-\\x7F]", "").trim
+        if (s != "" && s != null && s.length > 10 && sentString.contains(thing))
         {
-          sentence
+          sentString
         }
         else
           Seq()
