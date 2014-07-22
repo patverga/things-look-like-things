@@ -1,9 +1,8 @@
 package co.pemma.test
 
 import cc.factorie.app.nlp.load
-import co.pemma.galagos.GalagoWrapper
-import co.pemma.relationExtractors.RelationExtractor
-import co.pemma.{FactorieFunctions, MainThings, Utilities}
+import co.pemma.Util.Utilities
+import co.pemma.{RelationExtractor, GalagoWrapper, FactorieFunctions, MainThings}
 
 /**
  * Created by pat on 7/16/14.

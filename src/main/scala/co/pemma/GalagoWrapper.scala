@@ -1,8 +1,8 @@
-package co.pemma.galagos
+package co.pemma
 
 import org.lemurproject.galago.core.parse.Document
 import org.lemurproject.galago.core.retrieval.query.{Node, StructuredQuery}
-import org.lemurproject.galago.core.retrieval.{Retrieval, ScoredDocument}
+import org.lemurproject.galago.core.retrieval.{Retrieval, RetrievalFactory, ScoredDocument}
 import org.lemurproject.galago.tupleflow.Parameters
 
 import scala.collection.GenSeq
@@ -65,3 +65,28 @@ abstract class GalagoWrapper
     query
   }
 }
+
+class ClueWebQuery extends  GalagoWrapper
+{
+  val indexLocation = "/mnt/nfs/indexes/ClueWeb12/galago/clueweb-12-B13.index/"
+  println("cluein  " + indexLocation)
+
+  val retrieval = RetrievalFactory.instance(indexLocation, new Parameters)
+}
+
+class WikipediaQuery extends  GalagoWrapper
+{
+  val indexLocation = "/mnt/nfs/work1/pat/wikipedia/index"
+  println("wikin  " + indexLocation)
+  val retrieval = RetrievalFactory.instance(indexLocation, new Parameters)
+}
+
+class WikiClueQuery extends  GalagoWrapper
+{
+  val clueWebIndex = "/mnt/nfs/indexes/ClueWeb12/galago/clueweb-12-B13.index/"
+  val wikiIndex = "/mnt/nfs/work1/pat/wikipedia/index"
+  val indices = seqAsJavaList(Seq(clueWebIndex, wikiIndex))
+  println("Using ClueWeb12 + Wikipedia Index")
+  val retrieval = RetrievalFactory.instance(indices, new Parameters)
+}
+

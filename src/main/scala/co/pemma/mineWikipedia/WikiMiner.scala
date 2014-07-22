@@ -1,7 +1,7 @@
 package co.pemma.mineWikipedia
 
 import cc.factorie.app.nlp.lexicon.StopWords
-import co.pemma.galagos.WikipediaQuery
+import co.pemma.WikipediaQuery
 import org.jsoup._
 
 /**

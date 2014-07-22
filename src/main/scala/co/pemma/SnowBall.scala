@@ -1,11 +1,5 @@
 package co.pemma
 
-import java.io.{FileWriter, BufferedWriter, PrintWriter}
-
-import cc.factorie.app.nlp.load
-import co.pemma.galagos.GalagoWrapper
-import co.pemma.relationExtractors.RelationExtractor
-
 import scala.util.matching.Regex
 
 /**
