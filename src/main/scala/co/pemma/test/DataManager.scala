@@ -76,7 +76,7 @@ object DataManager
     val documents = galago.runBatchQueries(queries)
     var i = 0
     println("Processing Documents...")
-    val filteredSentences = documents.par.flatMap(document =>
+    val filteredSentences = documents.flatMap(document =>
     {
       i += 1
       Utilities.printPercentProgress(i, documents.size)
