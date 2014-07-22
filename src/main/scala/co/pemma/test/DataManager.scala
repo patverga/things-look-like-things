@@ -24,9 +24,9 @@ object DataManager
   {
 //    val thing = "whippet"
 //            exportSentences(args(0).toLowerCase())
-    exportSentences2("whippet","whippet2.result")
+//    exportSentences2("whippet","whippet2.result")
 
-//    exportRelationsByThing("whippet","whippet.result")
+    exportRelationsByThing("whippet","whippet.result")
 //    getRelations(readInSentences(s"data/$thing.data"), thing)
 
     //    val c = new ClauseIEExtractor
@@ -145,7 +145,7 @@ object DataManager
 
     val queries = regexer.patternList.map(p => s"$thing ${p.replaceAll("\\?", "")}")
     val documents = galago.runBatchQueries(queries)
-    val extractions = extractRelations(documents)
+    val extractions = extractRelations(documents, thing)
 
     // filter relations that do not involve the 'thing'
     val filteredExtractions = extractions.filter(x => {
@@ -182,8 +182,10 @@ object DataManager
     }
   }
 
-  def extractRelations(documents : GenSeq[String]) : GenSeq[(String, OllieExtraction)] =
+  def extractRelations(documents : GenSeq[String], thing :String) : GenSeq[(String, OllieExtraction)] =
   {
+    val writer = new PrintWriter(new BufferedWriter(new FileWriter("whippet3.result")))
+
     // load the data
     var i = 0
     println("Processing Documents...")
@@ -196,16 +198,20 @@ object DataManager
       val sentences = FactorieFunctions.extractSentences(doc)
       val extractions = sentences.flatMap(sentence =>
       {
-        val sentString = sentence.string.replaceAll("[^\\x00-\\x7F]", "").trim
-        if (sentString != "" && sentString != null && sentString.length > 10)
+        val sentString = sentence.string
+        val s = sentString.replaceAll("[^\\x00-\\x7F]", "").trim
+        if (s != "" && s != null && s.length > 10)
         {
-          ollieExtraction(sentence.string.toLowerCase())
+          if (sentString.contains(thing))
+            writer.println(s"${sentString.toLowerCase()}\n")
+          ollieExtraction(sentString.toLowerCase())
         }
         else
           Seq()
       })
       extractions
     })
+    writer.close()
     allExtractions
   }
 }
