@@ -23,10 +23,10 @@ object DataManager
   def main(args: Array[String])
   {
 //    val thing = "whippet"
-//            exportSentences(args(0).toLowerCase())
+            exportSentences(args(0).toLowerCase())
 //    exportSentences2("whippet","whippet2.result")
 
-    exportRelationsByThing("whippet","whippet.result")
+//    exportRelationsByThing("whippet","whippet.result")
 //    getRelations(readInSentences(s"data/$thing.data"), thing)
 
     //    val c = new ClauseIEExtractor
@@ -53,7 +53,7 @@ object DataManager
       i += 1
       Utilities.printPercentProgress(i, documents.size)
       // doc -> sentences with factorie
-      val strings = FactorieFunctions.extractSentences(load.LoadPlainText.fromString(document).head).map(_.string)
+      val strings = FactorieFunctions.extractSentences(load.LoadPlainText.fromString(document).head).map(_.string.toLowerCase)
       // filter sentences that dont contain the thing
       strings.filter(_.contains(thing))
     })
@@ -70,7 +70,6 @@ object DataManager
 
     val regexer = new Regexer(".*", ".*")
     val patternRegex = regexer.patternList.mkString("|")
-    val writer = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation)))
 
     val queries = regexer.patternList.map(p => s"$thing ${p.replaceAll("\\?", "")}")
     val documents = galago.runBatchQueries(queries)
@@ -90,12 +89,7 @@ object DataManager
         (s != "" && s != null && s.length > 10 && sentString.contains(thing))
       })
     })
-    filteredSentences.foreach(s =>
-    {
-      println(s"${s.string} \n\n")
-      writer.println(s"${s.string} \n\n")
-    })
-    writer.close()
+    printSentences(filteredSentences, outputLocation)
   }
 
 
@@ -145,6 +139,7 @@ object DataManager
 
     val queries = regexer.patternList.map(p => s"$thing ${p.replaceAll("\\?", "")}")
     val documents = galago.runBatchQueries(queries)
+
     val extractions = extractRelations(documents, thing)
 
     // filter relations that do not involve the 'thing'
@@ -203,7 +198,7 @@ object DataManager
         if (s != "" && s != null && s.length > 10)
         {
           if (sentString.contains(thing))
-            writer.println(s"${sentString.toLowerCase()}\n")
+          writer.println(s"${sentString.toLowerCase()}\n")
           ollieExtraction(sentString.toLowerCase())
         }
         else
