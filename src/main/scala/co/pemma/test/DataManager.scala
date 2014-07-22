@@ -88,7 +88,7 @@ object DataManager
         val s = sentString.replaceAll("[^\\x00-\\x7F]", "").trim
         (s != "" && s != null && s.length > 10 && sentString.contains(thing))
       })
-    })
+    }).map(_.string)
     printSentences(filteredSentences, outputLocation)
   }
 
