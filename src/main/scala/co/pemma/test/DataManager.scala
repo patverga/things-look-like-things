@@ -19,7 +19,7 @@ object DataManager
 
   def main(args: Array[String])
   {
-//    val thing = "whippet"
+    val thing = args(0) //"whippet"
     //            exportSentences(args(0).toLowerCase())
     //    exportSentences2("whippet","whippet2.result")
 
@@ -128,7 +128,7 @@ object DataManager
      otherArgs.contains(x.arg1) || otherArgs.contains(x.arg2)
     }).map(_.rel)
 
-    printSentences(otherPatterns, s"$newPatternLocation/$thing")
+    printSentences(otherPatterns.toSeq, s"$newPatternLocation/$thing")
   }
 
   def printSentences(sentences : GenSeq[String], outputLocation : String)
