@@ -24,7 +24,7 @@ object DataManager
     //    exportSentences2("whippet","whippet2.result")
 
     //    exportRelationsByThing("whippet","whippet.result")
-//    getRelations(readInSentences(s"data/$thing.data"), thing)
+    //    getRelations(readInSentences(s"data/$thing.data"), thing)
     relationsWithThing(readInSentences(s"data/$thing.data"), thing)
     //    val c = new ClauseIEExtractor
     //    println(c.extract(" the whippet is a sighthound breed that looks like a small greyhound .").mkString("\n"))
@@ -85,7 +85,7 @@ object DataManager
     //    println(s" ${filteredExtractions.size} relations involve $thing")
     //    filteredExtractions.foreach(s => println(s.toString()))
 
-        val filteredAgain = extractor.filter(filteredExtractions)
+    val filteredAgain = extractor.filter(filteredExtractions)
     println(s" ${filteredAgain.size} relations involve $thing and are a \'looks like\' relation")
 
     filteredAgain.foreach(s => println(s.relation()))
@@ -125,8 +125,11 @@ object DataManager
 
     val otherPatterns = otherPatternRelations.filter(x =>
     {
-     otherArgs.contains(x.arg1) || otherArgs.contains(x.arg2)
-    }).map(_.rel)
+      otherArgs.contains(x.arg1) || otherArgs.contains(x.arg2)
+    }).map(x =>{
+      println(x.relation())
+      x.rel
+    })
 
     printSentences(otherPatterns.toSeq, s"$newPatternLocation/$thing")
   }
