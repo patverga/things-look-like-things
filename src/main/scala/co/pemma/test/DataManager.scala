@@ -1,6 +1,6 @@
 package co.pemma.test
 
-import java.io.{FileWriter, BufferedWriter, PrintWriter}
+import java.io.{BufferedWriter, FileWriter, PrintWriter}
 
 import cc.factorie.app.nlp.load
 import co.pemma.Util.{ProgressBar, Utilities}
@@ -8,6 +8,9 @@ import co.pemma.{ClueWebQuery, Extraction, FactorieFunctions, OllieExtractor, Re
 
 import scala.collection.{GenSeq, GenSet}
 import scala.io.Source
+import util.control.Breaks._
+
+
 
 /**
  * Created by pv on 7/18/14.
@@ -19,7 +22,8 @@ object DataManager
 
   def main(args: Array[String])
   {
-    val thing = args(0).toLowerCase() //"whippet"
+    val thing = args(0).toLowerCase()
+//    val thing = "test"
     //            exportSentences(args(0).toLowerCase())
     //    exportSentences2("whippet","whippet2.result")
 
@@ -79,7 +83,7 @@ object DataManager
     })
     println(s" Found ${allExtractions.size} total relations")
     val filteredExtractions = allExtractions.filter(x =>{
-      (x.arg1.contains(thing) || x.arg2.contains(thing))
+      (x.arg1.contains(thing) || x.arg2.contains(thing)) && x.confidence > 0.7
     })
 
     //    println(s" ${filteredExtractions.size} relations involve $thing")
@@ -101,7 +105,7 @@ object DataManager
       extractor.extract(s)
     })
     val filteredExtractions = allExtractions.filter(x =>{
-      (x.arg1.contains(thing) || x.arg2.contains(thing)) //&& x.confidence >= 0.80
+      (x.arg1.contains(thing) || x.arg2.contains(thing)) && x.confidence >= 0.70
     })
     println(s" Found ${allExtractions.size} total relations. Found ${filteredExtractions.size} relations involving $thing.")
 
@@ -130,7 +134,6 @@ object DataManager
       println(x.relation())
       x.rel
     })
-
     printSentences(otherPatterns.toSeq, s"$newPatternLocation/$thing")
   }
 

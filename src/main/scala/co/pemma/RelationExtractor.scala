@@ -18,7 +18,7 @@ import scala.collection.JavaConversions._
  */
 abstract class RelationExtractor
 {
-  val omitArgRegex = "(?:you)|(?:he)|(?:she)|(?:it)|(?:we)|(?:they)|(?:him)|(?:her)|(?:i)|(?:\\W)".r
+  val omitArgRegex = "(?:you)|(?:he)|(?:she)|(?:it)|(?:we)|(?:they)|(?:him)|(?:her)|(?:i)|(?:\\W)|(?:one)".r
   val patternRegex = "(?:(?:appear(?:s|ed|ance is)?|look(?:s|ed)?) (?:exactly |almost |pretty much |just )?(?:the same as|identical to|similar to|like)|(?:resemble(?:s|d)))".r
 
 
