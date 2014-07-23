@@ -19,7 +19,7 @@ object DataManager
 
   def main(args: Array[String])
   {
-    val thing = args(0) //"whippet"
+    val thing = args(0).toLowerCase() //"whippet"
     //            exportSentences(args(0).toLowerCase())
     //    exportSentences2("whippet","whippet2.result")
 
