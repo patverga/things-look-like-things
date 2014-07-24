@@ -5,7 +5,7 @@ import java.io.{FileWriter, BufferedWriter, PrintWriter, File}
 
 import cc.factorie.app.nlp.load.LoadOWPL
 import cc.factorie.app.nlp.ner.{LabeledBilouConllNerTag, NerTag}
-import co.pemma.FactorieFunctions
+import co.pemma.{OllieExtractor, FactorieFunctions}
 import co.pemma.Util.ProgressBar
 
 import scala.collection.GenSeq
@@ -16,26 +16,29 @@ import scala.io.Source
  */
 object ReadAndEntityTag
 {
-
+  val DIR = "org_loc_sentences"
   //  val seeds = Seq()
 
 
   def main(args: Array[String])
   {
-    val file = "test"
-    //    val file = "lw97.dat"
-
+//    val file = "test"
+//    val file = "lw97.dat"
 //    val inputLoc = s"/home/pat/corpus/Na_news98/$file"
-//    val validSentences = extractOrgLocSentences(docsToNERSentences(readNaNewsData(inputLoc)))
-//    writeSentences(validSentences, file)
-//
+
+    val inputLoc = args(0)
+
+    val validSentences = extractOrgLocSentences(docsToNERSentences(readNaNewsData(inputLoc)))
+    writeAnnotatedSentences(validSentences, inputLoc.split("/").last)
+
 //    readAnnotedData(file).foreach(s => {
 //      s.tokens.foreach(t => {
 //        println(t.string +" \t " + t.attr[NerTag].categoryValue)
 //      })
 //    })
 
-    val sentences = readAnnotedData(file)
+//    val sentences = readAnnotedData(file)
+//    extractRelations(sentences)
 
   }
 
@@ -55,11 +58,29 @@ object ReadAndEntityTag
 
   def readAnnotedData(fileName : String) : Seq[Sentence] =
   {
-    val inputLoc = s"org_loc_sentences/$fileName"
+    val inputLoc = s"$DIR/$fileName"
     def nerLabelMaker(tok: Token, labels: Seq[String]) : LabeledBilouConllNerTag = {
       new LabeledBilouConllNerTag(tok, if(labels.size == 1) "O" else labels(1))
     }
-    LoadOWPL.fromFilename(inputLoc, nerLabelMaker).head.sentences.toSeq
+    LoadOWPL.fromFilename(inputLoc, nerLabelMaker).head.sentences.toSeq.filter(_!="")
+  }
+
+  def writeAnnotatedSentences(sentences : GenSeq[Sentence], file : String)
+  {
+    println(s"Exporting valid sentences to file : $file")
+    val writer = new PrintWriter(new BufferedWriter(new FileWriter(s"$DIR/$file")))
+    sentences.foreach(sentence =>
+    {
+      sentence.tokens.foreach(t => {
+        val tag =
+          if (t.attr[NerTag].categoryValue == "O")  ""
+          else t.attr[NerTag].categoryValue
+        //        if (tag.equals("O")) tag = ""
+        writer.println(s"${t.string} \t $tag")
+      })
+      writer.println()
+    })
+    writer.close()
   }
 
   def docsToNERSentences( docs : Seq[String]) : GenSeq[Sentence] =
@@ -70,9 +91,9 @@ object ReadAndEntityTag
       segment.DeterministicSentenceSegmenter, ner.NoEmbeddingsConllStackedChainNer))
 
     val progress = new ProgressBar(docs.size)
-    docs.flatMap(doc =>
+    docs.par.flatMap(doc =>
     {
-      progress.increment()
+//      progress.increment()
       FactorieFunctions.extractSentences(load.LoadPlainText.fromString(doc).head, pipeline)
     })
   }
@@ -95,21 +116,17 @@ object ReadAndEntityTag
     })
   }
 
-  def writeSentences(sentences : GenSeq[Sentence], file : String)
+  def extractRelations(sentences : Seq[Sentence])
   {
-    println(s"Exporting valid sentences to file : $file")
-    val writer = new PrintWriter(new BufferedWriter(new FileWriter(s"org_loc_sentences/$file")))
-    sentences.foreach(sentence =>
-    {
-      sentence.tokens.foreach(t => {
-        val tag =
-          if (t.attr[NerTag].categoryValue == "O")  ""
-          else t.attr[NerTag].categoryValue
-        //        if (tag.equals("O")) tag = ""
-        writer.println(s"${t.string} \t $tag")
-      })
-      writer.println()
+    println(s"Extracting relations")
+    val extractor = new OllieExtractor
+    val progress = new ProgressBar(sentences.size)
+    val allExtractions = sentences.flatMap(s => {
+      progress.increment()
+      extractor.extract(s)
     })
-    writer.close()
+    println(s" Found ${allExtractions.size} total relations")
+
+    allExtractions.foreach(x => println(x.relation()))
   }
 }
