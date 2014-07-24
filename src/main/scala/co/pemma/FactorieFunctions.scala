@@ -36,13 +36,18 @@ object FactorieFunctions {
 
   def extractSentences(doc :Document) : Iterable[Sentence] =
   {
+    extractSentences(doc, pipeline)
+  }
+
+  def extractSentences(doc : Document, pipe : DocumentAnnotationPipeline ) : Iterable[Sentence] =
+  {
     try {
-      val processedDoc = FactorieFunctions.pipeline.process(doc)
+      val processedDoc = pipe.process(doc)
       processedDoc.sentences
     }
     catch
       {
-        case  e: Exception => System.err.println(s"FACTORIE ERROR : ${doc.string}")
+        case  e: Exception => System.err.println(s"FACTORIE ERROR : ${e.printStackTrace()}")
           Iterable()
         case  e: StackOverflowError => System.err.println(s"FACTORIE ERROR : ${doc.string}")
           Iterable()
