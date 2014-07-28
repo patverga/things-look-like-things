@@ -117,7 +117,9 @@ class ReverbExtractor extends RelationExtractor{
       result
     }
     catch{
-      case  e: Exception => System.err.println(s"REVERB ERROR : $sentStr")
+      case  e: Exception =>
+        System.err.println(s"REVERB ERROR : $sentStr")
+        System.err.println(e.printStackTrace())
         Seq()
     }
   }
