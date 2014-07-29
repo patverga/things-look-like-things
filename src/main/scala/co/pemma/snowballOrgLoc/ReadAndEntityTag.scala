@@ -18,23 +18,20 @@ import scala.util.matching.Regex
  */
 object ReadAndEntityTag
 {
-  val DIR = "org_loc_sentences/utf"
-  //  val coRegex = Seq("google", "microsoft","exxon","ibm", "boeing","intel").mkString("(?:.* "," .*)|(?:.* "," .*)").r
-  //  val locRegex = Seq("mountain view","redmond","irving", "armonk","seattle","santa clara").mkString("(?:.* "," .*)|(?:.* "," .*)").r
-
-  val seedRegex = createSeedRegex()
+  val DIR = "org_loc_sentences"
+   val seedRegex = createSeedRegex()
   println(seedRegex)
 
   def main(args: Array[String])
   {
     //    val file = "test"
-    val file = "lw97.dat"
-    //    val inputLoc = s"/home/pat/corpus/Na_news98/$file"
+//    val file = "lw97.dat"
+//        val inputLoc = s"/home/pat/corpus/Na_news98/$file"
 
-    //    val inputLoc = args(0)
+        val inputLoc = args(0)
     //
-    //    val validSentences = extractOrgLocSentences(docsToNERSentences(readNaNewsData(inputLoc)))
-    //    writeAnnotatedSentences(validSentences, inputLoc.split("/").last)
+        val validSentences = extractOrgLocSentences(docsToNERSentences(readNaNewsData(inputLoc)))
+        writeAnnotatedSentences(validSentences, inputLoc.split("/").last)
 
     //    readAnnotedData(file).foreach(s => {
     //      s.tokens.foreach(t => {
@@ -44,15 +41,17 @@ object ReadAndEntityTag
 
     //    extractRelations(sentences)
 
+//    seedMatches().foreach(s => println(s"$s\n"))
+//    docsToNERSentences(readNaNewsData(inputLoc)).foreach(s => println(s"$s\n"))
 //    extractRelations(seedMatches())
-    FiveTupleFunctions.groupTuples(seedMatches().map(s =>{
-      FiveTupleFunctions.sentenceToFiveTuple(s)
-    }).filter(_!=null))
+//    FiveTupleFunctions.groupTuples(seedMatches().map(s =>{
+//      FiveTupleFunctions.sentenceToFiveTuple(s)
+//    }).filter(_!=null))
   }
 
   def seedMatches() : Seq[Sentence] =
   {
-    val dir = new File(DIR)
+    val dir = new File(s"DIR/utf")
     val sentences = dir.listFiles.par.flatMap(f => {
       val fStr = f.toPath.toString
       if (fStr.contains("ny"))
@@ -106,7 +105,7 @@ object ReadAndEntityTag
   def writeAnnotatedSentences(sentences : GenSeq[Sentence], file : String)
   {
     println(s"Exporting valid sentences to file : $file")
-    val writer = new PrintWriter(new BufferedWriter(new FileWriter(s"$DIR/$file")))
+    val writer = new PrintWriter(new BufferedWriter(new FileWriter(s"$DIR/original/$file")))
     sentences.foreach(sentence =>
     {
       sentence.tokens.foreach(t => {
@@ -121,7 +120,7 @@ object ReadAndEntityTag
     writer.close()
   }
 
-  def docsToNERSentences( docs : Seq[String]) : GenSeq[Sentence] =
+  def docsToNERSentences( docs : Seq[String]) : Seq[Sentence] =
   {
     println("Converting Docs to Sentences and Tagging NERs")
 
@@ -129,14 +128,14 @@ object ReadAndEntityTag
       segment.DeterministicSentenceSegmenter, ner.NoEmbeddingsConllStackedChainNer))
 
     val progress = new ProgressBar(docs.size)
-    docs.par.flatMap(doc =>
+    docs.flatMap(doc =>
     {
       //      progress.increment()
       FactorieFunctions.extractSentences(load.LoadPlainText.fromString(doc).head, pipeline)
     })
   }
 
-  def extractOrgLocSentences(sentences : GenSeq[Sentence]) : GenSeq[Sentence] =
+  def extractOrgLocSentences(sentences : Seq[Sentence]) : Seq[Sentence] =
   {
     println("Keeping sentences that contain both an ORG and a LOC.")
     sentences.filter(s => {

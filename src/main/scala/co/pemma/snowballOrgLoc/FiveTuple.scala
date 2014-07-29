@@ -27,39 +27,39 @@ object FiveTupleFunctions
   val window = 5
 
 
-  def groupTuples(tuples : Seq[FiveTuple])
-  {
-    val leftCounts = new scala.collection.mutable.HashMap[String, Int]
-    val centerCounts = new scala.collection.mutable.HashMap[String, Int]
-    val rightCounts = new scala.collection.mutable.HashMap[String, Int]
-
-    tuples.foreach(t =>
-    {
-      t.left.split(" ").foreach(w =>
-      {
-        if (counts.contains(w))
-          leftCounts.put(w, leftCounts(w) + 1)
-        else
-          leftCounts.put(w, 1)
-      })
-      t.center.split(" ").foreach(w =>
-      {
-        if (counts.contains(w))
-          centerCounts.put(w, centerCounts(w) + 1)
-        else
-          centerCounts.put(w, 1)
-      })
-      t.right.split(" ").foreach(w =>
-      {
-        if (rightCounts.contains(w))
-          rightCounts.put(w, rightCounts(w) + 1)
-        else
-          rightCounts.put(w, 1)
-      })
-    })
-
-    
-  }
+//  def groupTuples(tuples : Seq[FiveTuple])
+//  {
+//    val leftCounts = new scala.collection.mutable.HashMap[String, Int]
+//    val centerCounts = new scala.collection.mutable.HashMap[String, Int]
+//    val rightCounts = new scala.collection.mutable.HashMap[String, Int]
+//
+//    tuples.foreach(t =>
+//    {
+//      t.left.split(" ").foreach(w =>
+//      {
+//        if (counts.contains(w))
+//          leftCounts.put(w, leftCounts(w) + 1)
+//        else
+//          leftCounts.put(w, 1)
+//      })
+//      t.center.split(" ").foreach(w =>
+//      {
+//        if (counts.contains(w))
+//          centerCounts.put(w, centerCounts(w) + 1)
+//        else
+//          centerCounts.put(w, 1)
+//      })
+//      t.right.split(" ").foreach(w =>
+//      {
+//        if (rightCounts.contains(w))
+//          rightCounts.put(w, rightCounts(w) + 1)
+//        else
+//          rightCounts.put(w, 1)
+//      })
+//    })
+//
+//
+//  }
 
   def sentenceToFiveTuple(sentence : Sentence) : FiveTuple =
   {
@@ -122,5 +122,11 @@ object FiveTupleFunctions
       return null
     new FiveTuple(left.toString(), e1.toString(), center.toString(), e2.toString(), right.toString(), locFirst)
     //    new FiveTuple(left, e1, center, e2, right, locFirst)
+  }
+
+  def main(args: Array[String])
+  {
+    val s = ReadAndEntityTag.readAnnotedData("org_loc_sentences/test")
+    println(s(0))
   }
 }
