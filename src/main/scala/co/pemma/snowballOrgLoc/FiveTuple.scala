@@ -9,6 +9,15 @@ import cc.factorie.la.SparseTensor1
  * Created by pat on 7/28/14.
  */
 
+class FiveTuple(t : SparseTensor1, c : Seq[TokenSpan], e : Seq[Phrase], s : Sentence)
+{
+  val tensor = t
+  val contexts = c
+  val entities = e
+  val sentence = s
+  val orgFirst = entities(0).headToken.attr[NerTag].shortCategoryValue == "ORG"
+}
+
 object FiveTupleFunctions
 {
   val window = 3
@@ -52,9 +61,9 @@ object FiveTupleFunctions
   }
 
   def sentenceToRelationContext(sentence : Sentence, map : scala.collection.mutable.HashMap[String, Int])
-  : Seq[(SparseTensor1, Seq[TokenSpan], Seq[Phrase])] =
+  : Seq[FiveTuple] =
   {
-    val result = scala.collection.mutable.ArrayBuffer[(SparseTensor1, Seq[TokenSpan], Seq[Phrase])]()
+    val result = scala.collection.mutable.ArrayBuffer[FiveTuple]()
     val phrases = sentence.attr[PhraseList]
     var i = 0
     while (i < phrases.size)
@@ -72,8 +81,7 @@ object FiveTupleFunctions
           //          println(s"${p1.string}   ${p2.string}")
           val context = contextBetweenPhrases(p1, p2, sentence)
           val tensor = contextsToVector(context._1, map)
-          val tup = (tensor, context._1, context._2)
-          result += tup
+          result += new FiveTuple(tensor, context._1, context._2, sentence)
         }
         j += 1
       }
@@ -117,13 +125,13 @@ object FiveTupleFunctions
     (Seq(left, center, right),Seq(p1, p2))
   }
 
-  def contextsToVector(fiveTuple : Seq[TokenSpan], map : scala.collection.mutable.HashMap[String, Int])
+  def contextsToVector(contexts : Seq[TokenSpan], map : scala.collection.mutable.HashMap[String, Int])
   : SparseTensor1 =
   {
     // iterate over the three contexts
     val tensor = new SparseTensor1(map.size * 3)
     var startDex = 0
-    fiveTuple.foreach(context =>
+    contexts.foreach(context =>
     {
       // weight contexts differently
       val weight =
@@ -141,7 +149,7 @@ object FiveTupleFunctions
   }
 
   def sentencesToVectors(sentences : Seq[Sentence], map : scala.collection.mutable.HashMap[String, Int])
-  : Seq[(SparseTensor1, Seq[TokenSpan], Seq[Phrase])] =
+  : Seq[FiveTuple] =
   {
     sentences.flatMap(s => {
       extractPhrases(s)

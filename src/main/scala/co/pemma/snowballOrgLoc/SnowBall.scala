@@ -2,13 +2,17 @@ package co.pemma.snowballOrgLoc
 
 import java.io.File
 
+import bsh.commands.dir
 import cc.factorie.app.nlp.load.LoadOWPL
 import cc.factorie.app.nlp.ner.LabeledBilouConllNerTag
-import cc.factorie.app.nlp.{Token, Sentence}
+import cc.factorie.app.nlp.phrase.Phrase
+import cc.factorie.app.nlp.{TokenSpan, Token, Sentence}
+import cc.factorie.la.SparseTensor1
 import co.pemma.OllieExtractor
 import co.pemma.Util.ProgressBar
 
 import scala.util.matching.Regex
+import scalaz.Digit._3
 
 /**
  * Created by pat on 7/30/14.
@@ -17,6 +21,7 @@ object SnowBall
 {
   val DIR = "org_loc_sentences"
   val seedRegex = createSeedRegex()
+  val simThreshold = .4
 
 
   def main(args: Array[String])
@@ -38,17 +43,28 @@ object SnowBall
     val map = SnowBall.createWordIndexMap(allData)
     val fiveTuples = FiveTupleFunctions.sentencesToVectors(allData, map)
 
-    fiveTuples.foreach(f => {
-      f._3
+    // seperate patterns that match seeds and rest
+    val partitions = fiveTuples.partition(tuple => {
+      val entityStr = s"${tuple.entities(0).string} ${tuple.entities(1).string}".toLowerCase;
+      seedRegex.pattern.matcher(entityStr).matches
     })
 
-//
-//    val seedSentences = allData.par.filter(s => seedRegex.pattern.matcher(s.string.toLowerCase).matches).toSet
-//    val notSeeds = allData.toSet.diff(seedSentences)
-//
-//    println(s"${allData.size} ${seedSentences.size} ${notSeeds.size}")
-//    val patterns =
+    val patterns = partitions._1
+    val otherData = partitions._2
 
+    similarTuples(patterns, otherData).foreach(tuple => println(s"${tuple.entities(0).string} ${tuple.entities(1).string}"))
+  }
+
+  def similarTuples(patterns : Seq[FiveTuple], otherData : Seq[FiveTuple]) : Seq[FiveTuple] =
+  {
+    for { dat <- otherData
+      if patterns.map(pat => {
+        if (dat.orgFirst == pat.orgFirst)
+          dat.tensor.dot(pat.tensor)
+        else
+          0
+      }).max >= simThreshold
+    } yield dat
   }
 
   def seedMatches() : Seq[Sentence] =
