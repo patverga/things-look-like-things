@@ -22,6 +22,7 @@ object ReadAndEntityTag
 
   def main(args: Array[String])
   {
+//    val inputLoc = s"/home/pat/corpus/Na_news98/$file"
     val inputLoc = args(0)
 
     val validSentences = extractOrgLocSentences(docsToNERSentences(readNaNewsData(inputLoc)))

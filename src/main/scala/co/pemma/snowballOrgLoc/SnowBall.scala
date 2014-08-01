@@ -21,24 +21,34 @@ object SnowBall
 
   def main(args: Array[String])
   {
-    //    val file = "test"
-    val file = "test"
-    val inputLoc = s"/home/pat/corpus/Na_news98/$file"
+    run()
+  }
 
-    //    readAnnotedData(file).foreach(s => {
-    //      s.tokens.foreach(t => {
-    //        println(t.string +" \t " + t.attr[NerTag].categoryValue)
-    //      })
-    //    })
+  def run()
+  {
+    // read in all nytimes data
+    val allData = new File(s"$DIR/utf").listFiles.par.flatMap(f => {
+      val fStr = f.toPath.toString
+      if (fStr.contains("ny98"))
+        readAnnotedData(fStr)
+      else
+        Seq()
+    }).seq
 
-    //    extractRelations(sentences)
+    val map = SnowBall.createWordIndexMap(allData)
+    val fiveTuples = FiveTupleFunctions.sentencesToVectors(allData, map)
 
-    //    seedMatches().foreach(s => println(s"$s\n"))
-    //    docsToNERSentences(readNaNewsData(inputLoc)).foreach(s => println(s"$s\n"))
-    //    extractRelations(seedMatches())
-    //    FiveTupleFunctions.groupTuples(seedMatches().map(s =>{
-    //      FiveTupleFunctions.sentenceToFiveTuple(s)
-    //    }).filter(_!=null))
+    fiveTuples.foreach(f => {
+      f._3
+    })
+
+//
+//    val seedSentences = allData.par.filter(s => seedRegex.pattern.matcher(s.string.toLowerCase).matches).toSet
+//    val notSeeds = allData.toSet.diff(seedSentences)
+//
+//    println(s"${allData.size} ${seedSentences.size} ${notSeeds.size}")
+//    val patterns =
+
   }
 
   def seedMatches() : Seq[Sentence] =

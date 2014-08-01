@@ -12,6 +12,10 @@ import cc.factorie.la.SparseTensor1
 object FiveTupleFunctions
 {
   val window = 3
+  val distance = 5
+
+  val weightSides = .2
+  val weightCenter = .6
 
   def extractPhrases(sentence : Sentence)
   {
@@ -19,8 +23,8 @@ object FiveTupleFunctions
     var i = 0
     while (i < sentence.length) {
       val tag = sentence(i).nerTag
-      if (tag.categoryValue != "O" //&&
-      //(tag.shortCategoryValue == "ORG" || tag.shortCategoryValue == "LOC")
+      if (tag.categoryValue != "O" &&
+        (tag.shortCategoryValue == "ORG" || tag.shortCategoryValue == "LOC")
       )
       {
         val entitySentenceStart = i
@@ -37,12 +41,9 @@ object FiveTupleFunctions
         /* we have the entityStart idx wrt this sentence, now we need to get it wrt this section */
         val entitySectionStart = entitySentenceStart + sentence.start
 
-        //          val phrase = new Phrase(new TokenSpan(sentence.section, entitySectionStart, entityLen))
         val ts = new TokenSpan(sentence.section, entitySectionStart, entityLen)
         val phrase = new Phrase(sentence.section, entitySectionStart, entityLen, ts.length-1)
-        //          println(s"Found mention: [${phrase.tokensString(" ")}]")
         phrases += phrase
-        //          println(s"phrase: ${phrase.string} (${phrase.headToken.nerTag.categoryValue})")
       } else {
         i += 1
       }
@@ -50,8 +51,10 @@ object FiveTupleFunctions
     sentence.attr += new PhraseList(phrases)
   }
 
-  def sentenceToRelationContext(sentence : Sentence)
+  def sentenceToRelationContext(sentence : Sentence, map : scala.collection.mutable.HashMap[String, Int])
+  : Seq[(SparseTensor1, Seq[TokenSpan], Seq[Phrase])] =
   {
+    val result = scala.collection.mutable.ArrayBuffer[(SparseTensor1, Seq[TokenSpan], Seq[Phrase])]()
     val phrases = sentence.attr[PhraseList]
     var i = 0
     while (i < phrases.size)
@@ -62,15 +65,21 @@ object FiveTupleFunctions
       {
         val p2 = phrases(j)
         // only consider when one phrase is an org and one is a loc
-        if (p1.headToken.attr[NerTag].shortCategoryValue != p2.headToken.attr[NerTag].shortCategoryValue)
+        if (p1.headToken.attr[NerTag].shortCategoryValue != p2.headToken.attr[NerTag].shortCategoryValue &&
+          // and p1 and p2 are close enough together
+          (p2.headToken.positionInSection - p1.headToken.next(p1.length).positionInSection) <= distance)
         {
           //          println(s"${p1.string}   ${p2.string}")
           val context = contextBetweenPhrases(p1, p2, sentence)
+          val tensor = contextsToVector(context._1, map)
+          val tup = (tensor, context._1, context._2)
+          result += tup
         }
         j += 1
       }
       i += 1
     }
+    result.seq
   }
 
   def contextBetweenPhrases(p1 : Phrase, p2 : Phrase, sentence : Sentence) :
@@ -108,38 +117,53 @@ object FiveTupleFunctions
     (Seq(left, center, right),Seq(p1, p2))
   }
 
-  def contextsToVector(fiveTuple : (Seq[TokenSpan],Seq[Phrase]), map : scala.collection.mutable.HashMap[String, Int])
+  def contextsToVector(fiveTuple : Seq[TokenSpan], map : scala.collection.mutable.HashMap[String, Int])
+  : SparseTensor1 =
   {
     // iterate over the three contexts
-    val cTensors = fiveTuple._1.map(context =>
+    val tensor = new SparseTensor1(map.size * 3)
+    var startDex = 0
+    fiveTuple.foreach(context =>
     {
-      val tensor = new SparseTensor1(map.size)
+      // weight contexts differently
+      val weight =
+        if (startDex == map.size) weightCenter else weightSides
+
       // iterate over each token
       context.foreach(tok =>
       {
-        val dex = map.getOrElse(tok.string,-1);
-        tensor(dex) += 1
+        val dex = map.getOrElse(tok.string,-1)
+        tensor(dex + startDex) += (1/context.length) * weight
       })
-      //      tensor.normalize()
-      tensor./=(context.length)
+      startDex += map.size
+    })
+    tensor
+  }
+
+  def sentencesToVectors(sentences : Seq[Sentence], map : scala.collection.mutable.HashMap[String, Int])
+  : Seq[(SparseTensor1, Seq[TokenSpan], Seq[Phrase])] =
+  {
+    sentences.flatMap(s => {
+      extractPhrases(s)
+      sentenceToRelationContext(s, map)
     })
   }
 
   def main(args: Array[String])
   {
-    val inputLoc = s"org_loc_sentences/test"
-
-    val sentences = SnowBall.readAnnotedData(inputLoc)
-    val map = SnowBall.createWordIndexMap(sentences)
-    sentences.foreach(s => {
-      extractPhrases(s)
-      val contexts = sentenceToRelationContext(s)
-      val i = 1
-//      contextsToVector(contexts, map)
+//    val inputLoc = s"org_loc_sentences/test"
+//
+//    val sentences = SnowBall.readAnnotedData(inputLoc)
+//    val map = SnowBall.createWordIndexMap(sentences)
+//    sentences.foreach(s => {
+//      extractPhrases(s)
+//      val contexts = sentenceToRelationContext(s, map)
+//      val i = 1
+      //      contextsToVector(contexts, map)
       //          s.attr[PhraseList].foreach(t => {
       ////            println(t.string +" \t " + t.attr[NerTag].categoryValue)
       //            println(t)
       //          })
-    })
+//    })
   }
 }
