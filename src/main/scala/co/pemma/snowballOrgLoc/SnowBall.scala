@@ -2,17 +2,13 @@ package co.pemma.snowballOrgLoc
 
 import java.io.File
 
-import bsh.commands.dir
 import cc.factorie.app.nlp.load.LoadOWPL
 import cc.factorie.app.nlp.ner.LabeledBilouConllNerTag
-import cc.factorie.app.nlp.phrase.Phrase
-import cc.factorie.app.nlp.{TokenSpan, Token, Sentence}
-import cc.factorie.la.SparseTensor1
+import cc.factorie.app.nlp.{ Token, Sentence}
 import co.pemma.OllieExtractor
 import co.pemma.Util.ProgressBar
 
 import scala.util.matching.Regex
-import scalaz.Digit._3
 
 /**
  * Created by pat on 7/30/14.
@@ -21,12 +17,17 @@ object SnowBall
 {
   val DIR = "org_loc_sentences"
   val seedRegex = createSeedRegex()
-  val simThreshold = .4
+  val simThreshold = .18
+  val tauSim = .2
+  val weightSides = .2
+  val weightCenter = .6
+
+
 
 
   def main(args: Array[String])
   {
-    run()
+      run()
   }
 
   def run()
@@ -45,27 +46,38 @@ object SnowBall
 
     // seperate patterns that match seeds and rest
     val partitions = fiveTuples.partition(tuple => {
-      val entityStr = s"${tuple.entities(0).string} ${tuple.entities(1).string}".toLowerCase;
-      seedRegex.pattern.matcher(entityStr).matches
+      seedRegex.pattern.matcher(tuple.entityString).matches
     })
 
-    val patterns = partitions._1
     val otherData = partitions._2
+    val patterns = HAC.run(partitions._1)
 
-    similarTuples(patterns, otherData).foreach(tuple => println(s"${tuple.entities(0).string} ${tuple.entities(1).string}"))
+    similarTuples(patterns, otherData).foreach(tuple => println(tuple.entityString))
   }
 
-  def similarTuples(patterns : Seq[FiveTuple], otherData : Seq[FiveTuple]) : Seq[FiveTuple] =
+  //  def clusterPatterns(patterns : Seq[FiveTuple]) : Seq[FiveTuple] =
+  //  {
+  //    int i = 0
+  //    while (i < patterns.size)
+  //  }
+
+
+  def similarTuples(patterns : Seq[Pattern], otherData : Seq[ExtractedTuple]) : Seq[ExtractedTuple] =
   {
     for { dat <- otherData
-      if patterns.map(pat => {
-        if (dat.orgFirst == pat.orgFirst)
-          dat.tensor.dot(pat.tensor)
-        else
-          0
-      }).max >= simThreshold
+          if patterns.map(pat => {
+            if (dat.orgFirst == pat.orgFirst) {
+              val a = dat.similarity(pat)
+//              println(a)
+              a
+            }
+            else
+              0
+          }).max >= simThreshold
     } yield dat
   }
+
+//  def patternConfidence(patterns : Seq[Pattern],otherData : Seq[ExtractedTuple]))
 
   def seedMatches() : Seq[Sentence] =
   {

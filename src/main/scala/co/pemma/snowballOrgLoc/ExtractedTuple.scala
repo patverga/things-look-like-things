@@ -9,22 +9,62 @@ import cc.factorie.la.SparseTensor1
  * Created by pat on 7/28/14.
  */
 
-class FiveTuple(t : SparseTensor1, c : Seq[TokenSpan], e : Seq[Phrase], s : Sentence)
+abstract class FiveTuple ()
 {
-  val tensor = t
+  val leftTensor : SparseTensor1
+  val centerTensor : SparseTensor1
+  val rightTensor : SparseTensor1
+  val orgFirst : Boolean
+
+  def similarity(otherTuple : FiveTuple) : Double =
+  {
+    leftTensor.dot(otherTuple.leftTensor) +
+      centerTensor.dot(otherTuple.centerTensor) +
+      rightTensor.dot(otherTuple.rightTensor)
+  }
+}
+
+class ExtractedTuple(indexMap : scala.collection.mutable.HashMap[String, Int], c : Seq[TokenSpan], e : Seq[Phrase], s : Sentence) extends FiveTuple()
+{
   val contexts = c
   val entities = e
   val sentence = s
   val orgFirst = entities(0).headToken.attr[NerTag].shortCategoryValue == "ORG"
+  val leftTensor = contextsToVector(c(0), indexMap)
+  leftTensor *= SnowBall.weightSides
+  val centerTensor = contextsToVector(c(1), indexMap)
+  centerTensor *= SnowBall.weightCenter
+  val rightTensor = contextsToVector(c(2), indexMap)
+  rightTensor *= SnowBall.weightSides
+  val entityString = s"${entities(0).string} ${entities(1).string}".toLowerCase()
+
+  def contextsToVector(context : TokenSpan, map : scala.collection.mutable.HashMap[String, Int])
+  : SparseTensor1 =
+  {
+    // iterate over the three contexts
+    val tensor = new SparseTensor1(map.size)
+    // iterate over each token
+    context.foreach(tok =>
+    {
+      val dex = map.getOrElse(tok.string,-1)
+      tensor(dex) += (1.0/context.length)
+    })
+    tensor
+  }
+}
+
+class Pattern(l : SparseTensor1, c : SparseTensor1, r : SparseTensor1, of : Boolean) extends FiveTuple()
+{
+  val leftTensor : SparseTensor1 = l
+  val centerTensor : SparseTensor1 = c
+  val rightTensor : SparseTensor1 = r
+  val orgFirst = of
 }
 
 object FiveTupleFunctions
 {
   val window = 3
   val distance = 5
-
-  val weightSides = .2
-  val weightCenter = .6
 
   def extractPhrases(sentence : Sentence)
   {
@@ -61,9 +101,9 @@ object FiveTupleFunctions
   }
 
   def sentenceToRelationContext(sentence : Sentence, map : scala.collection.mutable.HashMap[String, Int])
-  : Seq[FiveTuple] =
+  : Seq[ExtractedTuple] =
   {
-    val result = scala.collection.mutable.ArrayBuffer[FiveTuple]()
+    val result = scala.collection.mutable.ArrayBuffer[ExtractedTuple]()
     val phrases = sentence.attr[PhraseList]
     var i = 0
     while (i < phrases.size)
@@ -79,9 +119,8 @@ object FiveTupleFunctions
           (p2.headToken.positionInSection - p1.headToken.next(p1.length).positionInSection) <= distance)
         {
           //          println(s"${p1.string}   ${p2.string}")
-          val context = contextBetweenPhrases(p1, p2, sentence)
-          val tensor = contextsToVector(context._1, map)
-          result += new FiveTuple(tensor, context._1, context._2, sentence)
+          val (context, entities) = contextBetweenPhrases(p1, p2, sentence)
+          result += new ExtractedTuple(map, context, entities, sentence)
         }
         j += 1
       }
@@ -125,31 +164,8 @@ object FiveTupleFunctions
     (Seq(left, center, right),Seq(p1, p2))
   }
 
-  def contextsToVector(contexts : Seq[TokenSpan], map : scala.collection.mutable.HashMap[String, Int])
-  : SparseTensor1 =
-  {
-    // iterate over the three contexts
-    val tensor = new SparseTensor1(map.size * 3)
-    var startDex = 0
-    contexts.foreach(context =>
-    {
-      // weight contexts differently
-      val weight =
-        if (startDex == map.size) weightCenter else weightSides
-
-      // iterate over each token
-      context.foreach(tok =>
-      {
-        val dex = map.getOrElse(tok.string,-1)
-        tensor(dex + startDex) += (1/context.length) * weight
-      })
-      startDex += map.size
-    })
-    tensor
-  }
-
   def sentencesToVectors(sentences : Seq[Sentence], map : scala.collection.mutable.HashMap[String, Int])
-  : Seq[FiveTuple] =
+  : Seq[ExtractedTuple] =
   {
     sentences.flatMap(s => {
       extractPhrases(s)
@@ -159,19 +175,14 @@ object FiveTupleFunctions
 
   def main(args: Array[String])
   {
-//    val inputLoc = s"org_loc_sentences/test"
-//
-//    val sentences = SnowBall.readAnnotedData(inputLoc)
-//    val map = SnowBall.createWordIndexMap(sentences)
-//    sentences.foreach(s => {
-//      extractPhrases(s)
-//      val contexts = sentenceToRelationContext(s, map)
-//      val i = 1
-      //      contextsToVector(contexts, map)
-      //          s.attr[PhraseList].foreach(t => {
-      ////            println(t.string +" \t " + t.attr[NerTag].categoryValue)
-      //            println(t)
-      //          })
-//    })
+    val inputLoc = s"org_loc_sentences/test"
+
+    val sentences = SnowBall.readAnnotedData(inputLoc)
+    val map = SnowBall.createWordIndexMap(sentences)
+    map.foreach(entry => println(entry))
+    sentences.foreach(s => {
+      extractPhrases(s)
+      val contexts = sentenceToRelationContext(s, map).foreach(t => println(s"${t.contexts.mkString(":")} \n ${t.leftTensor} \n"))
+    })
   }
 }
