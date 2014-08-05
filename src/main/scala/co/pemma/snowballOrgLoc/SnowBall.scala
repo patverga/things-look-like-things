@@ -22,9 +22,6 @@ object SnowBall
   val weightSides = .2
   val weightCenter = .6
 
-
-
-
   def main(args: Array[String])
   {
       run()
