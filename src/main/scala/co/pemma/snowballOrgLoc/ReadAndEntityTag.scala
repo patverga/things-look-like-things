@@ -22,26 +22,32 @@ object ReadAndEntityTag
 
   def main(args: Array[String])
   {
-//    val inputLoc = s"/home/pat/corpus/Na_news98/$file"
-    val inputLoc = args(0)
+    // test
+//    val inputLoc = s"/home/pat/corpus/Na_news98/test"
+//    val sentences = readNaNewsData(inputLoc)
+//    sentences.foreach(println(_))
+//    extractOrgLocSentences(docsToNERSentences(sentences)).foreach(println(_))
 
-    val validSentences = extractOrgLocSentences(docsToNERSentences(readNaNewsData(inputLoc)))
-    writeAnnotatedSentences(validSentences, inputLoc.split("/").last)
-
+    //real
+        val inputLoc = args(0)
+        val validSentences = extractOrgLocSentences(docsToNERSentences(readNaNewsData(inputLoc)))
+        writeAnnotatedSentences(validSentences, inputLoc.split("/").last)
   }
 
   def readNaNewsData(inputLoc : String) : Seq[String] =
   {
     val source = Source.fromFile(inputLoc, "iso-8859-1")
     println("Loading Docs from file...")
-    val lines = source.getLines().toSeq
-    val uselessTagRegex = "(?:<[A-Z].*>)|(?:</(?!DOC).*>)".r
+    val lines = source.getLines().toSeq.filter(_!="<p>")
 
-    val filteredLines = lines.filter(!uselessTagRegex.pattern.matcher(_).matches())
-    val docs = filteredLines.mkString("\n").split("</DOC>")
-
-    println(s"${lines.size} lines : ${filteredLines.size} filtered Lines : ${docs.size} docs")
-    docs.toSeq.map(_.toLowerCase)
+    val lineSplit = lines.mkString("\n").split("<TEXT>").drop(1).map(_.split("</TEXT>")(0).toLowerCase())
+    val removeStart = lineSplit.map(line =>
+    {
+      if (line.contains("&md;"))
+        line.split("&md;")(1)
+      else line
+    })
+    removeStart
   }
 
   def writeAnnotatedSentences(sentences : GenSeq[Sentence], file : String)
@@ -68,20 +74,12 @@ object ReadAndEntityTag
 
     val pipeline = new DocumentAnnotationPipeline(Seq(segment.DeterministicTokenizer,
       segment.DeterministicSentenceSegmenter, ner.NoEmbeddingsConllStackedChainNer))
-    val annotators = Seq(
-      segment.DeterministicTokenizer,
-      segment.DeterministicSentenceSegmenter,
-      ner.NoEmbeddingsConllStackedChainNer
-    )
 
     val progress = new ProgressBar(docs.size)
-    docs.par.flatMap(doc =>
+    docs.flatMap(doc =>
     {
       progress.increment()
-      //      FactorieFunctions.extractSentences(load.LoadPlainText.fromString(doc).head, pipeline)\
-      val fDoc = load.LoadPlainText.fromString(doc).head
-      annotators.foreach(_.process(fDoc))
-      fDoc.sentences
+      FactorieFunctions.extractSentences(load.LoadPlainText.fromString(doc).head, pipeline)
     }).seq
   }
 

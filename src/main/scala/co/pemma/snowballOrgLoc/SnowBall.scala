@@ -3,7 +3,7 @@ package co.pemma.snowballOrgLoc
 import java.io.File
 
 import cc.factorie.app.nlp.load.LoadOWPL
-import cc.factorie.app.nlp.ner.LabeledBilouConllNerTag
+import cc.factorie.app.nlp.ner.{NerTag, LabeledBilouConllNerTag}
 import cc.factorie.app.nlp.{ Token, Sentence}
 import co.pemma.OllieExtractor
 import co.pemma.Util.ProgressBar
@@ -52,7 +52,11 @@ object SnowBall
     val otherData = partitions._2
     val patterns = HAC.run(partitions._1)
 
-    similarTuples(patterns, otherData).foreach(tuple => println(tuple.entityString))
+    similarTuples(patterns, otherData).foreach(tuple => {
+      println(tuple.entityString)
+      tuple.sentence.foreach(tok => print(tok.string + "::" + tok.attr[NerTag].shortCategoryValue + " "))
+      println()
+    })
   }
 
   //  def clusterPatterns(patterns : Seq[FiveTuple]) : Seq[FiveTuple] =
