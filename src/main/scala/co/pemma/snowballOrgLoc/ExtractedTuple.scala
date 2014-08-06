@@ -11,6 +11,9 @@ import cc.factorie.la.SparseTensor1
 
 abstract class FiveTuple ()
 {
+  val weightSides = .2
+  val weightCenter = .6
+
   val leftTensor : SparseTensor1
   val centerTensor : SparseTensor1
   val rightTensor : SparseTensor1
@@ -24,20 +27,28 @@ abstract class FiveTuple ()
   }
 }
 
+
 class ExtractedTuple(indexMap : scala.collection.mutable.HashMap[String, Int], c : Seq[TokenSpan], e : Seq[Phrase], s : Sentence) extends FiveTuple()
 {
   val contexts = c
   val entities = e
   val sentence = s
   val orgFirst = entities(0).headToken.attr[NerTag].shortCategoryValue == "ORG"
-  val leftTensor = contextsToVector(c(0), indexMap)
-  leftTensor *= SnowBall.weightSides
-  val centerTensor = contextsToVector(c(1), indexMap)
-  centerTensor *= SnowBall.weightCenter
-  val rightTensor = contextsToVector(c(2), indexMap)
-  rightTensor *= SnowBall.weightSides
-  val entityString = s"${entities(0).string} ${entities(1).string}".toLowerCase()
   val contextString = s"${contexts(0).string} ${entities(0).string} ${contexts(1).string} ${entities(1).string} ${contexts(2).string}"
+  val entityString = s"${entities(0).string} ${entities(1).string}".toLowerCase()
+
+  val leftTensor = contextsToVector(c(0), indexMap)
+  leftTensor *= weightSides
+  leftTensor.expNormalize
+
+  val centerTensor = contextsToVector(c(1), indexMap)
+  centerTensor *= weightCenter
+  leftTensor.expNormalize()
+
+  val rightTensor = contextsToVector(c(2), indexMap)
+  rightTensor *= weightSides
+  leftTensor.expNormalize
+
 
   def contextsToVector(context : TokenSpan, map : scala.collection.mutable.HashMap[String, Int])
   : SparseTensor1 =
@@ -68,6 +79,15 @@ object FiveTupleFunctions
   val window = 2
   // max distance between the org and loc
   val distance = 3
+
+  def sentencesToVectors(sentences : Seq[Sentence], map : scala.collection.mutable.HashMap[String, Int])
+  : Seq[ExtractedTuple] =
+  {
+    sentences.flatMap(s => {
+      extractPhrases(s)
+      sentenceToRelationContext(s, map)
+    })
+  }
 
   def extractPhrases(sentence : Sentence)
   {
@@ -167,25 +187,27 @@ object FiveTupleFunctions
     (Seq(left, center, right),Seq(p1, p2))
   }
 
-  def sentencesToVectors(sentences : Seq[Sentence], map : scala.collection.mutable.HashMap[String, Int])
-  : Seq[ExtractedTuple] =
-  {
-    sentences.flatMap(s => {
-      extractPhrases(s)
-      sentenceToRelationContext(s, map)
-    })
-  }
 
   def main(args: Array[String])
   {
     val inputLoc = s"org_loc_sentences/test"
 
-    val sentences = SnowBall.readAnnotedData(inputLoc)
+    val sentences = SnowBall.readAnnotedData(inputLoc).filter(_!="")
     val map = SnowBall.createWordIndexMap(sentences)
-    map.foreach(entry => println(entry))
+    println(map.size)
+
+    //    map.foreach(entry => println(entry))
     sentences.foreach(s => {
       extractPhrases(s)
-      val contexts = sentenceToRelationContext(s, map).foreach(t => println(s"${t.contexts.mkString(":")} \n ${t.leftTensor} \n"))
+      val contexts = sentenceToRelationContext(s, map).toList
+        contexts.foreach(t => {
+        val c = t.contexts.map(_.string)
+        println(s"${c(0)} \t ${t.leftTensor}")
+        println(s"${c(1)} \t ${t.centerTensor}")
+        println(s"${c(2)} \t ${t.rightTensor} \n")
+      })
+      if(contexts.size > 0)
+        println(contexts(0).leftTensor.cosineSimilarity(contexts(1).leftTensor))
     })
   }
 }

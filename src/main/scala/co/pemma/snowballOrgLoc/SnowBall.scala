@@ -19,8 +19,6 @@ object SnowBall
   val seedRegex = createSeedRegex()
   val simThreshold = .19
   val tauSim = .2
-  val weightSides = .2
-  val weightCenter = .6
 
   def main(args: Array[String])
   {
@@ -32,7 +30,7 @@ object SnowBall
     // read in all nytimes data
     val allData = new File(s"$DIR/utf").listFiles.par.flatMap(f => {
       val fStr = f.toPath.toString
-      if (fStr.contains("ny97"))
+      if (fStr.contains("ny"))
         readAnnotedData(fStr)
       else
         Seq()
@@ -48,15 +46,18 @@ object SnowBall
 
     val otherData = partitions._2
     val patterns = HAC.run(partitions._1)
-    //    partitions._1.foreach(p => {
-    //      println(p.sentence)
-    //      println(p.entityString)
-    //      println(p.contextString)
-    //    })
-    similarTuples(patterns, otherData).foreach(tuple => {
-      println(tuple.contextString)
-      println()
-    })
+    otherData.foreach(d=> println(d.contexts(1).string))
+    println("PATTERNS")
+        partitions._1.foreach(p => {
+          println(p.contexts(1).string)
+//          println(p.sentence)
+//          println(p.entityString)
+//          println(p.contextString)
+        })
+//    similarTuples(patterns, otherData).foreach(tuple => {
+//      println(tuple.contextString)
+//      println()
+//    })
   }
 
   //  def clusterPatterns(patterns : Seq[FiveTuple]) : Seq[FiveTuple] =
@@ -72,7 +73,7 @@ object SnowBall
           if patterns.map(pat => {
             if (dat.orgFirst == pat.orgFirst) {
               val a = dat.similarity(pat)
-              println(a)
+              //              println(a)
               a
             }
             else
