@@ -17,14 +17,14 @@ object SnowBall
 {
   val DIR = "org_loc_sentences"
   val seedRegex = createSeedRegex()
-  val simThreshold = .18
+  val simThreshold = .19
   val tauSim = .2
   val weightSides = .2
   val weightCenter = .6
 
   def main(args: Array[String])
   {
-      run()
+    run()
   }
 
   def run()
@@ -32,7 +32,7 @@ object SnowBall
     // read in all nytimes data
     val allData = new File(s"$DIR/utf").listFiles.par.flatMap(f => {
       val fStr = f.toPath.toString
-      if (fStr.contains("ny98"))
+      if (fStr.contains("ny97"))
         readAnnotedData(fStr)
       else
         Seq()
@@ -48,10 +48,13 @@ object SnowBall
 
     val otherData = partitions._2
     val patterns = HAC.run(partitions._1)
-
+    //    partitions._1.foreach(p => {
+    //      println(p.sentence)
+    //      println(p.entityString)
+    //      println(p.contextString)
+    //    })
     similarTuples(patterns, otherData).foreach(tuple => {
-      println(tuple.entityString)
-      tuple.sentence.foreach(tok => print(tok.string + "::" + tok.attr[NerTag].shortCategoryValue + " "))
+      println(tuple.contextString)
       println()
     })
   }
@@ -69,7 +72,7 @@ object SnowBall
           if patterns.map(pat => {
             if (dat.orgFirst == pat.orgFirst) {
               val a = dat.similarity(pat)
-//              println(a)
+              println(a)
               a
             }
             else
@@ -78,7 +81,7 @@ object SnowBall
     } yield dat
   }
 
-//  def patternConfidence(patterns : Seq[Pattern],otherData : Seq[ExtractedTuple]))
+  //  def patternConfidence(patterns : Seq[Pattern],otherData : Seq[ExtractedTuple]))
 
   def seedMatches() : Seq[Sentence] =
   {

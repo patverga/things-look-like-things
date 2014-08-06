@@ -40,7 +40,7 @@ object ReadAndEntityTag
     println("Loading Docs from file...")
     val lines = source.getLines().toSeq.filter(_!="<p>")
 
-    val lineSplit = lines.mkString("\n").split("<TEXT>").drop(1).map(_.split("</TEXT>")(0).toLowerCase())
+    val lineSplit = lines.mkString("\n").split("<TEXT>").drop(1).map(_.split("</TEXT>")(0))
     val removeStart = lineSplit.map(line =>
     {
       if (line.contains("&md;"))
@@ -61,7 +61,7 @@ object ReadAndEntityTag
           if (t.attr[NerTag].categoryValue == "O")  ""
           else t.attr[NerTag].categoryValue
         //        if (tag.equals("O")) tag = ""
-        writer.println(s"${t.string} \t $tag")
+        writer.println(s"${t.string.toLowerCase} \t $tag")
       })
       writer.println()
     })

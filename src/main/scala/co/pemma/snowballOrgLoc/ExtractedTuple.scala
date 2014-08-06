@@ -37,6 +37,7 @@ class ExtractedTuple(indexMap : scala.collection.mutable.HashMap[String, Int], c
   val rightTensor = contextsToVector(c(2), indexMap)
   rightTensor *= SnowBall.weightSides
   val entityString = s"${entities(0).string} ${entities(1).string}".toLowerCase()
+  val contextString = s"${contexts(0).string} ${entities(0).string} ${contexts(1).string} ${entities(1).string} ${contexts(2).string}"
 
   def contextsToVector(context : TokenSpan, map : scala.collection.mutable.HashMap[String, Int])
   : SparseTensor1 =
@@ -63,8 +64,10 @@ class Pattern(l : SparseTensor1, c : SparseTensor1, r : SparseTensor1, of : Bool
 
 object FiveTupleFunctions
 {
-  val window = 3
-  val distance = 5
+  // tokens to take for context
+  val window = 2
+  // max distance between the org and loc
+  val distance = 3
 
   def extractPhrases(sentence : Sentence)
   {
