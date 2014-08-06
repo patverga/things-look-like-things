@@ -25,6 +25,13 @@ abstract class FiveTuple ()
       centerTensor.dot(otherTuple.centerTensor) +
       rightTensor.dot(otherTuple.rightTensor)
   }
+
+  def cosSimilarity(otherTuple : FiveTuple) : Double =
+  {
+//    (leftTensor.cosineSimilarity(otherTuple.leftTensor) * weightSides) +
+      (centerTensor.cosineSimilarity(otherTuple.centerTensor)) //* weightCenter) +
+//      (rightTensor.cosineSimilarity(otherTuple.rightTensor) * weightSides)
+  }
 }
 
 
@@ -38,16 +45,16 @@ class ExtractedTuple(indexMap : scala.collection.mutable.HashMap[String, Int], c
   val entityString = s"${entities(0).string} ${entities(1).string}".toLowerCase()
 
   val leftTensor = contextsToVector(c(0), indexMap)
-  leftTensor *= weightSides
-  leftTensor.expNormalize
+//  leftTensor *= weightSides
+//  leftTensor.expNormalize
 
   val centerTensor = contextsToVector(c(1), indexMap)
-  centerTensor *= weightCenter
-  leftTensor.expNormalize()
+//  centerTensor *= weightCenter
+//  leftTensor.expNormalize()
 
   val rightTensor = contextsToVector(c(2), indexMap)
-  rightTensor *= weightSides
-  leftTensor.expNormalize
+//  rightTensor *= weightSides
+//  leftTensor.expNormalize
 
 
   def contextsToVector(context : TokenSpan, map : scala.collection.mutable.HashMap[String, Int])
@@ -141,9 +148,13 @@ object FiveTupleFunctions
           // and p1 and p2 are close enough together
           (p2.headToken.positionInSection - p1.headToken.next(p1.length).positionInSection) <= distance)
         {
-          //          println(s"${p1.string}   ${p2.string}")
-          val (context, entities) = contextBetweenPhrases(p1, p2, sentence)
-          result += new ExtractedTuple(map, context, entities, sentence)
+//                    println(s"${p1.string}   ${p2.string}")
+          val r = contextBetweenPhrases(p1, p2, sentence)
+          if (r != null) {
+            val context = r._1
+            val entities = r._2
+            result += new ExtractedTuple(map, context, entities, sentence)
+          }
         }
         j += 1
       }
@@ -155,13 +166,14 @@ object FiveTupleFunctions
   def contextBetweenPhrases(p1 : Phrase, p2 : Phrase, sentence : Sentence) :
   (Seq[TokenSpan],Seq[Phrase]) =
   {
+    if (p1.headToken.prev(p1.length) == null)
+      return null
     val p1Start = p1.headToken.prev(p1.length).positionInSentence
     val left =
       if (p1Start - window > sentence.start)
         new TokenSpan(sentence.section, (p1Start + sentence.start+1)-window, window)
       else
         new TokenSpan(sentence.section, sentence.start, 0)
-
 
     val p1End = p1.headToken.positionInSentence + sentence.start
     val p2Start = p2.headToken.prev(p2.length).positionInSentence + sentence.start
@@ -200,14 +212,18 @@ object FiveTupleFunctions
     sentences.foreach(s => {
       extractPhrases(s)
       val contexts = sentenceToRelationContext(s, map).toList
-        contexts.foreach(t => {
+      contexts.foreach(t => {
         val c = t.contexts.map(_.string)
         println(s"${c(0)} \t ${t.leftTensor}")
         println(s"${c(1)} \t ${t.centerTensor}")
         println(s"${c(2)} \t ${t.rightTensor} \n")
       })
-      if(contexts.size > 0)
+      if(contexts.size > 0) {
         println(contexts(0).leftTensor.cosineSimilarity(contexts(1).leftTensor))
+        println(contexts(0).centerTensor.cosineSimilarity(contexts(1).centerTensor))
+        println(contexts(0).rightTensor.cosineSimilarity(contexts(1).rightTensor))
+        println(contexts(0).cosSimilarity(contexts(1)))
+      }
     })
   }
 }

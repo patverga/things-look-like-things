@@ -17,7 +17,7 @@ object SnowBall
 {
   val DIR = "org_loc_sentences"
   val seedRegex = createSeedRegex()
-  val simThreshold = .19
+  val simThreshold = .4
   val tauSim = .2
 
   def main(args: Array[String])
@@ -46,25 +46,19 @@ object SnowBall
 
     val otherData = partitions._2
     val patterns = HAC.run(partitions._1)
-    otherData.foreach(d=> println(d.contexts(1).string))
+//    otherData.foreach(d=> println(d.contexts(1).string))
     println("PATTERNS")
         partitions._1.foreach(p => {
-          println(p.contexts(1).string)
+//          println(p.contexts(1).string)
 //          println(p.sentence)
 //          println(p.entityString)
 //          println(p.contextString)
         })
-//    similarTuples(patterns, otherData).foreach(tuple => {
-//      println(tuple.contextString)
-//      println()
-//    })
+    similarTuples(patterns, otherData).foreach(tuple => {
+      println(tuple.contextString)
+      println()
+    })
   }
-
-  //  def clusterPatterns(patterns : Seq[FiveTuple]) : Seq[FiveTuple] =
-  //  {
-  //    int i = 0
-  //    while (i < patterns.size)
-  //  }
 
 
   def similarTuples(patterns : Seq[Pattern], otherData : Seq[ExtractedTuple]) : Seq[ExtractedTuple] =
@@ -72,8 +66,8 @@ object SnowBall
     for { dat <- otherData
           if patterns.map(pat => {
             if (dat.orgFirst == pat.orgFirst) {
-              val a = dat.similarity(pat)
-              //              println(a)
+              val a = dat.cosSimilarity(pat)
+                            println(a)
               a
             }
             else
