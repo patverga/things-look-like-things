@@ -17,8 +17,7 @@ object SnowBall
 {
   val DIR = "org_loc_sentences"
   val seedRegex = createSeedRegex()
-  val simThreshold = .4
-  val tauSim = .2
+  val simThreshold = .5
 
   def main(args: Array[String])
   {
@@ -30,7 +29,7 @@ object SnowBall
     // read in all nytimes data
     val allData = new File(s"$DIR/utf").listFiles.par.flatMap(f => {
       val fStr = f.toPath.toString
-      if (fStr.contains("ny"))
+      if (fStr.contains("ny98ae"))
         readAnnotedData(fStr)
       else
         Seq()
@@ -46,34 +45,38 @@ object SnowBall
 
     val otherData = partitions._2
     val patterns = HAC.run(partitions._1)
-//    otherData.foreach(d=> println(d.contexts(1).string))
-    println("PATTERNS")
-        partitions._1.foreach(p => {
-//          println(p.contexts(1).string)
-//          println(p.sentence)
-//          println(p.entityString)
-//          println(p.contextString)
-        })
-    similarTuples(patterns, otherData).foreach(tuple => {
-      println(tuple.contextString)
-      println()
+    //    otherData.foreach(d=> println(d.contexts(1).string))
+
+    similarTuples(patterns, otherData).foreach(tuple =>
+    {
+      //      tuple.sentence.foreach(t=>print(s"(${t.attr[NerTag].categoryValue})${t.string} "))
+      println(tuple.sentence.string)
+      println(s"\n${tuple.entityString}\n")
     })
+
+    partitions._1.foreach(p => println(p.contextString))
+
   }
 
 
   def similarTuples(patterns : Seq[Pattern], otherData : Seq[ExtractedTuple]) : Seq[ExtractedTuple] =
   {
-    for { dat <- otherData
-          if patterns.map(pat => {
-            if (dat.orgFirst == pat.orgFirst) {
-              val a = dat.cosSimilarity(pat)
-                            println(a)
-              a
-            }
-            else
-              0
-          }).max >= simThreshold
-    } yield dat
+    if (patterns != null && patterns.size > 0)
+    {
+      otherData.filter(dat => {
+        patterns.map(pat => {
+          if (dat.orgFirst == pat.orgFirst) {
+            val a = dat.similarity(pat)
+            //  println(a)
+            a
+          }
+          else
+            0
+        }).max >= simThreshold
+      })
+    }
+    else
+      Seq()
   }
 
   //  def patternConfidence(patterns : Seq[Pattern],otherData : Seq[ExtractedTuple]))

@@ -12,7 +12,7 @@ import cc.factorie.la.SparseTensor1
 abstract class FiveTuple ()
 {
   val weightSides = .2
-  val weightCenter = .6
+  val weightCenter = 1
 
   val leftTensor : SparseTensor1
   val centerTensor : SparseTensor1
@@ -21,9 +21,11 @@ abstract class FiveTuple ()
 
   def similarity(otherTuple : FiveTuple) : Double =
   {
-    leftTensor.dot(otherTuple.leftTensor) +
-      centerTensor.dot(otherTuple.centerTensor) +
-      rightTensor.dot(otherTuple.rightTensor)
+    val l = leftTensor.dot(otherTuple.leftTensor)
+    val c = centerTensor.dot(otherTuple.centerTensor)
+    val r = rightTensor.dot(otherTuple.rightTensor)
+    println()
+    l+c+r
   }
 
   def cosSimilarity(otherTuple : FiveTuple) : Double =
@@ -39,21 +41,24 @@ class ExtractedTuple(indexMap : scala.collection.mutable.HashMap[String, Int], c
 {
   val contexts = c
   val entities = e
+  val t1 = entities(0).headToken.attr[NerTag].shortCategoryValue
+  val t2 = entities(1).headToken.attr[NerTag].shortCategoryValue
   val sentence = s
-  val orgFirst = entities(0).headToken.attr[NerTag].shortCategoryValue == "ORG"
-  val contextString = s"${contexts(0).string} ${entities(0).string} ${contexts(1).string} ${entities(1).string} ${contexts(2).string}"
-  val entityString = s"${entities(0).string} ${entities(1).string}".toLowerCase()
+  val orgFirst = t1 == "ORG"
+
+  val contextString = s"${contexts(0).string} ${entities(0).string.toUpperCase} ${contexts(1).string} ${entities(1).string.toUpperCase} ${contexts(2).string}"
+  val entityString = s"${entities(0).string}($t1) ${entities(1).string}($t2)"
 
   val leftTensor = contextsToVector(c(0), indexMap)
-//  leftTensor *= weightSides
+  leftTensor *= weightSides
 //  leftTensor.expNormalize
 
   val centerTensor = contextsToVector(c(1), indexMap)
-//  centerTensor *= weightCenter
+  centerTensor *= weightCenter
 //  leftTensor.expNormalize()
 
   val rightTensor = contextsToVector(c(2), indexMap)
-//  rightTensor *= weightSides
+  rightTensor *= weightSides
 //  leftTensor.expNormalize
 
 
@@ -166,12 +171,12 @@ object FiveTupleFunctions
   def contextBetweenPhrases(p1 : Phrase, p2 : Phrase, sentence : Sentence) :
   (Seq[TokenSpan],Seq[Phrase]) =
   {
-    if (p1.headToken.prev(p1.length) == null)
+    if (p1.headToken.prev(p1.length-1) == null)
       return null
-    val p1Start = p1.headToken.prev(p1.length).positionInSentence
+    val p1Start = p1.headToken.prev(p1.length-1).positionInSentence
     val left =
-      if (p1Start - window > sentence.start)
-        new TokenSpan(sentence.section, (p1Start + sentence.start+1)-window, window)
+      if (p1Start - window > 0)
+        new TokenSpan(sentence.section, (p1Start + sentence.start)-window, window)
       else
         new TokenSpan(sentence.section, sentence.start, 0)
 

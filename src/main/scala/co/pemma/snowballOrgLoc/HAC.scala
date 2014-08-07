@@ -7,14 +7,29 @@ import scala.collection.mutable.Stack
 
 object HAC
 {
+  val tauSupport = 2
+  val tauSim = .5
+
 
   def run(patterns : Seq[FiveTuple]) : Seq[Pattern] =
   {
     println("Clustering Patterns")
     val simMatrix = constructSimilarityMatrix(patterns)
     val clusterMap = cluster(simMatrix)
-    centroids(clusterMap, patterns)
+    val centroids = getCentroids(clusterMap, patterns)
+    val filteredClusters = filter(centroids, patterns)
+    println(s"Clustered ${patterns.size} initial patterns into ${centroids.size} patterns and filtered to ${filteredClusters.size} final clusters.")
+    filteredClusters
   }
+
+  def filter(clusters : Seq[Pattern], patterns : Seq[FiveTuple] ) : Seq[Pattern] =
+  {
+    clusters.filter(cluster =>
+    {
+      patterns.count(pattern => cluster.similarity(pattern) > SnowBall.simThreshold) > tauSupport
+    })
+  }
+
 
   def maxSim(simMat :Array[Array[Double]], remaining : HashSet[Int] ) : (Int, Int, Double) =
   {
@@ -41,7 +56,7 @@ object HAC
     (maxRow, maxCol, maxSim)
   }
 
-  def centroids(clusterLists : List[scala.collection.mutable.HashSet[Int]], patterns : Seq[FiveTuple]) : Seq[Pattern] =
+  def getCentroids(clusterLists : List[scala.collection.mutable.HashSet[Int]], patterns : Seq[FiveTuple]) : Seq[Pattern] =
   {
     val centroids = clusterLists.map(clusterSet =>
     {
@@ -63,7 +78,6 @@ object HAC
       right /= tuples.size
       new Pattern(left, center, right, t.orgFirst)
     })
-    println(s"Clustered ${patterns.size} initial patterns into ${centroids.size} patterns.")
     centroids
   }
 
@@ -104,7 +118,7 @@ object HAC
     {
       val (x, y, sim) = maxSim(simMat, remaining)
 //      println(s"$sim $x $y  ${clusterMap.size}")
-      if (sim > SnowBall.tauSim) {
+      if (sim > tauSim) {
         // Remove the current and parent clusters from the cluster map
         // and extract the sizes.
         val (c1Points, c1Size) = removeCluster(clusterMap, x)
@@ -131,15 +145,6 @@ object HAC
     clusterMap.values.toList
   }
 
-  /**
-   * Adds an arbitrary node to the neighbor chain and removes it from the set
-   * of remaining clusters.  For simplicity, we just use the most easily
-   * accesible element in {@code remaining}.
-   */
-  def initializeChain(chain: Stack[(Double, Int)], remaining: HashSet[Int]) {
-    chain.push((-2.0, remaining.last))
-    remaining.remove(remaining.last)
-  }
 
   /**
    * Computes the distance between {@code current} and each cluster in {@code
