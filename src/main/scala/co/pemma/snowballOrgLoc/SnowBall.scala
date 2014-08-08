@@ -17,7 +17,7 @@ object SnowBall
 {
   val DIR = "org_loc_sentences"
   val seedRegex = createSeedRegex()
-  val simThreshold = .5
+  val simThreshold = .2
 
   def main(args: Array[String])
   {
@@ -50,8 +50,8 @@ object SnowBall
     similarTuples(patterns, otherData).foreach(tuple =>
     {
       //      tuple.sentence.foreach(t=>print(s"(${t.attr[NerTag].categoryValue})${t.string} "))
-      println(tuple.sentence.string)
-      println(s"\n${tuple.entityString}\n")
+//      println(tuple.sentence.string)
+//      println(s"\n${tuple.entityString}\n")
     })
 
     partitions._1.foreach(p => println(p.contextString))
@@ -64,7 +64,7 @@ object SnowBall
     if (patterns != null && patterns.size > 0)
     {
       otherData.filter(dat => {
-        patterns.map(pat => {
+        val sim = patterns.map(pat => {
           if (dat.orgFirst == pat.orgFirst) {
             val a = dat.similarity(pat)
             //  println(a)
@@ -72,7 +72,9 @@ object SnowBall
           }
           else
             0
-        }).max >= simThreshold
+        }).max
+        println(sim)
+        sim >= simThreshold
       })
     }
     else

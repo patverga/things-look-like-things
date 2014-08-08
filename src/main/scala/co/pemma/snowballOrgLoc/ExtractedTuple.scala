@@ -12,7 +12,7 @@ import cc.factorie.la.SparseTensor1
 abstract class FiveTuple ()
 {
   val weightSides = .2
-  val weightCenter = 1
+  val weightCenter = .6
 
   val leftTensor : SparseTensor1
   val centerTensor : SparseTensor1
@@ -24,7 +24,6 @@ abstract class FiveTuple ()
     val l = leftTensor.dot(otherTuple.leftTensor)
     val c = centerTensor.dot(otherTuple.centerTensor)
     val r = rightTensor.dot(otherTuple.rightTensor)
-    println()
     l+c+r
   }
 
@@ -51,7 +50,7 @@ class ExtractedTuple(indexMap : scala.collection.mutable.HashMap[String, Int], c
 
   val leftTensor = contextsToVector(c(0), indexMap)
   leftTensor *= weightSides
-//  leftTensor.expNormalize
+  leftTensor
 
   val centerTensor = contextsToVector(c(1), indexMap)
   centerTensor *= weightCenter
@@ -227,7 +226,7 @@ object FiveTupleFunctions
         println(contexts(0).leftTensor.cosineSimilarity(contexts(1).leftTensor))
         println(contexts(0).centerTensor.cosineSimilarity(contexts(1).centerTensor))
         println(contexts(0).rightTensor.cosineSimilarity(contexts(1).rightTensor))
-        println(contexts(0).cosSimilarity(contexts(1)))
+        println(contexts(0).similarity(contexts(1)))
       }
     })
   }

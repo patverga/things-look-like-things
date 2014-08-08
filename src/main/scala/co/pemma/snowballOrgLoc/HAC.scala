@@ -67,10 +67,10 @@ object HAC
       var right = t.rightTensor
       var i = 1
       while (i < tuples.size) {
-        t = tuples(1)
-        left = t.leftTensor
-        center = t.centerTensor
-        right = t.rightTensor
+        t = tuples(i)
+        left += t.leftTensor
+        center += t.centerTensor
+        right += t.rightTensor
         i += 1
       }
       left /= tuples.size
