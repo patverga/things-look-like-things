@@ -8,7 +8,7 @@ import scala.collection.mutable.Stack
 object HAC
 {
   val tauSupport = 2
-  val tauSim = .5
+  val tauSim = .6
 
 
   def run(patterns : Seq[FiveTuple]) : Seq[Pattern] =
@@ -17,16 +17,17 @@ object HAC
     val simMatrix = constructSimilarityMatrix(patterns)
     val clusterMap = cluster(simMatrix)
     val centroids = getCentroids(clusterMap, patterns)
-    val filteredClusters = filter(centroids, patterns)
-    println(s"Clustered ${patterns.size} initial patterns into ${centroids.size} patterns and filtered to ${filteredClusters.size} final clusters.")
-    filteredClusters
+//    val filteredClusters = filter(centroids, patterns)
+    println(s"Clustered ${patterns.size} initial patterns into ${centroids.size} patterns.")// and filtered to ${filteredClusters.size} final clusters.")
+//    filteredClusters
+    centroids
   }
 
   def filter(clusters : Seq[Pattern], patterns : Seq[FiveTuple] ) : Seq[Pattern] =
   {
     clusters.filter(cluster =>
     {
-      patterns.count(pattern => cluster.similarity(pattern) > SnowBall.simThreshold) > tauSupport
+      patterns.count(pattern => cluster.similarity(pattern) > tauSim) > tauSupport
     })
   }
 

@@ -16,8 +16,13 @@ import scala.util.matching.Regex
 object SnowBall
 {
   val DIR = "org_loc_sentences"
-  val seedRegex = createSeedRegex()
-  val simThreshold = .2
+  val seedTuples = Seq(("google","mountain view"),("microsoft","redmond"),("exxon","irving"),
+    ("ibm","armonk"),("boeing","seattle"),("intel","santa clara"))
+  val seedRegex = createSeedRegex(seedTuples)
+  val seedOrgsRegex = seedTuples.map(_._1).mkString("(?:.*",".*)|(?:.*",".*)").r
+  val seedLocsRegex = seedTuples.map(_._2).mkString("(?:.*",".*)|(?:.*",".*)").r
+  val simThreshold = .5
+  val tupleConfidence = .8
 
   def main(args: Array[String])
   {
@@ -29,7 +34,7 @@ object SnowBall
     // read in all nytimes data
     val allData = new File(s"$DIR/utf").listFiles.par.flatMap(f => {
       val fStr = f.toPath.toString
-      if (fStr.contains("ny98ae"))
+      if (fStr.contains("ny98"))
         readAnnotedData(fStr)
       else
         Seq()
@@ -43,19 +48,56 @@ object SnowBall
       seedRegex.pattern.matcher(tuple.entityString).matches
     })
 
-    val otherData = partitions._2
-    val patterns = HAC.run(partitions._1)
-    //    otherData.foreach(d=> println(d.contexts(1).string))
-
-    similarTuples(patterns, otherData).foreach(tuple =>
-    {
-      //      tuple.sentence.foreach(t=>print(s"(${t.attr[NerTag].categoryValue})${t.string} "))
-//      println(tuple.sentence.string)
-//      println(s"\n${tuple.entityString}\n")
+    val otherData = partitions._2.toSet.toSeq
+    val patterns = partitions._1
+    //    val patterns = HAC.run(partitions._1)
+    otherData.foreach(d=>{
+      //      if (seedOrgsRegex.pattern.matcher(d.entityString).matches)
+      //        println(d.contextString)
     })
 
-    partitions._1.foreach(p => println(p.contextString))
+    val tuplePatterns = new scala.collection.mutable.HashMap[ExtractedTuple, Seq[ExtractedTuple]]
+    // get the extracted tuples that are similar to each pattern
+    val patternMatches = patterns.map(p =>
+    {
+      // must be similar enough and have same tag order (org-loc, or loc-org)
+      val matches = fiveTuples.filter(tup => tup.orgFirst == p.orgFirst && tup.similarity(p) >= simThreshold)
+      // keep track of each pattern that produces each tuple
+      matches.foreach(m => tuplePatterns.put(m, tuplePatterns.getOrElseUpdate(m, Seq()) :+ p))
+      (p, matches)
+    })
 
+    val patternConfidence = patternMatches.map(pm => {
+      println(pm._2.size)
+      val posNeg = pm._2.groupBy(m =>
+      {
+        if (seedOrgsRegex.pattern.matcher(m.entityString).matches())
+        {
+          if (seedRegex.pattern.matcher(m.entityString).matches())
+            "pos"
+          else
+            "neg"
+        }
+      }).mapValues(_.length)
+      (pm._1, pm._2, posNeg.getOrElse("pos",0).toDouble/(posNeg.getOrElse("neg",0)+1).toDouble)
+    })
+
+    patternConfidence.foreach(f => if ( f._3 >= tupleConfidence)
+    {
+      println(f._1.contextString + "   " + f._2.size)
+      f._2.foreach(tu => println(tu.entityString))
+    })
+
+    //    similarTuples(patterns, otherData).foreach(tuple =>
+    //    {
+    //      if (seedOrgsRegex.pattern.matcher(tuple.entityString).matches)
+    //      {
+    //        tuple.sentence.foreach(t => print(s"(${t.attr[NerTag].categoryValue})${t.string} "))
+    //        println(tuple.sentence.string)
+    //        println(s"\n${tuple.entityString}\n")
+    //      }
+    //    })
+    //    partitions._1.foreach(p => println(p.contextString))
   }
 
 
@@ -144,11 +186,8 @@ object SnowBall
     allExtractions.foreach(x => println(x.relation()))
   }
 
-  def createSeedRegex() : Regex =
+  def createSeedRegex(tuples : Seq[(String, String)]) : Regex =
   {
-    val tuples = Seq(("google","mountain view"),("microsoft","redmond"),("exxon","irving"),
-      ("ibm","armonk"),("boeing","seattle"),("intel","santa clara"))
-
     tuples.map(t => {
       val c = t._1
       val l = t._2

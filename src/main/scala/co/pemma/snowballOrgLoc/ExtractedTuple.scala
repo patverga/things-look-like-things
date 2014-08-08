@@ -21,10 +21,11 @@ abstract class FiveTuple ()
 
   def similarity(otherTuple : FiveTuple) : Double =
   {
-    val l = leftTensor.dot(otherTuple.leftTensor)
-    val c = centerTensor.dot(otherTuple.centerTensor)
-    val r = rightTensor.dot(otherTuple.rightTensor)
-    l+c+r
+    val l = leftTensor.dot(otherTuple.leftTensor) * weightSides
+    val c = centerTensor.dot(otherTuple.centerTensor) * weightCenter
+    val r = rightTensor.dot(otherTuple.rightTensor) * weightSides
+    val sim = l+c+r
+    sim
   }
 
   def cosSimilarity(otherTuple : FiveTuple) : Double =
@@ -49,16 +50,16 @@ class ExtractedTuple(indexMap : scala.collection.mutable.HashMap[String, Int], c
   val entityString = s"${entities(0).string}($t1) ${entities(1).string}($t2)"
 
   val leftTensor = contextsToVector(c(0), indexMap)
-  leftTensor *= weightSides
-  leftTensor
+//  leftTensor *= weightSides
+//  leftTensor
 
   val centerTensor = contextsToVector(c(1), indexMap)
-  centerTensor *= weightCenter
-//  leftTensor.expNormalize()
+//  centerTensor *= weightCenter
+//  centerTensor.expNormalize()
 
   val rightTensor = contextsToVector(c(2), indexMap)
-  rightTensor *= weightSides
-//  leftTensor.expNormalize
+//  rightTensor *= weightSides
+//  rightTensor.expNormalize
 
 
   def contextsToVector(context : TokenSpan, map : scala.collection.mutable.HashMap[String, Int])
