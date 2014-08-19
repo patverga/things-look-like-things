@@ -33,6 +33,11 @@ object FactorieFunctions {
   }
 
 
+  def extractSentences(docString : String) : Iterable[Sentence] =
+  {
+    val doc = load.LoadPlainText.fromString(docString).head
+    extractSentences(doc, pipeline)
+  }
 
   def extractSentences(doc :Document) : Iterable[Sentence] =
   {

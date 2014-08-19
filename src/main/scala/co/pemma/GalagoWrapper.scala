@@ -16,7 +16,7 @@ abstract class GalagoWrapper
 {
   // how many results to return from search
   val DEFAULT_K = 1000
-  val docComponents = new Document.DocumentComponents(true, false, false)
+  val docComponents = new Document.DocumentComponents(true, true, false)
   val retrieval : Retrieval
 
   def runQuery(queryText : String) : GenSeq[String] =
@@ -29,6 +29,19 @@ abstract class GalagoWrapper
     val results = getTopResults(queryText, kResults)
     // return the actual documents
     results.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filter(_ != null).map(_.toString)
+  }
+
+  def docsWithTitle(queryText : String, kResults : Int) : GenSeq[Document] =
+  {
+    val results = getTopResults(queryText, kResults)
+    // return the actual documents
+    val docs = results.map(docId => retrieval.getDocument(docId.documentName, docComponents)).filter(_ != null)
+
+    docs.filter(d => {
+      val txt = d.text
+      val title = txt.substring(txt.indexOf("<title>")+7,txt.indexOf("</title>"))
+      d.metadata.get("url").contains(queryText) || title.contains(queryText)
+    })
   }
 
   def runBatchQueries(queries : Seq[String]) : GenSeq[String] =
@@ -76,7 +89,8 @@ class ClueWebQuery extends  GalagoWrapper
 
 class WikipediaQuery extends  GalagoWrapper
 {
-  val indexLocation = "/mnt/nfs/work1/pat/wikipedia/index"
+  //  val indexLocation = "/mnt/nfs/work1/pat/wikipedia/index"
+  val indexLocation = "/home/pat/indices/wikipedia/index"
   println("wikin  " + indexLocation)
   val retrieval = RetrievalFactory.instance(indexLocation, new Parameters)
 }
